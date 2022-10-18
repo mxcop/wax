@@ -3,7 +3,7 @@ use regex::Regex;
 
 use crate::{utils, printpro};
 
-pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> String {
+pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> Result<String, String> {
 
   // Check if this file has already been generated and cached:
   let cached_path = format!("./.wax/{}/{}", relative_path, parent_file);
@@ -13,7 +13,7 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
     let parent_ext = std::path::Path::new(&parent_file).extension().unwrap().to_str().unwrap();
     printpro!("recycle", Color::Blue, format!("{}{}{}", parent_name, ".".black(), parent_ext.black()));
 
-    return cached;
+    return Ok(cached);
   }
 
   // Use regex to find all the <wax> elements:
@@ -45,8 +45,16 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
         // DEBUG //
         let file_name = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
 
+        if file_name == parent_file {
+          printpro!("error! ", Color::Red, format!("({}) recursive include detected", parent_file.red()));
+          return Err("Cannot include component within itself".into());
+        }
+
         // First handle the <wax> elements inside this component.
-        subcontents = include(code_path, format!("{}/{}", relative_path, file_dir).as_str(), file_name, subcontents);
+        match include(code_path, format!("{}/{}", relative_path, file_dir).as_str(), file_name, subcontents) {
+          Ok(result) => subcontents = result,
+          Err(e) => return Err(e)
+        }
 
         // Then include the result.
         output.replace_range(range, &subcontents);
@@ -81,5 +89,5 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
     std::fs::write(cache_file, &output).expect("Failed to write cache");
   }
 
-  output
+  Ok(output)
 }

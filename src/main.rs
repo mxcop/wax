@@ -27,7 +27,10 @@ fn main() {
     return;
   }
 
-  std::fs::remove_dir_all("./.wax").expect("Failed to remove .wax directory");
+  // Delete the .wax directory if it exists.
+  if std::path::Path::new("./.wax").exists() {
+    std::fs::remove_dir_all("./.wax").expect("Failed to remove .wax directory");
+  }
 
 
   println!("{} building '{}'\n", "Wax".green().bold(), code_path);
@@ -38,7 +41,13 @@ fn main() {
 
   // Attempt to read the index file:
   if let Ok(contents) = utils::load_file(code_path, format!("{}/index.html", index_dir).as_str()) {
-    output = include::include(code_path, &index_dir, "index.html", contents);
+    match include::include(code_path, &index_dir, "index.html", contents) {
+      Ok(result) => output = result,
+      Err(e) => {
+        println!("\n{} failed ({})", "Wax".red().bold(), e);
+        return;
+      }
+    }
   }
 
   // Write the output to the disk:
