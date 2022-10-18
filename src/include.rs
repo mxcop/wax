@@ -1,6 +1,7 @@
+use colored::{Colorize, Color};
 use regex::Regex;
 
-use crate::utils;
+use crate::{utils, printpro};
 
 pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> String {
 
@@ -8,7 +9,9 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
   let cached_path = format!("./.wax/{}/{}", relative_path, parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
     // DEBUG //
-    println!("~ loading '{}' from cache", parent_file);
+    let parent_name = std::path::Path::new(&parent_file).file_stem().unwrap().to_str().unwrap();
+    let parent_ext = std::path::Path::new(&parent_file).extension().unwrap().to_str().unwrap();
+    printpro!("recycle", Color::Blue, format!("{}{}{}", parent_name, ".".black(), parent_ext.black()));
 
     return cached;
   }
@@ -53,8 +56,15 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
       }
 
       // DEBUG //
-      let file_name = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
-      println!("~ waxing '{}' into '{}'", file_name, parent_file);
+      let file_name = std::path::Path::new(&path).file_stem().unwrap().to_str().unwrap();
+      let file_ext = std::path::Path::new(&path).extension().unwrap().to_str().unwrap();
+      let parent_name = std::path::Path::new(&parent_file).file_stem().unwrap().to_str().unwrap();
+      let parent_ext = std::path::Path::new(&parent_file).extension().unwrap().to_str().unwrap();
+      printpro!("waxing ", Color::Green, 
+        format!("{} {} {}", format!("{}{}{}", file_name, ".".black(), file_ext.black()), 
+        "->".black(), 
+        format!("{}{}{}", parent_name, ".".black(), parent_ext.black()))
+      );
 
     } else {
       println!("warn: missing 'path' attribute on wax element");

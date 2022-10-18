@@ -1,6 +1,11 @@
+use colored::Colorize;
+
 mod include;
 mod utils;
 mod conf;
+
+#[macro_use]
+mod term;
 
 fn main() {
 
@@ -10,7 +15,7 @@ fn main() {
   let code_path = args.get(1).unwrap_or(&default_path);
 
 
-  println!("\nWax - Loading Conf...\n");
+  println!("\n{} loading config", "Wax".green().bold());
 
 
   let index_dir;
@@ -25,7 +30,7 @@ fn main() {
   std::fs::remove_dir_all("./.wax").expect("Failed to remove .wax directory");
 
 
-  println!("Wax - Building...\n");
+  println!("{} building '{}'\n", "Wax".green().bold(), code_path);
   let start = std::time::Instant::now();
 
 
@@ -40,6 +45,5 @@ fn main() {
   std::fs::create_dir_all("./build").expect("Failed to create ./build directory");
   std::fs::write("./build/index.html", &output).expect("Failed to write output");
 
-
-  println!("\nWax - Finished in {}ms", start.elapsed().as_millis());
+  println!("\n{} finished in {}ms", "Wax".green().bold(), start.elapsed().as_millis());
 }
