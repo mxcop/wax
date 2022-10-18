@@ -22,6 +22,8 @@ fn main() {
     return;
   }
 
+  std::fs::remove_dir_all("./.wax").expect("Failed to remove .wax directory");
+
 
   println!("Wax - Building...\n");
   let start = std::time::Instant::now();
