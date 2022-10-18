@@ -2,8 +2,6 @@ mod include;
 mod utils;
 mod conf;
 
-use regex::Regex;
-
 fn main() {
 
   // Get the code path from the args.
@@ -11,7 +9,9 @@ fn main() {
   let default_path = String::from(".");
   let code_path = args.get(1).unwrap_or(&default_path);
 
-  println!("Wax - Loading Conf...\n");
+
+  println!("\nWax - Loading Conf...\n");
+
 
   let index_dir;
 
@@ -22,24 +22,22 @@ fn main() {
     return;
   }
 
+
   println!("Wax - Building...\n");
+  let start = std::time::Instant::now();
+
 
   let mut output = String::new();
 
   // Attempt to read the index file:
   if let Ok(contents) = utils::load_file(code_path, format!("{}/index.html", index_dir).as_str()) {
-    output = contents;
-
-    // Use regex to find all the <wax> elements:
-    let exp = Regex::new(r"<wax.*?>").expect("Regex failed");
-
-    while let Some(caps) = exp.captures(&output) {
-      output = include::include(caps, code_path, &index_dir, output.clone());
-    }
+    output = include::include(code_path, &index_dir, "index.html", contents);
   }
 
+  // Write the output to the disk:
   std::fs::create_dir_all("./build").expect("Failed to create ./build directory");
   std::fs::write("./build/index.html", &output).expect("Failed to write output");
 
-  println!("out: \n{}", output);
+
+  println!("\nWax - Finished in {}ms", start.elapsed().as_millis());
 }
