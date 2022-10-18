@@ -51,7 +51,7 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
         // Then include the result.
         output.replace_range(range, &subcontents);
       } else {
-        println!("warn: failed to load '{}'", format!("{} / {}", relative_path, path));
+        printpro!("warn!  ", Color::Yellow, format!("({}) failed to load '{}'", parent_file.yellow(), path));
         break;
       }
 
@@ -67,7 +67,7 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
       );
 
     } else {
-      println!("warn: missing 'path' attribute on wax element");
+      printpro!("warn!  ", Color::Yellow, format!("({}) missing a 'path' attribute", parent_file.yellow()));
       break;
     }
   }
