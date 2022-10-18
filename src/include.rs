@@ -1,7 +1,9 @@
+use std::path::Path;
+
 use colored::{Colorize, Color};
 use regex::Regex;
 
-use crate::{utils, printpro};
+use crate::{utils::{color_file, load_file}, printpro};
 
 pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> Result<String, String> {
 
@@ -9,15 +11,13 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
   let cached_path = format!("./.wax/{}/{}", relative_path, parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
     // DEBUG //
-    let parent_name = std::path::Path::new(&parent_file).file_stem().unwrap().to_str().unwrap();
-    let parent_ext = std::path::Path::new(&parent_file).extension().unwrap().to_str().unwrap();
-    printpro!("recycle", Color::Blue, format!("{}{}{}", parent_name, ".".black(), parent_ext.black()));
+    printpro!("recycle", Color::Blue, color_file(&parent_file));
 
     return Ok(cached);
   }
 
-  // Use regex to find all the <wax> elements:
-  let exp = Regex::new(r"<wax.*?>").expect("Regex failed");
+  // Use regex to find all the <wax!> elements:
+  let exp = Regex::new(r"<wax!.*?>").expect("Regex failed");
 
   // Check if this component has child components.
   let has_children = exp.captures(&output).is_some();
@@ -36,21 +36,21 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
       let path = path.get(1).unwrap().as_str();
 
       // Load the contents of the html file given in the path:
-      if let Ok(mut subcontents) = utils::load_file(code_path, format!("{}/{}", relative_path, path).as_str()) {
+      if let Ok(mut subcontents) = load_file(code_path, format!("{}/{}", relative_path, path).as_str()) {
         
         // Remove the filename & extension from the path to get the directory of this file.
         // This is important for relative import paths.
-        let file_dir = std::path::Path::new(&path).ancestors().nth(1).unwrap().to_str().unwrap();
+        let file_dir = Path::new(&path).ancestors().nth(1).unwrap().to_str().unwrap();
 
         // DEBUG //
-        let file_name = std::path::Path::new(&path).file_name().unwrap().to_str().unwrap();
+        let file_name = Path::new(&path).file_name().unwrap().to_str().unwrap();
 
         if file_name == parent_file {
           printpro!("error! ", Color::Red, format!("({}) recursive include detected", parent_file.red()));
           return Err("Cannot include component within itself".into());
         }
 
-        // First handle the <wax> elements inside this component.
+        // First handle the <wax!> elements inside this component.
         match include(code_path, format!("{}/{}", relative_path, file_dir).as_str(), file_name, subcontents) {
           Ok(result) => subcontents = result,
           Err(e) => return Err(e)
@@ -64,14 +64,10 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
       }
 
       // DEBUG //
-      let file_name = std::path::Path::new(&path).file_stem().unwrap().to_str().unwrap();
-      let file_ext = std::path::Path::new(&path).extension().unwrap().to_str().unwrap();
-      let parent_name = std::path::Path::new(&parent_file).file_stem().unwrap().to_str().unwrap();
-      let parent_ext = std::path::Path::new(&parent_file).extension().unwrap().to_str().unwrap();
       printpro!("waxing ", Color::Green, 
-        format!("{} {} {}", format!("{}{}{}", file_name, ".".black(), file_ext.black()), 
+        format!("{} {} {}", color_file(&path), 
         "->".black(), 
-        format!("{}{}{}", parent_name, ".".black(), parent_ext.black()))
+        color_file(&parent_file))
       );
 
     } else {
