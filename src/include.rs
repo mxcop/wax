@@ -5,10 +5,10 @@ use regex::Regex;
 
 use crate::{utils::{color_file, load_file}, printpro};
 
-pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> Result<String, String> {
+pub fn include(work_dir: &str, code_path: &str, relative_path: &str, parent_file: &str, mut output: String) -> Result<String, String> {
 
   // Check if this file has already been generated and cached:
-  let cached_path = format!("./.wax/{}/{}", relative_path, parent_file);
+  let cached_path = format!("{}/.wax/{}/{}", work_dir, relative_path, parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
     // DEBUG //
     printpro!("recycle", Color::Blue, color_file(&parent_file));
@@ -51,7 +51,7 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
         }
 
         // First handle the <wax!> elements inside this component.
-        match include(code_path, format!("{}/{}", relative_path, file_dir).as_str(), file_name, subcontents) {
+        match include(work_dir, code_path, format!("{}/{}", relative_path, file_dir).as_str(), file_name, subcontents) {
           Ok(result) => subcontents = result,
           Err(e) => return Err(e)
         }
@@ -77,7 +77,7 @@ pub fn include(code_path: &str, relative_path: &str, parent_file: &str, mut outp
   }
 
   if has_children {
-    let cache_path = format!("./.wax/{}", relative_path);
+    let cache_path = format!("{}/.wax/{}", work_dir, relative_path);
     let cache_file = format!("{}/{}", cache_path, parent_file);
 
     // Write a copy of this component to the disk:
