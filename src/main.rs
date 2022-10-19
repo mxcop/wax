@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-mod include;
+mod flow;
 mod utils;
 mod conf;
 
@@ -39,9 +39,16 @@ fn main() {
 
   let mut output = String::new();
 
+  let mut dir = Directories { 
+    code_dir: code_path.clone(), 
+    work_dir: work_dir.clone(), 
+    relative_path: index_dir.clone(), 
+    parent_file: "index.html".into() 
+  };
+
   // Attempt to read the index file:
   if let Ok(contents) = utils::load_file(code_path, format!("{}/index.html", index_dir).as_str()) {
-    match include::include(&work_dir, code_path, &index_dir, "index.html", contents) {
+    match flow::wax(&mut dir, contents) {
       Ok(result) => output = result,
       Err(e) => {
         println!("\n{} failed ({})", "Wax".red().bold(), e);
@@ -55,4 +62,13 @@ fn main() {
   std::fs::write(format!("{}/build/index.html", work_dir), &output).expect("Failed to write output");
 
   println!("\n{} finished in {}ms", "Wax".green().bold(), start.elapsed().as_millis());
+}
+
+#[derive(Clone)]
+pub struct Directories {
+  work_dir: String,
+  code_dir: String,
+
+  relative_path: String,
+  parent_file: String,
 }
