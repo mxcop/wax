@@ -2,11 +2,9 @@ mod include;
 mod params;
 
 use std::ops::Range;
-
-use colored::{Colorize, Color};
 use regex::{Regex, Captures};
 
-use crate::{utils::color_file, printpro, Directories};
+use crate::{utils::color_file, Directories, info};
 
 use include::wax_include;
 
@@ -16,7 +14,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
   // Check if this file has already been generated and cached:
   let cached_path = format!("{}/.wax/{}/{}", dir.work_dir, dir.relative_path, dir.parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
-    printpro!("recycle", Color::Blue, color_file(&dir.parent_file));
+    info!("recycle", Color::Blue, color_file(&dir.parent_file));
     return Ok(cached);
   }
 
