@@ -8,7 +8,6 @@ use regex::{Regex, Captures};
 
 use crate::{utils::color_file, printpro, Directories};
 
-//use params::wax_params;
 use include::wax_include;
 
 /// Process a html file.
@@ -60,7 +59,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
 /// let caps = re.captures(r#"<wax! path="./test.html">"#).unwrap();
 /// 
 /// let (range, element) = from_captures(caps);
-/// assert_eq!("<wax!path="./test.html">", element);
+/// assert_eq!(r#"<wax!path="./test.html">"#, element);
 /// ```
 fn from_captures(caps: Captures) -> (Range<usize>, String) {
   (caps.get(0).unwrap().range(), caps.get(0).unwrap().as_str().replace(" ", ""))

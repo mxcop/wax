@@ -3,11 +3,12 @@ use std::{path::Path, ops::Range};
 use colored::{Colorize, Color};
 use regex::Regex;
 
-use crate::{utils::{color_file, load_file}, printpro, Directories, flow};
+use crate::{utils::{color_file, load_file}, printpro, Directories, flow::{self, params::wax_params}};
 
 pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, mut output: String) -> Result<String, String> {
+  
   // Use regex to extract the path attribute:
-  let exp = Regex::new(r#"src="(?s)(.*)""#).expect("Regex failed");
+  let exp = Regex::new(r#"src="(?s)(.*?)""#).expect("Regex failed");
   
   if let Some(path) = exp.captures(element) {
 
@@ -28,6 +29,9 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
         printpro!("error! ", Color::Red, format!("({}) recursive include detected", dir.parent_file.red()));
         return Err("Cannot include component within itself".into());
       }
+
+      // Wax all the parameters within this component.
+      subcontents = wax_params(subcontents, element)?;
 
       let mut new_dir = dir.clone();
       new_dir.relative_path = format!("{}/{}", dir.relative_path, file_dir);
