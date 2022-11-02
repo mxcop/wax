@@ -1,13 +1,13 @@
 use std::{path::Path, ops::Range};
 
-use colored::{Colorize, Color};
 use regex::Regex;
 
-use crate::{utils::{color_file, load_file}, printpro, Directories, flow};
+use crate::{utils::{color_file, load_file}, Directories, flow::{self, params::wax_params}, error, warn, info};
 
 pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, mut output: String) -> Result<String, String> {
+  
   // Use regex to extract the path attribute:
-  let exp = Regex::new(r#"src="(?s)(.*)""#).expect("Regex failed");
+  let exp = Regex::new(r#"src="(?s)(.*?)""#).expect("Regex failed");
   
   if let Some(path) = exp.captures(element) {
 
@@ -20,18 +20,19 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
       // Remove the filename & extension from the path to get the directory of this file.
       // This is important for relative import paths.
       let file_dir = Path::new(&path).ancestors().nth(1).unwrap().to_str().unwrap();
-
-      // DEBUG //
       let file_name = Path::new(&path).file_name().unwrap().to_str().unwrap();
 
       if file_name == dir.parent_file {
-        printpro!("error! ", Color::Red, format!("({}) recursive include detected", dir.parent_file.red()));
+        error!("({}) recursive include detected", dir.parent_file.red());
         return Err("Cannot include component within itself".into());
       }
 
       let mut new_dir = dir.clone();
       new_dir.relative_path = format!("{}/{}", dir.relative_path, file_dir);
       new_dir.parent_file = file_name.into();
+
+      // Wax all the parameters within this component.
+      subcontents = wax_params(&new_dir, &mut subcontents, element)?;
 
       // First handle the <wax!> elements inside this component.
       match flow::wax(&mut new_dir, subcontents) {
@@ -42,19 +43,19 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
       // Then include the result.
       output.replace_range(range.clone(), &subcontents);
     } else {
-      printpro!("warn!  ", Color::Yellow, format!("({}) failed to load '{}'", dir.parent_file.yellow(), path));
+      warn!("({}) failed to load '{}'", dir.parent_file.yellow(), path);
       return Ok(String::new());
     }
 
     // DEBUG //
-    printpro!("waxing ", Color::Green, 
-      format!("{} {} {}", color_file(&path), 
+    info!("waxing ", Color::Green, 
+      "{} {} {}", color_file(&path), 
       "->".black(), 
-      color_file(&dir.parent_file))
+      color_file(&dir.parent_file)
     );
 
   } else {
-    printpro!("warn!  ", Color::Yellow, format!("({}) missing a 'path' attribute", dir.parent_file.yellow()));
+    warn!("({}) missing a 'path' attribute", dir.parent_file.yellow());
     return Ok(String::new());
   }
 

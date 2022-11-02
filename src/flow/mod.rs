@@ -2,13 +2,10 @@ mod include;
 mod params;
 
 use std::ops::Range;
-
-use colored::{Colorize, Color};
 use regex::{Regex, Captures};
 
-use crate::{utils::color_file, printpro, Directories};
+use crate::{utils::color_file, Directories, info};
 
-//use params::wax_params;
 use include::wax_include;
 
 /// Process a html file.
@@ -17,7 +14,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
   // Check if this file has already been generated and cached:
   let cached_path = format!("{}/.wax/{}/{}", dir.work_dir, dir.relative_path, dir.parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
-    printpro!("recycle", Color::Blue, color_file(&dir.parent_file));
+    info!("recycle", Color::Blue, color_file(&dir.parent_file));
     return Ok(cached);
   }
 
@@ -60,7 +57,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
 /// let caps = re.captures(r#"<wax! path="./test.html">"#).unwrap();
 /// 
 /// let (range, element) = from_captures(caps);
-/// assert_eq!("<wax!path="./test.html">", element);
+/// assert_eq!(r#"<wax!path="./test.html">"#, element);
 /// ```
 fn from_captures(caps: Captures) -> (Range<usize>, String) {
   (caps.get(0).unwrap().range(), caps.get(0).unwrap().as_str().replace(" ", ""))
