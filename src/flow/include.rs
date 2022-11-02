@@ -31,6 +31,7 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
 
       let mut new_dir = dir.clone();
       new_dir.relative_path = format!("{}/{}", dir.relative_path, file_dir);
+      new_dir.parent_file = file_name.into();
 
       // First handle the <wax!> elements inside this component.
       match flow::wax(&mut new_dir, subcontents) {
