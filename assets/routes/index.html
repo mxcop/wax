@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wax Test</title>
   <style> 
-    body { background-color: #111; color: #eee; } 
+    body { background-color: #111; color: #eee; width: 100vw; margin: 0; } 
     h1, h2, h3 { color: #eee; }
     p { color: #bbb; }
+    .row { display: flex; justify-content: center; }
   </style>
 </head>
 <body>
@@ -17,11 +18,13 @@
 
   <wax! src="../lib/level_1.html" />
 
-  <wax! src="../lib/dyn_level.html" title="Dynamic title" info="Dynamic description" />
+  <div class="row">
+    <wax! src="../lib/dyn_level.html" title="Dynamic title" info="Dynamic description" />
 
-  <wax! src="../lib/dyn_level.html" title="Dynamic title 2" info="Dynamic description 2" />
+    <wax! src="../lib/dyn_level.html" title="Dynamic title 2" info="Dynamic description 2" />
 
-  <wax! src="../lib/dyn_level.html" title="Dynamic title 3" info="Dynamic description 3" />
-  
+    <wax! src="../lib/dyn_level.html" title="Dynamic title 3" info="Dynamic description 3" />
+  </div>
+
 </body>
 </html>
