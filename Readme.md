@@ -25,6 +25,8 @@ cargo run -- <path>
 
 ### Static Components
 
+Wax components are an extension of html.
+
 <div><sub>Example : Component File</sub></div>
 
 ```html
@@ -34,6 +36,9 @@ cargo run -- <path>
   Hello from my component ! :D
 </p>
 ```
+
+Importing / including wax components is done using the <code><wax!></code> tag.<br>
+<i>e.g.</i> <code><wax! … src="[path]" … ></code>
 
 <div><sub>Example : Importing</sub></div>
 
@@ -49,17 +54,8 @@ cargo run -- <path>
 
 ### Dynamic Components *
 
-<div><sub>Example : Component File</sub></div>
-
-```html
-~ src/lib/my-component.html
-
-<params! title>
-
-<h1>
-  { title }
-</h1>
-```
+Passing parameters to a component is done using html attributes.<br>
+<i>e.g.</i> <code><wax! … [key]="[value]" … ></code>
 
 <div><sub>Example : Importing</sub></div>
 
@@ -71,6 +67,21 @@ cargo run -- <path>
   <wax! src="../lib/my-component.html" title="My dynamic title" />
   …
 </body>
+```
+
+Each component has to declare its parameters using <code><params! … [key] … ></code><br>
+Parameters can be inserted into the html using <code>{ [key] }</code>
+
+<div><sub>Example : Component File</sub></div>
+
+```html
+~ src/lib/my-component.html
+
+<params! title>
+
+<h1>
+  { title }
+</h1>
 ```
 
 <br>
