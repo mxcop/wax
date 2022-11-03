@@ -21,8 +21,8 @@ pub fn build(path: String) {
   }
 
   // Delete the .wax directory if it exists.
-  if std::path::Path::new(format!("{}/.wax", work_dir).as_str()).exists() {
-    std::fs::remove_dir_all(format!("{}/.wax", work_dir)).expect("Failed to remove .wax directory");
+  if std::path::Path::new(format!("{}/.wax", path).as_str()).exists() {
+    std::fs::remove_dir_all(format!("{}/.wax", path)).expect("Failed to remove .wax directory");
   }
 
 

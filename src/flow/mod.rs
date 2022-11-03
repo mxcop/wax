@@ -12,7 +12,7 @@ use include::wax_include;
 pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> {
 
   // Check if this file has already been generated and cached:
-  let cached_path = format!("{}/.wax/{}/{}", dir.work_dir, dir.relative_path, dir.parent_file);
+  let cached_path = format!("{}/.wax/{}/{}", dir.code_dir, dir.relative_path, dir.parent_file);
   if let Ok(cached) = std::fs::read_to_string(&cached_path) {
     info!("recycle", Color::Blue, color_file(&dir.parent_file));
     return Ok(cached);
@@ -36,7 +36,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
 
   // Cache this component if it has child components.
   if has_children {
-    let cache_path = format!("{}/.wax/{}", dir.work_dir, dir.relative_path);
+    let cache_path = format!("{}/.wax/{}", dir.code_dir, dir.relative_path);
     let cache_file = format!("{}/{}", cache_path, dir.parent_file);
 
     // Write a copy of this component to the disk:
