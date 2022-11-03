@@ -4,7 +4,7 @@ mod params;
 use std::ops::Range;
 use regex::{Regex, Captures};
 
-use crate::{utils::color_file, build::Directories, info};
+use crate::{build::Directories, info, utils::utils::color_file};
 
 use include::wax_include;
 

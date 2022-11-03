@@ -1,11 +1,11 @@
 use toml::Value;
 
-use crate::utils;
+use super::utils::load_file;
 
 /** Read the wax toml config file */
 pub fn get_conf(code_path: &str) -> Result<String, String> {
   // Attempt to read the wax config file:
-  if let Ok(conf) = utils::load_file(code_path, "./wax.toml") {
+  if let Ok(conf) = load_file(code_path, "./wax.toml") {
     // Parse the config file.
     let val = conf.parse::<Value>().unwrap();
     let index = val.get("index");
