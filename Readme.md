@@ -18,7 +18,7 @@
 ## Useage
 
 ```
-cargo run -- <path>
+cargo run build <PATH>
 ```
 
 <br>
@@ -89,5 +89,5 @@ Parameters can be inserted into the html using <code>{ [key] }</code>
 ## Testing
 
 ```
-cargo run -- ./assets
+cargo run build ./assets
 ```
