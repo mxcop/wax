@@ -21,10 +21,12 @@ fn main() {
   let index_dir;
 
   // Attempt to read the wax config file:
-  if let Some(index) = conf::get_conf(&code_path) {
-    index_dir = index;
-  } else {
-    return;
+  match conf::get_conf(&code_path) {
+    Ok(index) => index_dir = index,
+    Err(e) => {
+      error!(e);
+      return;
+    },
   }
 
   // Delete the .wax directory if it exists.

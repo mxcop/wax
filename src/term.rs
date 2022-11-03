@@ -1,11 +1,3 @@
-// #[macro_export]
-// macro_rules! printpro {
-//   ($name:expr, $color:expr, $info:expr) => {
-//     use colored::{Colorize, Color};
-//     println!("{} {} {}", "~".color(Color::Black), $name.color($color), $info);
-//   };
-// }
-
 #[macro_export]
 macro_rules! info {
   ($title:expr, $color:expr, $fmt_str:expr) => {{

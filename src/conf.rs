@@ -2,21 +2,24 @@ use toml::Value;
 
 use crate::utils;
 
-pub fn get_conf(code_path: &str) -> Option<String> {
+/** Read the wax toml config file */
+pub fn get_conf(code_path: &str) -> Result<String, String> {
   // Attempt to read the wax config file:
   if let Ok(conf) = utils::load_file(code_path, "./wax.toml") {
     // Parse the config file.
     let val = conf.parse::<Value>().unwrap();
-    let index = val["index"].as_str();
+    let index = val.get("index");
 
-    if let Some(index) = index {
-      return Some(String::from(index));
+    // Check if the index is none.
+    if index.is_none() { return Err(r#"missing 'index = "..."' in wax.toml"#.into()); }
+
+    // Check if the index is a string.
+    if let Some(index) = index.unwrap().as_str() {
+      return Ok(String::from(index));
     } else {
-      println!("error: missing 'index' from wax.toml");
-      return None;
+      return Err("wrong type used for 'index' in wax.toml".into());
     }
   } else {
-    println!("error: missing wax.config file");
-    return None;
+    return Err("missing wax.config file".into());
   }
 }
