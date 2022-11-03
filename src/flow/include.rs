@@ -2,7 +2,7 @@ use std::{path::Path, ops::Range};
 
 use regex::Regex;
 
-use crate::{utils::{color_file, load_file}, Directories, flow::{self, params::wax_params}, error, warn, info};
+use crate::{utils::{color_file, load_file}, build::Directories, flow::{self, params::wax_params}, error, warn, info};
 
 pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, mut output: String) -> Result<String, String> {
   

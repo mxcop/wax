@@ -3,9 +3,14 @@ name = "wax"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 regex = "1.6.0"
+
+# Toml parser
 toml = "0.5.9"
+
+# Fancy colors in the terminal
 colored = "2.0.0"
+
+# Command line tool helper
+clap = { version = "4.0.18", features = ["derive"] }

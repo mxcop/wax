@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::{error, Directories};
+use crate::{error, build::Directories};
 
 pub fn wax_params(dir: &Directories, contents: &mut String, import: &str) -> Result<String, String> {
   // Use regex to find the first <params!> element:
