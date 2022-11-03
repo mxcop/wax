@@ -1,4 +1,22 @@
 <params! title info>
 
-<h3> { title } </h3>
-<p> { info } </p>
+<style>
+  .card {
+    width: 300px;
+    height: 300px;
+
+    padding: 8px 16px;
+    margin: 16px;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: #222;
+    border-radius: 16px;
+  }
+</style>
+
+<div class="card">
+  <h3> { title } </h3>
+  <p> { info } </p>
+</div>
