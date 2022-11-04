@@ -130,10 +130,10 @@ Parameters can be inserted into the html using <code>{ [key] }</code>
 # wax.toml
 
 [website]
-pages = RelativePath  # Path to the directory containing your index.html.
+pages = "RelativePath"  # Path to the directory containing your index.html.
 
 [build]
-minify = Boolean?     # If enabled, will minify the collapsed HTML files.
+minify = "Boolean?"     # If enabled, will minify the collapsed HTML files.
 ```
 
 <br>
