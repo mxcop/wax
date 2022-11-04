@@ -1,7 +1,17 @@
 [package]
 name = "wax"
+description = "An extension of HTML written in Rust"
+authors = ["Max C. <mxcop.dev@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
+readme = "Readme.md"
+repository = "https://github.com/mxcop/wax/"
+license = "MIT"
+license-file = "License.md"
+keywords = ["html", "parser", "cli"]
+categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
+exclude = ["/assets"]
+# publish = ["wax-cli"]
 
 [dependencies]
 regex = "1.6.0"
