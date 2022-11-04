@@ -1,5 +1,5 @@
 <h2 align="center">
-  <img src="https://github.com/mxcop/wax/blob/main/.github/icon.svg" width="80px">
+  <img src="https://raw.githubusercontent.com/mxcop/wax/main/.github/icon.svg" width="80px">
   <div>
     Wax 
   </div>
