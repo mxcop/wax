@@ -50,6 +50,7 @@ Wax components are an extension of html.
   Hello from my component ! :D
 </p>
 ```
+<br>
 
 Importing / including wax components is done using the <code><wax!></code> tag.<br>
 <i>e.g.</i> <code><wax! … src="[path]" … ></code>
@@ -65,6 +66,7 @@ Importing / including wax components is done using the <code><wax!></code> tag.<
   …
 </body>
 ```
+<br>
 
 ### Dynamic Components *
 
@@ -82,6 +84,7 @@ Passing parameters to a component is done using html attributes.<br>
   …
 </body>
 ```
+<br>
 
 Each component has to declare its parameters using <code><params! … [key] … ></code><br>
 Parameters can be inserted into the html using <code>{ [key] }</code>
