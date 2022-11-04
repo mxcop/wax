@@ -42,7 +42,8 @@ pub fn create(name: String) {
 
 // Wax config template.
 const CONF_TEMPLATE: &str = 
-r#"pages = "./src/pages""#;
+r#"[website]
+pages = "./src/pages""#;
 
 // Wax gitignore template.
 const GIT_TEMPLATE: &str =

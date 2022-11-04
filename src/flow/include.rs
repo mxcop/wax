@@ -34,6 +34,9 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
       // Wax all the parameters within this component.
       subcontents = wax_params(&new_dir, &mut subcontents, element)?;
 
+      // Remove any whitespace around the content.
+      subcontents = subcontents.trim().to_string();
+
       // First handle the <wax!> elements inside this component.
       match flow::wax(&mut new_dir, subcontents) {
         Ok(result) => subcontents = result,

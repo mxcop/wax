@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use crate::{flow::wax, error, utils::{conf::get_conf, utils::load_file}};
+use crate::{flow::wax, error, utils::{conf::{get_conf, WaxConfig}, utils::load_file}};
 
 /** Build a wax project */
 pub fn build(path: String) {
@@ -9,11 +9,11 @@ pub fn build(path: String) {
   println!("\n{} loading config", "Wax".green().bold());
 
 
-  let index_dir;
+  let conf: WaxConfig;
 
   // Attempt to read the wax config file:
   match get_conf(&path) {
-    Ok(index) => index_dir = index,
+    Ok(c) => conf = c,
     Err(e) => {
       error!(e);
       return;
@@ -35,18 +35,27 @@ pub fn build(path: String) {
   let mut dir = Directories { 
     code_dir: path.clone(), 
     work_dir: work_dir.clone(), 
-    relative_path: index_dir.clone(), 
+    relative_path: conf.website.pages.clone(), 
     parent_file: "index.html".into() 
   };
 
   // Attempt to read the index file:
-  if let Ok(contents) = load_file(&path, format!("{}/index.html", &index_dir).as_str()) {
+  if let Ok(contents) = load_file(&path, format!("{}/index.html", &dir.relative_path).as_str()) {
     match wax(&mut dir, contents) {
       Ok(result) => output = result,
       Err(e) => {
         println!("\n{} failed ({})", "Wax".red().bold(), e);
         return;
       }
+    }
+  }
+
+  // Check the build options in the config:
+  if let Some(build) = conf.build {
+    if let Some(true) = build.minify {
+      // Remove all newlines.
+      let re = regex::Regex::new(r"<!--(.*?)-->|\s\B").unwrap();
+      output = re.replace_all(&output, "").to_string();
     }
   }
 

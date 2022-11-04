@@ -122,6 +122,22 @@ Parameters can be inserted into the html using <code>{ [key] }</code>
 
 <br>
 
+## Config
+
+<div><sup>* <strong>?</strong> : means it is optional</sup></div>
+
+```toml
+# wax.toml
+
+[website]
+pages = RelativePath  # Path to the directory containing your index.html.
+
+[build]
+minify = Boolean?     # If enabled, will minify the collapsed HTML files.
+```
+
+<br>
+
 ## Testing
 
 <div><sup>* Using the testing project in <code>./assets</code></sup></div>

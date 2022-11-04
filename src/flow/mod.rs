@@ -30,7 +30,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
     // Get the range and element from the captures:
     let (range, element) = from_captures(caps);
 
-    //output = wax_params()?;
+    // Process the component and collapse it into the current one.
     output = wax_include(dir, &range, &element, output)?;
   }
 

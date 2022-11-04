@@ -20,6 +20,7 @@ regex = "1.6.0"
 
 # Toml parser
 toml = "0.5.9"
+serde = { version = "1.0", features = ["derive"] }
 
 # Fancy colors in the terminal
 colored = "2.0.0"
