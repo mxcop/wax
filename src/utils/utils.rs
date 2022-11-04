@@ -20,5 +20,5 @@ pub fn name_and_ext(path: &str) -> (&str, &str) {
 /** Convert a file path to a colorful debug representation (can panic) */
 pub fn color_file(path: &str) -> String {
   let (name, ext) = name_and_ext(path);
-  format!("{}{}{}", name, ".".black(), ext.black())
+  format!("{}{}{}", name, ".".bright_black(), ext.bright_black())
 }

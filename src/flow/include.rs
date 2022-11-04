@@ -50,7 +50,7 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, m
     // DEBUG //
     info!("waxing ", Color::Green, 
       "{} {} {}", color_file(&path), 
-      "->".black(), 
+      "->".bright_black(), 
       color_file(&dir.parent_file)
     );
 
