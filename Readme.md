@@ -1,7 +1,12 @@
-<h1>Wax ——— Collapse your HTML 
-  <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
-  <img align="right" src="https://img.shields.io/crates/l/wax-cli">
-  <img align="right" src="https://img.shields.io/crates/d/wax-cli">
+<h1>
+  <div>
+    Wax —— Collapse your HTML
+  </div>
+  <a href="https://crates.io/crates/wax-cli">
+    <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
+    <img align="right" src="https://img.shields.io/crates/l/wax-cli">
+    <img align="right" src="https://img.shields.io/crates/d/wax-cli">
+  </a>
 </h1>
 
 <br>
