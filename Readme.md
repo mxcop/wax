@@ -1,16 +1,8 @@
-## Wax Project Structure
-
-```graphql
-./<my-wax-site>/* 
-  ├─ src/*         - # Your codebase (html, css, and js)
-  │  ├─ .wax       - # Wax file cache
-  │  ├─ build/     - # Wax build output
-  │  ├─ lib/       - # Html components
-  │  ├─ routes/    - # Location of all your html pages
-  │  ├─ wax.toml   - # Wax config file
-  │  └─ ...
-  └─ ...
-```
+<h1>Wax ——— Collapse your HTML 
+  <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
+  <img align="right" src="https://img.shields.io/crates/l/wax-cli">
+  <img align="right" src="https://img.shields.io/crates/d/wax-cli">
+</h1>
 
 <br>
 
@@ -33,6 +25,24 @@ $ wax create <NAME>
 
 ```md
 $ wax build <PATH>
+```
+
+<br>
+
+## Project Structure
+
+```graphql
+./<my-wax-site>/* 
+  │
+  ├─ .wax       - # Wax file cache
+  ├─ dist       - # Wax build output
+  │
+  ├─ src/*      - # Your codebase (html, css, and js)
+  │  ├─ lib/       - # Html wax components
+  │  ├─ pages/     - # Your html pages
+  │  └─ ...
+  │
+  └─ wax.toml   - # Wax config file
 ```
 
 <br>
