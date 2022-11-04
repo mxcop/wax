@@ -2,12 +2,12 @@
 macro_rules! info {
   ($title:expr, $color:expr, $fmt_str:expr) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), $title.color($color), $fmt_str);
+    println!("{} {} {}", "~".color(Color::BrightBlack), $title.color($color), $fmt_str);
   }};
 
   ($title:expr, $color:expr, $fmt_str:literal, $($args:expr),*) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), $title.color($color), format!($fmt_str, $($args),*));
+    println!("{} {} {}", "~".color(Color::BrightBlack), $title.color($color), format!($fmt_str, $($args),*));
   }};
 }
 
@@ -15,12 +15,12 @@ macro_rules! info {
 macro_rules! error {
   ($fmt_str:expr) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), "error! ".color(Color::Red), $fmt_str);
+    println!("{} {} {}", "~".color(Color::BrightBlack), "error! ".color(Color::Red), $fmt_str);
   }};
 
   ($fmt_str:literal, $($args:expr),*) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), "error! ".color(Color::Red), format!($fmt_str, $($args),*));
+    println!("{} {} {}", "~".color(Color::BrightBlack), "error! ".color(Color::Red), format!($fmt_str, $($args),*));
   }};
 }
 
@@ -28,11 +28,11 @@ macro_rules! error {
 macro_rules! warn {
   ($fmt_str:expr) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), "warn!  ".color(Color::Yellow), $fmt_str);
+    println!("{} {} {}", "~".color(Color::BrightBlack), "warn!  ".color(Color::Yellow), $fmt_str);
   }};
 
   ($fmt_str:literal, $($args:expr),*) => {{
     use colored::{Colorize, Color};
-    println!("{} {} {}", "~".color(Color::Black), "warn!  ".color(Color::Yellow), format!($fmt_str, $($args),*));
+    println!("{} {} {}", "~".color(Color::BrightBlack), "warn!  ".color(Color::Yellow), format!($fmt_str, $($args),*));
   }};
 }
