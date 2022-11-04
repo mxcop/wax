@@ -21,12 +21,12 @@ pub fn build(path: String) {
   }
 
   // Delete the .wax directory if it exists.
-  if std::path::Path::new(format!("{}/.wax", path).as_str()).exists() {
-    std::fs::remove_dir_all(format!("{}/.wax", path)).expect("Failed to remove .wax directory");
+  if std::path::Path::new(format!("{}/.wax", &path).as_str()).exists() {
+    std::fs::remove_dir_all(format!("{}/.wax", &path)).expect("Failed to remove .wax directory");
   }
 
 
-  println!("{} building '{}'\n", "Wax".green().bold(), path);
+  println!("{} building '{}'\n", "Wax".green().bold(), &path);
   let start = std::time::Instant::now();
 
 
@@ -40,7 +40,7 @@ pub fn build(path: String) {
   };
 
   // Attempt to read the index file:
-  if let Ok(contents) = load_file(&path, format!("{}/index.html", index_dir).as_str()) {
+  if let Ok(contents) = load_file(&path, format!("{}/index.html", &index_dir).as_str()) {
     match wax(&mut dir, contents) {
       Ok(result) => output = result,
       Err(e) => {
@@ -51,8 +51,8 @@ pub fn build(path: String) {
   }
 
   // Write the output to the disk:
-  std::fs::create_dir_all(format!("{}/build", work_dir)).expect("Failed to create ./build directory");
-  std::fs::write(format!("{}/build/index.html", work_dir), &output).expect("Failed to write output");
+  std::fs::create_dir_all(format!("{}/build", &path)).expect("Failed to create ./build directory");
+  std::fs::write(format!("{}/build/index.html", &path), &output).expect("Failed to write output");
 
   println!("\n{} finished in {}ms", "Wax".green().bold(), start.elapsed().as_millis());
 }

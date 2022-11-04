@@ -1,3 +1,8 @@
+# Wax cache dir
 .wax
+
+# Rust build dir
 /target
-/build
+
+# Wax build dir
+*/build
