@@ -4,7 +4,9 @@
   </div>
   <a href="https://crates.io/crates/wax-cli">
     <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
+    <img align="right" width=4px height=4px>
     <img align="right" src="https://img.shields.io/crates/l/wax-cli">
+    <img align="right" width=4px height=4px>
     <img align="right" src="https://img.shields.io/crates/d/wax-cli">
   </a>
 </h1>
