@@ -14,10 +14,25 @@
 
 <br>
 
+## Install
+
+Install the Wax cli using cargo :
+```
+$ cargo install wax-cli
+```
+
 ## Useage
 
+<div><sup>Create new project</sup></div>
+
+```md
+$ wax create <NAME>
 ```
-cargo run build <PATH>
+
+<div><sup>Build your project</sup></div>
+
+```md
+$ wax build <PATH>
 ```
 
 <br>
@@ -26,7 +41,7 @@ cargo run build <PATH>
 
 Wax components are an extension of html.
 
-<div><sub>Example : Component File</sub></div>
+<div><sup>Example : Component File</sup></div>
 
 ```html
 ~ src/lib/my-component.html
@@ -39,7 +54,7 @@ Wax components are an extension of html.
 Importing / including wax components is done using the <code><wax!></code> tag.<br>
 <i>e.g.</i> <code><wax! … src="[path]" … ></code>
 
-<div><sub>Example : Importing</sub></div>
+<div><sup>Example : Importing</sup></div>
 
 ```html
 ~ src/routes/index.html
@@ -56,7 +71,7 @@ Importing / including wax components is done using the <code><wax!></code> tag.<
 Passing parameters to a component is done using html attributes.<br>
 <i>e.g.</i> <code><wax! … [key]="[value]" … ></code>
 
-<div><sub>Example : Importing</sub></div>
+<div><sup>Example : Importing</sup></div>
 
 ```html
 ~ src/routes/index.html
@@ -71,7 +86,7 @@ Passing parameters to a component is done using html attributes.<br>
 Each component has to declare its parameters using <code><params! … [key] … ></code><br>
 Parameters can be inserted into the html using <code>{ [key] }</code>
 
-<div><sub>Example : Component File</sub></div>
+<div><sup>Example : Component File</sup></div>
 
 ```html
 ~ src/lib/my-component.html
@@ -87,6 +102,8 @@ Parameters can be inserted into the html using <code>{ [key] }</code>
 
 ## Testing
 
+<div><sup>* Using the testing project in <code>./assets</code></sup></div>
+
 ```
-cargo run build ./assets
+$ cargo run build ./assets
 ```
