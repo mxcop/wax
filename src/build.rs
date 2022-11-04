@@ -51,8 +51,8 @@ pub fn build(path: String) {
   }
 
   // Write the output to the disk:
-  std::fs::create_dir_all(format!("{}/build", &path)).expect("Failed to create ./build directory");
-  std::fs::write(format!("{}/build/index.html", &path), &output).expect("Failed to write output");
+  std::fs::create_dir_all(format!("{}/dist", &path)).expect("Failed to create ./dist directory");
+  std::fs::write(format!("{}/dist/index.html", &path), &output).expect("Failed to write output");
 
   println!("\n{} finished in {}ms", "Wax".green().bold(), start.elapsed().as_millis());
 }

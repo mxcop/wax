@@ -1,0 +1,5 @@
+# Wax cache
+.wax
+
+# Wax build
+/dist

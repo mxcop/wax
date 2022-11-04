@@ -22,8 +22,8 @@ pub fn create(name: String) {
   };
 
   // Create the directories:
-  create_dir_all(get_path("routes")).expect("Failed to create project routes directory");
-  create_dir_all(get_path("lib")).expect("Failed to create project lib directory");
+  create_dir_all(get_path("src/pages")).expect("Failed to create project pages directory");
+  create_dir_all(get_path("src/lib")).expect("Failed to create project lib directory");
 
   // Create the config file.
   write(get_path("wax.toml"), CONF_TEMPLATE).expect("Failed to create config file");
@@ -32,17 +32,17 @@ pub fn create(name: String) {
   write(get_path(".gitignore"), GIT_TEMPLATE).expect("Failed to create gitignore file");
 
   // Create the index.html file.
-  write(get_path("routes/index.html"), HTML_TEMPLATE).expect("Failed to create index.html file");
+  write(get_path("src/pages/index.html"), HTML_TEMPLATE).expect("Failed to create index.html file");
 
   // Create the example component file.
-  write(get_path("lib/comp.html"), COMP_TEMPLATE).expect("Failed to create example component file");
+  write(get_path("src/lib/comp.html"), COMP_TEMPLATE).expect("Failed to create example component file");
 
   println!("\n{} finished creating project at './{}'", "Wax".green().bold(), &name);
 }
 
 // Wax config template.
 const CONF_TEMPLATE: &str = 
-r#"index = "./routes""#;
+r#"pages = "./src/pages""#;
 
 // Wax gitignore template.
 const GIT_TEMPLATE: &str =
@@ -50,7 +50,7 @@ r#"# Wax cache
 .wax
 
 # Wax build
-/build"#;
+/dist"#;
 
 // Index html file template.
 const HTML_TEMPLATE: &str = 
