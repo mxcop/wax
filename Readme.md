@@ -1,13 +1,17 @@
-<h1>
+<h2 align="center">
+  <img src="https://github.com/emberry-org/emberry-rework/blob/main/.github/icon.svg" width="80px">
   <div>
-    Wax —— Collapse your HTML
+    Wax 
+  </div>
+  <div>
+    <sup>* Collapse your HTML *</sup>
   </div>
   <a href="https://crates.io/crates/wax-cli">
     <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
     <img align="right" src="https://img.shields.io/crates/l/wax-cli">
     <img align="right" src="https://img.shields.io/crates/d/wax-cli">
   </a>
-</h1>
+</h2>
 
 <br>
 

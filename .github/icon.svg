@@ -1,0 +1,19 @@
+<svg width="20" height="20" version="1.1" viewBox="0 0 5.2917 5.2917" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <linearGradient id="linearGradient901">
+   <stop stop-color="#ff8e5a" offset="0"/>
+   <stop stop-color="#f9bf60" offset=".49703"/>
+   <stop stop-color="#eef458" offset="1"/>
+  </linearGradient>
+  <linearGradient id="linearGradient903" x1="1.8047" x2="21.628" y1="17.296" y2="4.7117" gradientTransform="matrix(0 .26458 -.26458 0 5.3232 .0030599)" gradientUnits="userSpaceOnUse" xlink:href="#linearGradient901"/>
+  <linearGradient id="linearGradient902" x1="7.1406" x2="11.984" y1=".56395" y2="5.7566" gradientUnits="userSpaceOnUse" xlink:href="#linearGradient901"/>
+ </defs>
+ <g>
+  <path d="m5.3113 0.95029a0.26461 0.26461 0 0 0-0.13436-0.23048l-1.1896-0.67179a0.26461 0.26461 0 0 0-0.26355 0.00207l-1.0542 0.61185-1.0671-0.6041a0.26461 0.26461 0 0 0-0.26355 0.00207l-1.1973 0.69504a0.26461 0.26461 0 0 0-0.13281 0.22841v1.3477a0.26461 0.26461 0 0 0 0.13281 0.22841l1.0526 0.60875v1.1942a0.26461 0.26461 0 0 0 0.13281 0.22841l1.1855 0.68575a0.26461 0.26461 0 0 0 0.26562 0l1.203-0.69556a0.26461 0.26461 0 0 0 0.13281-0.22841v-1.1979l1.0666-0.61443a0.26461 0.26461 0 0 0 0.13074-0.23048zm-0.52917 0.15451v1.0526l-0.92501 0.53588-0.93018-0.524v-1.0459l0.93121-0.54002zm-1.1973 2.0552v1.0382l-0.93948 0.54312-0.92191-0.5333v-1.0392l0.93689-0.54157zm-1.1911-2.0459v1.0537l-0.93431 0.54157-0.92139-0.53227v-1.0413l0.93741-0.54312z" color="#000000" color-rendering="auto" dominant-baseline="auto" fill="url(#linearGradient903)" image-rendering="auto" shape-rendering="auto" solid-color="#000000" stop-color="#000000" style="font-feature-settings:normal;font-variant-alternates:normal;font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;font-variant-position:normal;font-variation-settings:normal;inline-size:0;isolation:auto;mix-blend-mode:normal;shape-margin:0;shape-padding:0;text-decoration-color:#000000;text-decoration-line:none;text-decoration-style:solid;text-indent:0;text-orientation:mixed;text-transform:none;white-space:normal"/>
+  <g fill="#f7c95e">
+   <path d="m2.1154 3.9892 0.52417 0.30322 0.53416-0.3088v-0.59028l-0.52564-0.30293-0.53269 0.30792v0.59087z"/>
+   <path d="m0.93436 1.9529 0.52417 0.30322 0.53416-0.3088v-0.59028l-0.52564-0.30293-0.53269 0.30792v0.59087z"/>
+   <path d="m3.3321 1.9733 0.52417 0.30322 0.53416-0.3088v-0.59028l-0.52564-0.30293-0.53269 0.30792v0.59087z"/>
+  </g>
+ </g>
+</svg>
