@@ -1,15 +1,15 @@
 <h2 align="center">
   <img src="https://raw.githubusercontent.com/mxcop/wax/main/.github/icon.svg" width="80px">
   <div>
-    Wax 
+    Wax
   </div>
   <div>
-    <sup>* Collapse your HTML *</sup>
+    <sub>HTML with Components</sub>
   </div>
   <a href="https://crates.io/crates/wax-cli">
     <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
     <img align="right" src="https://img.shields.io/crates/l/wax-cli">
-    <img align="right" src="https://img.shields.io/crates/d/wax-cli">
+    <img align="left" src="https://img.shields.io/crates/d/wax-cli">
   </a>
 </h2>
 
