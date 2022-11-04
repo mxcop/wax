@@ -11,6 +11,10 @@ keywords = ["html", "parser", "cli"]
 categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
 exclude = ["/assets"]
 
+[[bin]]
+name = "wax"
+path = "src/main.rs"
+
 [dependencies]
 regex = "1.6.0"
 
