@@ -9,6 +9,9 @@ mod utils;
 
 fn main() {
 
+  // Enable colors in the command prompt.
+  colored::control::set_virtual_terminal(true).unwrap();
+
   let args = args::Args::parse();
 
   match args.cmd {
