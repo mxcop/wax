@@ -28,6 +28,9 @@ pub fn create(name: String) {
   // Create the config file.
   write(get_path("wax.toml"), CONF_TEMPLATE).expect("Failed to create config file");
 
+  // Create the gitignore file.
+  write(get_path(".gitignore"), GIT_TEMPLATE).expect("Failed to create gitignore file");
+
   // Create the index.html file.
   write(get_path("routes/index.html"), HTML_TEMPLATE).expect("Failed to create index.html file");
 
@@ -40,6 +43,14 @@ pub fn create(name: String) {
 // Wax config template.
 const CONF_TEMPLATE: &str = 
 r#"index = "./routes""#;
+
+// Wax gitignore template.
+const GIT_TEMPLATE: &str =
+r#"# Wax cache
+.wax
+
+# Wax build
+/build"#;
 
 // Index html file template.
 const HTML_TEMPLATE: &str = 

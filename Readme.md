@@ -4,12 +4,12 @@
 ./<my-wax-site>/* 
   ├─ src/*         - # Your codebase (html, css, and js)
   │  ├─ .wax       - # Wax file cache
+  │  ├─ build/     - # Wax build output
   │  ├─ lib/       - # Html components
   │  ├─ routes/    - # Location of all your html pages
   │  ├─ wax.toml   - # Wax config file
   │  └─ ...
-  │
-  └─ build/    - # Wax build output
+  └─ ...
 ```
 
 <br>
