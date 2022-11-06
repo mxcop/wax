@@ -2,4 +2,4 @@
 pages = "./src/pages"
 
 [build]
-minify = false
+minify = true

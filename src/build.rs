@@ -53,9 +53,13 @@ pub fn build(path: String) {
   // Check the build options in the config:
   if let Some(build) = conf.build {
     if let Some(true) = build.minify {
-      // Remove all newlines.
-      let re = regex::Regex::new(r"<!--(.*?)-->|\s\B").unwrap();
-      output = re.replace_all(&output, "").to_string();
+      use minify_html::{Cfg, minify};
+
+      // Minify the final document using minify_html crate:
+      let cfg = Cfg::new();
+      let minified = minify(output.as_bytes(), &cfg);
+
+      output = String::from_utf8_lossy(&minified).to_string();
     }
   }
 

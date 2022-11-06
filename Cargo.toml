@@ -30,3 +30,4 @@ clap = { version = "4.0.18", features = ["derive"] }
 
 # Markdown parser
 pulldown-cmark = { version = "0.9.2", default-features = false }
+minify-html = "0.10.3"
