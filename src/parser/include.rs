@@ -30,11 +30,12 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, o
       else if extension == "md" {
         md::include_md(dir, &subcontents, path, range.clone(), output)?;
       }
-      else if path.ends_with("/*") {
-        dir::include_dir(dir, subcontents, path, element, range.clone(), output)?;
-      }
-      
-    } else {
+
+    } 
+    else if path.ends_with("/*") {
+      dir::include_dir(dir, path, element, range.clone(), output)?;
+    }
+    else {
       warn!("({}) failed to load '{}'", dir.parent_file.yellow(), path);
       return Ok(String::new());
     }
