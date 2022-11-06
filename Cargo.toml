@@ -2,7 +2,7 @@
 name = "wax-cli"
 description = "An extension of HTML written in Rust"
 authors = ["Max C. <mxcop.dev@gmail.com>"]
-version = "0.1.10"
+version = "0.2.0"
 edition = "2021"
 readme = "Readme.md"
 repository = "https://github.com/mxcop/wax/"
