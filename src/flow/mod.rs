@@ -31,7 +31,7 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
     let (range, element) = from_captures(caps);
 
     // Process the component and collapse it into the current one.
-    output = wax_include(dir, &range, &element, output)?;
+    output = wax_include(dir, &range, &element, &mut output)?;
   }
 
   // Cache this component if it has child components.
