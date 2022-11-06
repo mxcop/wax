@@ -2,6 +2,7 @@ use std::{ops::Range, path::Path};
 
 use crate::{info, utils::utils::color_file, build::Directories};
 
+/// Function for parsing and then including a markdown file.
 pub fn include_md(dir: &mut Directories, contents: &str, path: &str, range: Range<usize>, output: &mut String) -> Result<(), String> {
 
   // Check if this file has already been generated and cached:
