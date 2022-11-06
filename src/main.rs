@@ -4,7 +4,7 @@ use args::Commands;
 mod args;
 mod create;
 mod build;
-mod flow;
+mod parser;
 mod utils;
 
 fn main() {

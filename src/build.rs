@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use crate::{flow::wax, error, utils::{conf::{get_conf, WaxConfig}, files::visit_dirs}};
+use crate::{parser::wax, error, utils::{conf::{get_conf, WaxConfig}, files::visit_dirs}};
 
 /** Build a wax project */
 pub fn build(path: String) {

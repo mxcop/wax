@@ -1,6 +1,6 @@
 use std::{path::Path, ops::Range};
 
-use crate::{info, utils::utils::color_file, build::Directories, error, flow::{params::wax_params, self}};
+use crate::{info, utils::utils::color_file, build::Directories, error, parser::{params::wax_params, self}};
 
 /// Function for including a HTML file using Wax.
 pub fn include_html(dir: &mut Directories, mut contents: String, path: &str, element: &str, range: Range<usize>, output: &mut String) -> Result<(), String> {
@@ -26,7 +26,7 @@ pub fn include_html(dir: &mut Directories, mut contents: String, path: &str, ele
   contents = contents.trim().to_string();
 
   // First handle the <wax!> elements inside this component.
-  match flow::wax(&mut new_dir, contents) {
+  match parser::wax(&mut new_dir, contents) {
     Ok(result) => contents = result,
     Err(e) => return Err(e)
   }
