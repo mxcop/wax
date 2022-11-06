@@ -5,13 +5,6 @@ use crate::{info, utils::utils::color_file, build::Directories, error, flow::{pa
 /// Function for including a HTML file using Wax.
 pub fn include_html(dir: &mut Directories, mut contents: String, path: &str, element: &str, range: Range<usize>, output: &mut String) -> Result<(), String> {
 
-  // Logging:
-  info!("waxing ", Color::Green, 
-    "{} {} {}", color_file(&path), 
-    "->".bright_black(), 
-    color_file(&dir.parent_file)
-  );
-
   // Remove the filename & extension from the path to get the directory of this file.
   // This is important for relative import paths.
   let file_dir = Path::new(&path).ancestors().nth(1).unwrap().to_str().unwrap();
@@ -40,6 +33,13 @@ pub fn include_html(dir: &mut Directories, mut contents: String, path: &str, ele
 
   // Then include the result.
   output.replace_range(range.clone(), &contents);
+
+  // Logging:
+  info!("waxing ", Color::Green, 
+    "{} {} {}", color_file(&path), 
+    "->".bright_black(), 
+    color_file(&dir.parent_file)
+  );
 
   Ok(())
 }
