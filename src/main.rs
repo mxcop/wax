@@ -6,8 +6,10 @@ mod create;
 mod build;
 mod parser;
 mod utils;
+mod server;
 
-fn main() {
+#[tokio::main]
+async fn main() {
 
   // Enable colors in the command prompt.
   colored::control::set_virtual_terminal(true).unwrap();
@@ -16,6 +18,6 @@ fn main() {
 
   match args.cmd {
     Commands::Create { name } => create::create(name),
-    Commands::Build { path } => build::build(path),
+    Commands::Build { path } => { build::build(path.clone()); server::start(8080, format!("{}/dist/", &path), false, "", "127.0.0.1").await; },
   }
 }

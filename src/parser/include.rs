@@ -33,7 +33,7 @@ pub fn wax_include(dir: &mut Directories, range: &Range<usize>, element: &str, o
 
     } 
     else if path.ends_with("/*") {
-      dir::include_dir(dir, path, element, range.clone(), output)?;
+      dir::include_dir(dir, path, range.clone(), output)?;
     }
     else {
       warn!("({}) failed to load '{}'", dir.parent_file.yellow(), path);

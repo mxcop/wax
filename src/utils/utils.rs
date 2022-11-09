@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, fs::ReadDir};
 
 use colored::Colorize;
 
@@ -7,6 +7,13 @@ pub fn load_file(code_path: &str, path: &str) -> std::io::Result<String> {
   let path = format!("{}/{}", code_path, path);
   let path = Path::new(&path);
   std::fs::read_to_string(path)
+}
+
+/** Load information about a directory */
+pub fn load_dir(code_path: &str, path: &str) -> std::io::Result<ReadDir> {
+  let path = format!("{}/{}", code_path, path);
+  let path = Path::new(&path);
+  std::fs::read_dir(path)
 }
 
 /** Get the file name & file extension from a path (can panic) */
