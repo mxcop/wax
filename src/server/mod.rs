@@ -1,5 +1,6 @@
 // Copied from : https://github.com/robertohuertasm/microserver/blob/master/src/server.rs
 // Please check them out if you are interested :D
+// Copyright (c) 2018 Roberto Huertas
 
 use std::net::{IpAddr, SocketAddr};
 
