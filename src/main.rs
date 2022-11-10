@@ -18,6 +18,6 @@ async fn main() {
 
   match args.cmd {
     Commands::Create { name } => create::create(name),
-    Commands::Build { path } => { build::build(path.clone()); server::start(8080, format!("{}/dist/", &path), false, "", "127.0.0.1").await; },
+    Commands::Build { path } => { build::build(path.clone()); /* server::start(8080, format!("{}/dist/", &path), false, "", "127.0.0.1").await; */ },
   }
 }

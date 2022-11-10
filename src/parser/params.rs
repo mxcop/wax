@@ -24,7 +24,7 @@ pub fn wax_params(dir: &Directories, contents: &mut String, import: &str) -> Res
 
     for param in params {
       // Use regex to extract the attribute from the import element.
-      let exp = Regex::new(format!(r#"{}="(?s)(.*?)""#, param).as_str()).expect("Regex failed");
+      let exp = Regex::new(format!(r#"{}="(.*?)""#, param).as_str()).expect("Regex failed");
 
       // Try to extract the attribute:
       if let Some(caps) = exp.captures(&import) {

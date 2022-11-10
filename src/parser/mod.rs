@@ -54,11 +54,11 @@ pub fn wax(dir: &mut Directories, mut output: String) -> Result<String, String> 
 /// Basic usage:
 /// ```
 /// let re = Regex::new(r"<wax!.*?>").unwrap();
-/// let caps = re.captures(r#"<wax! path="./test.html">"#).unwrap();
+/// let caps = re.captures(r#"<wax! src="./test.html">"#).unwrap();
 /// 
 /// let (range, element) = from_captures(caps);
-/// assert_eq!(r#"<wax!path="./test.html">"#, element);
+/// assert_eq!(r#"<wax! src="./test.html">"#, element);
 /// ```
 fn from_captures(caps: Captures) -> (Range<usize>, String) {
-  (caps.get(0).unwrap().range(), caps.get(0).unwrap().as_str().replace(" ", ""))
+  (caps.get(0).unwrap().range(), caps.get(0).unwrap().as_str().to_string()/* .replace(" ", "") */)
 }
