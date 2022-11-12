@@ -1,10 +1,10 @@
 <script>
-  import Component from "../lib/comp";
+  import comp from "../lib/comp.wx";
 </script>
 
 
 <div class="hive">
-  <Component />
+  <comp />
 </div>
 
 
