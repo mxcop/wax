@@ -1,0 +1,14 @@
+<section>
+  <h1>Header</h1>
+  <p>Paragraph</p>
+</section>
+
+
+<style scoped>
+  h1 {
+    color: #eee;
+  }
+  p {
+    color: #aaa;
+  }
+</style>

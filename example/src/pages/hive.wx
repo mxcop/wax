@@ -1,0 +1,16 @@
+<script>
+  import Component from "../lib/comp";
+</script>
+
+
+<div class="hive">
+  <Component />
+</div>
+
+
+<style global>
+  body {
+    background-color: #222;
+    color: #eee;
+  }
+</style>
