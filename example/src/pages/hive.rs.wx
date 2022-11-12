@@ -1,0 +1,23 @@
+use component;
+
+fn on_mount() {
+  // code ...
+}
+
+fn draw(ctx) -> Html {
+  html!(ctx,
+    <div class="hive">
+      { component }
+    </div>
+  )
+}
+
+fn styles(ctx) -> Css {
+  css!(ctx,
+    body {
+      background-color: #222;
+      color: #eee;
+    }
+  , global)
+}
+

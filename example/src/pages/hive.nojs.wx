@@ -1,6 +1,5 @@
-<script>
-  import comp from "../lib/comp.wx";
-</script>
+alias hive;
+use comp;
 
 
 <div class="hive">
