@@ -1,9 +1,6 @@
 use clap::Parser;
 use args::Commands;
 
-#[cfg(test)]
-mod tests;
-
 mod args;
 mod create;
 mod build;
@@ -11,6 +8,7 @@ mod parser;
 mod utils;
 mod server;
 mod fetcher;
+mod error;
 
 #[tokio::main]
 async fn main() {

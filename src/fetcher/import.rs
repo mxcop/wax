@@ -2,6 +2,8 @@ use std::path::Path;
 
 use regex::Regex;
 
+use crate::error::SyntaxError;
+
 /// References an import statement which imports a wax component.
 pub struct ComponentImport {
   pub name: String,
@@ -9,7 +11,7 @@ pub struct ComponentImport {
 }
 
 /// Fetch all the import statements within the contents of a script tag.
-pub fn fetch_imports(script: &str) -> Option<Vec<ComponentImport>> {
+pub fn fetch_imports(script: &str) -> Result<Vec<ComponentImport>, SyntaxError> {
 
   // Use regex to find all the import statements:
   let re = Regex::new(IMPORT_REGEX).expect("Regex failed to initialize");
@@ -29,18 +31,30 @@ pub fn fetch_imports(script: &str) -> Option<Vec<ComponentImport>> {
       if let None = name { println!("warning(fetch_imports) : captures match number 1 was None"); continue; }
       if let None = path { println!("warning(fetch_imports) : captures match number 2 was None"); continue; }
 
-      let mut name = name.unwrap().as_str();
+      let mut name_str = name.unwrap().as_str();
       let path = path.unwrap().as_str();
 
+      // If the name isn't one word, or uses curly braces.
+      if name_str.trim().contains(' ') {
+        return Err(SyntaxError::with_help(
+          "component import cannot use curly braces syntax", 
+          "folder/file.wx", 
+          0, 
+          0,
+          "<line>",
+          "use default import syntax instead, `import <name> from <path>`"
+        ));
+      }
+
       // If the name is empty then we set it using the file name.
-      if name.trim().is_empty() {
+      if name_str.trim().is_empty() {
         // TODO : use prefix instead of stem here! (otherwise component name might include a '.')
         let file_name = Path::new(path).file_stem().expect("import missing component name and file name in path");
-        name = file_name.to_str().unwrap();
+        name_str = file_name.to_str().unwrap();
       }
 
       let import = ComponentImport { 
-        name: name.trim().to_string(), 
+        name: name_str.trim().to_string(), 
         // The trim -> trim -> trim is because the result includes \s"\s
         path: path.trim().trim_matches('"').trim().to_string()
       };
@@ -49,10 +63,10 @@ pub fn fetch_imports(script: &str) -> Option<Vec<ComponentImport>> {
       imports.push(import); 
     }
 
-    return Some(imports);
+    return Ok(imports);
   }
 
-  None
+  Ok(Vec::new())
 }
 
 const IMPORT_REGEX: &str = r#"import([\s\S]*?)(?:from|")([\s\S]*?\.wx)[\s\S]*?""#;

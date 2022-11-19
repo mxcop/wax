@@ -1,12 +1,13 @@
-use crate::fetcher::import::fetch_imports;
+use super::super::import::fetch_imports;
 
+/// Test different import formats.
 #[test]
 fn formatting() -> Result<(), String> {
   let result = fetch_imports(FORMATTING_TEST);
   
-  if let Some(result) = result {
+  if let Ok(result) = result {
 
-    if result.len() < 10 {
+    if result.len() < 9 {
       return Err(format!("not all imports were found ({} out of 10)", result.len()));
     }
 
@@ -21,7 +22,32 @@ fn formatting() -> Result<(), String> {
 
     Ok(())
   } else {
-    Err(String::from("no imports were found"))
+    Err(String::from("an error occured during fetching"))
+  }
+}
+
+/// Test if curly brace imports will panic.
+#[test]
+#[should_panic]
+fn curly_braces() {
+  fetch_imports(CURLY_IMPORT_TEST).unwrap();
+}
+
+/// Test if imports without a name will be interpreted correctly.
+#[test]
+fn no_name() -> Result<(), String> {
+  let result = fetch_imports(NONAME_IMPORT_TEST);
+
+  if let Ok(result) = result {
+    if result.len() == 0 {
+      return Err(String::from("no imports were found"));
+    }
+    if result[0].name == "comp" {
+      return Ok(());
+    }
+    return Err(format!(r#"no name import name was interpreted incorrectly ("{}" should've been "comp")"#, result[0].name));
+  } else {
+    return Err(String::from("an error occured during fetching"));
   }
 }
 
@@ -51,8 +77,6 @@ from
 import comp from " ../lib/comp.wx";
 
 import comp from "../lib/comp.wx ";
-
-import { comp } from "../lib/comp.wx";
 
 import "../lib/comp.wx";
 "#;

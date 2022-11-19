@@ -1,1 +1,4 @@
-pub(crate) mod import;
+mod import;
+
+#[cfg(test)]
+mod tests;
