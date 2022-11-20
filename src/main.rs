@@ -7,6 +7,8 @@ mod build;
 mod utils;
 mod logging;
 
+mod compiler;
+
 fn main() {
 
   // Enable colors in the command prompt.

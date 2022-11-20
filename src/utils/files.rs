@@ -16,3 +16,10 @@
 //   }
 //   Ok(())
 // }
+
+use std::path::Path;
+
+/** Load a file using relative or absolute path */
+pub fn load_file(path: &str) -> std::io::Result<String> {
+  std::fs::read_to_string(Path::new(path))
+}
