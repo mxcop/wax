@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use crate::{parser::wax, error, utils::{conf::{get_conf, WaxConfig}, files::visit_dirs}};
+use crate::{utils::{conf::{get_conf, WaxConfig}, files::visit_dirs}, error};
 
 /** Build a wax project */
 pub fn build(path: String) {
@@ -54,15 +54,15 @@ pub fn build(path: String) {
     };
 
     // Attempt to read the file:
-    if let Ok(contents) = std::fs::read_to_string(file.path()) {
-      match wax(&mut dir.clone(), contents) {
-        Ok(result) => output = result,
-        Err(e) => {
-          println!("\n{} failed ({})", "Wax".red().bold(), e);
-          return;
-        }
-      }
-    }
+    // if let Ok(contents) = std::fs::read_to_string(file.path()) {
+    //   match wax(&mut dir.clone(), contents) {
+    //     Ok(result) => output = result,
+    //     Err(e) => {
+    //       println!("\n{} failed ({})", "Wax".red().bold(), e);
+    //       return;
+    //     }
+    //   }
+    // }
 
     // Check the build options in the config:
     if let Some(build) = &conf.build {
