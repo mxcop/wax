@@ -1,16 +1,17 @@
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Token {
   ILLEGAL,
   EOF,
   IDENT(String),
   INT(Vec<char>),
-  ASSIGN(char),
+  EQUALS(char),
   PLUS(char),
   COMMA(char),
-  SEMICOLON(char),
+  SEMI(char),
   COLON(char),
   LPAREN(char),
   RPAREN(char),
+  QUEST(char),
   LBRACE(char),
   RBRACE(char),
   IMPORT,
@@ -26,13 +27,14 @@ pub enum Token {
   RETURN,
   MINUS(char),
   BANG(char),
-  ASTERISK(char),
+  AST(char),
   SLASH(char),
   LT(char),
   GT(char),
   QUOT(char),
   APOS(char),
   DOT(char),
+  COMMAT(char),
 }
 
 pub fn get_keyword_token(ident: &String) -> Result<Token, String> {

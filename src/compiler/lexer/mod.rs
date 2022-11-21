@@ -66,7 +66,7 @@ impl Lexer {
     self.skip_whitespace();
     match self.ch {
       '=' => {
-        tok = Token::ASSIGN(self.ch);
+        tok = Token::EQUALS(self.ch);
       }
       '+' => {
         tok = Token::PLUS(self.ch);
@@ -81,7 +81,7 @@ impl Lexer {
         tok = Token::SLASH(self.ch);
       }
       '*' => {
-        tok = Token::ASTERISK(self.ch);
+        tok = Token::AST(self.ch);
       }
       '<' => {
         tok = Token::LT(self.ch);
@@ -89,8 +89,11 @@ impl Lexer {
       '>' => {
         tok = Token::GT(self.ch);
       }
+      '?' => {
+        tok = Token::QUEST(self.ch);
+      }
       ';' => {
-        tok = Token::SEMICOLON(self.ch);
+        tok = Token::SEMI(self.ch);
       }
       ':' => {
         tok = Token::COLON(self.ch);
@@ -118,6 +121,9 @@ impl Lexer {
       }
       '.' => {
         tok = Token::DOT(self.ch);
+      }
+      '@' => {
+        tok = Token::COMMAT(self.ch);
       }
       '0' => {
         tok = Token::EOF;

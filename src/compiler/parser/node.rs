@@ -1,22 +1,22 @@
 #[derive(Debug, Clone)]
-pub enum GrammarItem {
-    Product,
-    Sum,
-    Number(u64),
-    Paren
+pub enum GrammarNode {
+  HTML,
+  CSS,
+  JS,
+  IMPORT
 }
 
 #[derive(Debug, Clone)]
 pub struct Node {
   pub children: Vec<Node>,
-  pub entry: GrammarItem,
+  pub entry: GrammarNode,
 }
 
 impl Node {
-  pub fn new() -> Node {
+  pub fn new(entry: GrammarNode) -> Node {
     Node {
       children: Vec::new(),
-      entry: GrammarItem::Paren,
+      entry,
     }
   }
 }
