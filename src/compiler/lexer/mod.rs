@@ -54,6 +54,18 @@ impl Lexer {
       l.input[position..l.position].into_iter().collect()
     };
 
+    let read_tag = |l: &mut Lexer| -> String {
+      let position = l.position + 1;
+      while l.position < l.input.len() && l.input[l.position + 1] != '>' && (is_letter(l.ch) || l.ch == '<') {
+        l.read_char();
+      }
+      if l.input[l.position + 1] != '>' {
+        l.input[position..l.position].into_iter().collect()
+      } else {
+        l.input[position..l.position + 1].into_iter().collect()
+      }
+    };
+
     let read_number = |l: &mut Lexer| -> Vec<char> {
       let position = l.position;
       while l.position < l.input.len() && is_digit(l.ch) {
@@ -84,7 +96,12 @@ impl Lexer {
         tok = Token::AST(self.ch);
       }
       '<' => {
-        tok = Token::LT(self.ch);
+        if is_letter(self.input[self.position + 1]) {
+          let ident = read_tag(self);
+          tok = Token::TAG(ident);
+        } else {
+          tok = Token::LT(self.ch);
+        }
       }
       '>' => {
         tok = Token::GT(self.ch);
