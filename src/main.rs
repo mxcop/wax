@@ -4,6 +4,8 @@
 use compiler::lexer::{token::Token, Lexer};
 use compiler::parser::Parser;
 
+use crate::compiler::parser::tree::ArenaTree;
+
 mod args;
 mod build;
 mod create;
@@ -37,32 +39,45 @@ fn main() {
   //let mut p = Parser::new(tk);
   //p.read_token();
 
-  enum NodeType<'a> {
+  struct Attribute {
+    name: String,
+    value: String,
+  }
+
+  enum NodeType {
     Root,
-    Linear(Vec<Node<'a>>),
-    Branch{ eq: &'a Node<'a>, neq: &'a Node<'a>},
-    Script(&'a Node<'a>),
-    DefaultImport(&'a Node<'a>),
+    Script{ attributes: Vec<Attribute> },
+    Style{ attributes: Vec<Attribute> },
+    Tag{ attributes: Vec<Attribute> },
   }
 
-  struct Node<'a> {
-    parent: Option<&'a Node<'a>>,
-    entry: NodeType<'a>
-  }
-
-  let mut root = Node { parent: None, entry: NodeType::Root };
-  let mut curr = &mut root;
+  let mut tree: ArenaTree<NodeType> = ArenaTree::new();
+  let curr = tree.add_node("Root".into(), NodeType::Root);
 
   for (index, token) in tk.iter().enumerate() {
     match token {
-      Token::TAG(tag) => parse_tag(index, &tag, &tk, &mut curr),
+      Token::TAG(tag) => parse_tag(index, &tag, &tk, &mut tree, curr),
       _ => {}
     }
     println!("{} : {:?}", index, token);
   }
 
-  fn parse_tag(start: usize, tag: &String, tokens: &Vec<Token>, curr: &mut Node) {
+  fn parse_tag(start: usize, tag: &String, tokens: &Vec<Token>, tree: &mut ArenaTree<NodeType>, curr: usize) {
     println!("Found a tag <{}>", tag);
+
+    let node: NodeType;
+
+    match tag.as_str() {
+      "script" => {
+        node = NodeType::Script { attributes: Vec::new() };
+        tree.add_child(curr, "Script".into(), node);
+      }
+      "style" => {
+        node = NodeType::Style { attributes: Vec::new() };
+        tree.add_child(curr, "Style".into(), node);
+      }
+      _ => {}
+    }
 
     let mut j = start;
     loop {
@@ -81,6 +96,8 @@ fn main() {
       j += 1;
     }
   }
+
+  println!("\nAST : \n{}", tree);
   
   // let mut i = tk.iter().peekable();
   // loop {

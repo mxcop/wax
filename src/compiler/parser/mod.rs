@@ -1,4 +1,5 @@
 pub mod node;
+pub mod tree;
 
 use self::node::{Node, GrammarNode};
 
