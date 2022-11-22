@@ -1,11 +1,17 @@
 // Referenced from https://dev.to/deciduously/no-more-tears-no-more-knots-arena-allocated-trees-in-rust-44k6
 
+use std::fmt::Debug;
+
 #[derive(Default)]
-pub struct ArenaTree<T> {
+pub struct ArenaTree<T> 
+  where T : Debug
+{
   arena: Vec<Node<T>>,
 }
 
-impl<T> ArenaTree<T> {
+impl<T> ArenaTree<T> 
+  where T : Debug
+{
   pub fn new() -> ArenaTree<T> {
     ArenaTree { arena: Vec::new() }
   }
@@ -35,10 +41,14 @@ impl<T> ArenaTree<T> {
   }
 }
 
-impl<T> std::fmt::Display for ArenaTree<T> {
+impl<T> std::fmt::Display for ArenaTree<T> 
+  where T : Debug
+{
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 
-    fn recurse<T>(f: &mut std::fmt::Formatter, tree: &ArenaTree<T>, node: &Node<T>, level: u32) -> std::fmt::Result {
+    fn recurse<T>(f: &mut std::fmt::Formatter, tree: &ArenaTree<T>, node: &Node<T>, level: u32) -> std::fmt::Result 
+      where T : Debug
+    {
       for child in &node.children {
         let child = tree.get(*child);
 
@@ -47,7 +57,7 @@ impl<T> std::fmt::Display for ArenaTree<T> {
         }
 
         if child.children.len() == 0 {
-          writeln!(f, "{}", child.name)?;
+          writeln!(f, "{:?}", child.val)?;
         } else {
           writeln!(f, "{} : {{", child.name)?;
           recurse(f, &tree, &child, level + 1)?;
@@ -71,15 +81,19 @@ impl<T> std::fmt::Display for ArenaTree<T> {
   }
 }
 
-pub struct Node<T> {
+pub struct Node<T> 
+  where T : Debug
+{
   idx: usize,
   name: String,
-  val: T,
+  pub val: T,
   parent: Option<usize>,
   children: Vec<usize>,
 }
 
-impl<T> Node<T> {
+impl<T> Node<T> 
+  where T : Debug
+{
   pub fn new(idx: usize, name: String, val: T) -> Self {
     Self {
       idx,
