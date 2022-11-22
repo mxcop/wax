@@ -1,22 +1,13 @@
-#[derive(Debug, Clone)]
-pub enum GrammarNode {
-  HTML,
-  CSS,
-  JS,
-  IMPORT
+#[derive(Debug)]
+pub struct Attribute {
+  pub name: String,
+  pub value: String,
 }
 
-#[derive(Debug, Clone)]
-pub struct Node {
-  pub children: Vec<Node>,
-  pub entry: GrammarNode,
-}
-
-impl Node {
-  pub fn new(entry: GrammarNode) -> Node {
-    Node {
-      children: Vec::new(),
-      entry,
-    }
-  }
+#[derive(Debug)]
+pub enum NodeType {
+  Root,
+  Script { attributes: Vec<Attribute> },
+  Style { attributes: Vec<Attribute> },
+  Tag { attributes: Vec<Attribute> },
 }

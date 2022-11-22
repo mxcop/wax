@@ -2,9 +2,10 @@
 // use args::Commands;
 
 use compiler::lexer::{token::Token, Lexer};
-use compiler::parser::Parser;
+//use compiler::parser::Parser;
 
-use crate::compiler::parser::tree::ArenaTree;
+use compiler::parser::node::{NodeType, Attribute};
+use compiler::parser::tree::ArenaTree;
 
 mod args;
 mod build;
@@ -36,23 +37,6 @@ fn main() {
   println!("{} {} {}", char::from(l.ch), l.position, l.read_position);
 
   // Parse :
-  //let mut p = Parser::new(tk);
-  //p.read_token();
-
-  #[derive(Debug)]
-  struct Attribute {
-    name: String,
-    value: String,
-  }
-
-  #[derive(Debug)]
-  enum NodeType {
-    Root,
-    Script { attributes: Vec<Attribute> },
-    Style { attributes: Vec<Attribute> },
-    Tag { attributes: Vec<Attribute> },
-  }
-
   let mut tree: ArenaTree<NodeType> = ArenaTree::new();
   let curr = tree.add_node("Root".into(), NodeType::Root);
 
@@ -128,41 +112,35 @@ fn main() {
 
         tree.add_child(curr, "Style".into(), node);
       }
-      _ => {}
+      _ => {
+        let mut attrs: Vec<Attribute> = Vec::new();
+
+        let mut j = start;
+        loop {
+          match &tokens[j] {
+            Token::GT(_) => {
+              break;
+            }
+            Token::IDENT(attr) => {
+              println!("Found an attribute {}", attr);
+              attrs.push(Attribute { name: attr.into(), value: "".into() });
+            }
+            Token::EOF => {
+              break;
+            }
+            _ => {}
+          }
+          j += 1;
+        }
+
+        let node = NodeType::Tag {
+          attributes: attrs,
+        };
+
+        tree.add_child(curr, tag.into(), node);
+      }
     }
   }
 
   println!("\nAST : \n{}", tree);
-
-  // let mut i = tk.iter().peekable();
-  // loop {
-  //   if let Some(token) = i.next() {
-  //     match &token {
-  //       Token::IDENT(_) => {},
-  //       Token::SLASH(_) => {},
-  //       Token::LT(_) => {
-  //         if let Some(peek) = i.peek() {
-  //           if let Token::IDENT(ident) = peek {
-  //             println!("<");
-  //             println!("{}", ident);
-  //           } else if let Token::SLASH(_) = peek {
-  //             println!("/>");
-  //           }
-  //         }
-  //       },
-  //       Token::GT(_) => {},
-  //       _ => {},
-  //     }
-  //   } else {
-  //     break;
-  //   }
-  // }
-  //println!("\n{:?}", p.);
-
-  // let args = args::Args::parse();
-
-  // match args.cmd {
-  //   Commands::Create { name } => create::create(name),
-  //   Commands::Build { path } => build::build(path.clone()),
-  // }
 }
