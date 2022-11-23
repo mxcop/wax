@@ -3,7 +3,11 @@ pub enum Token {
   ILLEGAL,
   EOF,
   IDENT(String),
-  TAG(String),
+
+  OpeningTag(String),
+  ClosedTag(String),
+  ClosingTag(String),
+
   INT(Vec<char>),
   EQUALS(char),
   PLUS(char),

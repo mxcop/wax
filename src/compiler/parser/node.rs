@@ -9,5 +9,6 @@ pub enum NodeType {
   Root,
   Script { attributes: Vec<Attribute> },
   Style { attributes: Vec<Attribute> },
-  Tag { attributes: Vec<Attribute> },
+  OpeningTag { attributes: Vec<Attribute> },
+  ClosingTag,
 }

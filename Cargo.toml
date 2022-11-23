@@ -17,6 +17,7 @@ path = "src/main.rs"
 
 [dependencies]
 regex = "1.6.0"
+peekmore = "1.0.0"
 
 # Toml parser
 toml = "0.5.9"
