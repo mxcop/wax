@@ -10,6 +10,10 @@ fn is_tag_name(ch: char) -> bool {
   'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
 }
 
+fn is_whitespace(ch: char) -> bool {
+  ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
+}
+
 // fn is_letter(ch: char) -> bool {
 //   'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-' || ch == '#'
 // }
@@ -78,6 +82,13 @@ impl<'a> Lexer<'a> {
               panic!("Closing tag missing tag name");
             }
 
+            while let Some(&ch) = self.iter.peek() {
+              if !is_whitespace(*ch) {
+                break;
+              }
+              self.iter.next();
+            }
+
             // Read the next char which should be '>' if not panic!
             if !self.cmove('>') {
               panic!("Closing tag missing closing bracket");
@@ -107,6 +118,12 @@ impl<'a> Lexer<'a> {
               if *ch == '/' {
                 tokens.push(Token::ClosedTag(name));
                 self.iter.next();
+                
+                // Read the next char which should be '>' if not panic!
+                if !self.cmove('>') {
+                  panic!("Closing tag missing closing bracket");
+                }
+
                 break;
               }
 
