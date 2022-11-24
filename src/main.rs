@@ -29,15 +29,19 @@ fn main() {
 
   // Parse :
   let mut tree: ArenaTree<NodeType> = ArenaTree::new();
-  let curr = tree.add_node("Root".into(), NodeType::Root);
+  let mut curr = tree.add_node("Root".into(), NodeType::Root);
 
   for (index, token) in tk.iter().enumerate() {
     match token {
       Token::OpeningTag(tag) => {
-        tree.add_child(curr, tag.to_string(), NodeType::OpeningTag { attributes: vec![] });
+        curr = tree.add_child(curr, tag.to_string(), NodeType::OpeningTag { attributes: vec![] });
       },
       Token::ClosingTag(tag) => {
-        tree.add_child(curr, "EndTag".into(), NodeType::ClosingTag);
+        tree.add_child(curr, tag.to_string(), NodeType::ClosingTag);
+        curr = tree.get_parent(curr);
+      },
+      Token::ClosedTag(tag) => {
+        tree.add_child(curr, tag.to_string(), NodeType::ClosedTag);
       },
       _ => {}
     }

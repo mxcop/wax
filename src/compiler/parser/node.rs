@@ -11,4 +11,5 @@ pub enum NodeType {
   Style { attributes: Vec<Attribute> },
   OpeningTag { attributes: Vec<Attribute> },
   ClosingTag,
+  ClosedTag,
 }

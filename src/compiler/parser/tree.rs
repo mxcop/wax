@@ -39,6 +39,11 @@ impl<T> ArenaTree<T>
   pub fn get(&self, idx: usize) -> &Node<T> {
     &self.arena[idx]
   }
+
+  /// Get the parent of a node in the tree by its id.
+  pub fn get_parent(&self, idx: usize) -> usize {
+    self.arena[idx].parent.unwrap()
+  }
 }
 
 impl<T> std::fmt::Display for ArenaTree<T> 
@@ -61,6 +66,11 @@ impl<T> std::fmt::Display for ArenaTree<T>
         } else {
           writeln!(f, "{} : {{", child.name)?;
           recurse(f, &tree, &child, level + 1)?;
+          
+          for _ in 0..level {
+            write!(f, "  ")?;
+          }
+          writeln!(f, "}}")?;
         }
       }
 

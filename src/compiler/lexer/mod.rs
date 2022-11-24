@@ -6,6 +6,10 @@ use peekmore::{PeekMore, PeekMoreIterator};
 use token::Token;
 
 
+fn is_tag_name(ch: char) -> bool {
+  'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
+}
+
 fn is_letter(ch: char) -> bool {
   'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-' || ch == '#'
 }
@@ -26,12 +30,31 @@ impl<'a> Lexer<'a> {
     }
   }
 
+  /// ### Read next Tag
+  fn rtag(&mut self) -> Option<String> {
+    let mut word: Vec<char> = Vec::new();
+    while let Some(&ch) = self.iter.peek() {
+      if is_tag_name(*ch) {
+        self.iter.next();
+        word.push(*ch);
+      } else {
+        break;
+      }
+    }
+    if word.len() > 0 {
+      Some(word.into_iter().collect())
+    } else {
+      None
+    }
+  }
+
   /// ### Conditional Move
   /// Returns whether the next character is equal to the given character.<br>
   /// If true then moves the iterator forward by one.
   fn cmove(&mut self, ch: char) -> bool {
     match self.iter.peek() {
       Some(&ch2) if *ch2 == ch => {
+        self.iter.next();
         true
       }
       _ => false
@@ -48,23 +71,47 @@ impl<'a> Lexer<'a> {
           if self.cmove('/') {
 
             // Read the next word as the tag name...
-
-            // If there's no word then panic!
+            if let Some(word) = self.rtag() {
+              tokens.push(Token::ClosingTag(word.clone()));
+            } else {
+              // If there's no word then panic!
+              panic!("Closing tag missing tag name");
+            }
 
             // Read the next char which should be '>' if not panic!
+            if !self.cmove('>') {
+              panic!("Closing tag missing closing bracket");
+            }
 
-            tokens.push(Token::ClosingTag("Lol".into()));
           } else {
+            let name: String;
 
             // Read the next word as the tag name...
-
-            // If there's no word then panic!
+            if let Some(word) = self.rtag() {
+              name = word;
+            } else {
+              // If there's no word then panic!
+              panic!("Closing tag missing tag name");
+            }
 
             // Read the next words as attributes...
+            while let Some(&ch) = self.iter.peek() {
 
-            // Until we reach the '>'
+              // Until we reach the '>'
+              if *ch == '>' {
+                tokens.push(Token::OpeningTag(name));
+                break;
+              }
 
-            tokens.push(Token::OpeningTag("Lol".into()));
+              // Or until we reach the '/'
+              if *ch == '/' {
+                tokens.push(Token::ClosedTag(name));
+                self.iter.next();
+                break;
+              }
+
+              self.iter.next();
+            }
           }
         }
         _ => {}
