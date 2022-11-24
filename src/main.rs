@@ -38,6 +38,9 @@ fn main() {
       },
       Token::ClosedTag(tag) => {
         tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
+      },
+      Token::DefaultImport{ name, path } => {
+        tree.add_child(curr, name.to_string(), NodeType::Import { name: name.into(), path: path.into() });
       }
     }
     println!("{} : {:?}", index, token);

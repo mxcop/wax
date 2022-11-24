@@ -3,6 +3,8 @@ pub enum Token {
   OpeningTag(String),
   ClosedTag(String),
   ClosingTag(String),
+
+  DefaultImport{ name: String, path: String }
 }
 
 // pub fn get_keyword_token(ident: &String) -> Result<Token, String> {
