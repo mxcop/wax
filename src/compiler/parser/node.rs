@@ -8,5 +8,5 @@ pub struct Attribute {
 pub enum NodeType {
   Root,
   Tag { attributes: Vec<Attribute> },
-  DefaultImport { name: String, path: String },
+  DefaultImport { specifier: String, source: String },
 }

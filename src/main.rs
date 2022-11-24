@@ -40,11 +40,27 @@ fn main() {
         tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
       },
       Token::DefaultImport{ name, path } => {
-        tree.add_child(curr, name.to_string(), NodeType::DefaultImport { name: name.into(), path: path.into() });
+        tree.add_child(
+          curr, 
+          name.to_string(), 
+          NodeType::DefaultImport { 
+            specifier: name.to_string(), 
+            source: path.to_string()
+          }
+        );
       }
     }
     println!("{} : {:?}", index, token);
   }
 
   println!("\nAST : \n{}", tree);
+
+  logging::bail(
+    "non-default component import!",
+    "src/pages/hive.wx",
+    Some("<script>"),
+    2,
+    r#"import { comp } from "../lib/comp.wx";"#,
+    Some(r#"try using `import <name> from "...";`"#)
+  );
 }
