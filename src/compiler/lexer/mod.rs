@@ -1,5 +1,5 @@
 pub mod token;
-pub mod html;
+pub mod script;
 
 use std::slice::Iter;
 use peekmore::PeekMoreIterator;
@@ -21,7 +21,6 @@ fn is_whitespace(ch: char) -> bool {
 // fn is_digit(ch: char) -> bool {
 //   '0' <= ch && ch <= '9'
 // }
-
 
 pub struct Lexer<'a> {
   iter: PeekMoreIterator<Iter<'a, char>>,
@@ -67,15 +66,25 @@ impl<'a> Lexer<'a> {
 
   pub fn lex(&mut self) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
+    let mut script: bool = false;
 
     // Move through all the characters:
     while let Some(ch) = self.iter.next() {
+
+      if script {
+        print!("{}", ch);
+        continue;
+      }
+
       match ch {
         '<' => {
           if self.cmove('/') {
 
             // Read the next word as the tag name...
             if let Some(word) = self.rtag() {
+              if word == "script" {
+                script = false;
+              }
               tokens.push(Token::ClosingTag(word.clone()));
             } else {
               // If there's no word then panic!
@@ -110,6 +119,9 @@ impl<'a> Lexer<'a> {
 
               // Until we reach the '>'
               if *ch == '>' {
+                if name == "script" {
+                  script = true;
+                }
                 tokens.push(Token::OpeningTag(name));
                 break;
               }
