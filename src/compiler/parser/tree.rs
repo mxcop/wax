@@ -50,6 +50,14 @@ impl<T> std::fmt::Display for ArenaTree<T>
   where T : Debug
 {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    use colored::Colorize;
+
+    fn append_tabs(f: &mut std::fmt::Formatter, level: u32) -> std::fmt::Result {
+      for _ in 0..level {
+        write!(f, "  ")?;
+      }
+      Ok(())
+    }
 
     fn recurse<T>(f: &mut std::fmt::Formatter, tree: &ArenaTree<T>, node: &Node<T>, level: u32) -> std::fmt::Result 
       where T : Debug
@@ -57,19 +65,15 @@ impl<T> std::fmt::Display for ArenaTree<T>
       for child in &node.children {
         let child = tree.get(*child);
 
-        for _ in 0..level {
-          write!(f, "  ")?;
-        }
+        append_tabs(f, level)?;
 
         if child.children.len() == 0 {
-          writeln!(f, "{:?}", child.val)?;
+          writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?;
         } else {
-          writeln!(f, "{} : {{", child.name)?;
+          writeln!(f, "{}: {{", child.name)?;
           recurse(f, &tree, &child, level + 1)?;
-          
-          for _ in 0..level {
-            write!(f, "  ")?;
-          }
+
+          append_tabs(f, level)?;
           writeln!(f, "}}")?;
         }
       }
@@ -94,7 +98,7 @@ impl<T> std::fmt::Display for ArenaTree<T>
 pub struct Node<T> 
   where T : Debug
 {
-  idx: usize,
+  _idx: usize,
   name: String,
   pub val: T,
   parent: Option<usize>,
@@ -104,9 +108,9 @@ pub struct Node<T>
 impl<T> Node<T> 
   where T : Debug
 {
-  pub fn new(idx: usize, name: String, val: T) -> Self {
+  pub fn new(_idx: usize, name: String, val: T) -> Self {
     Self {
-      idx,
+      _idx,
       name,
       val,
       parent: None,

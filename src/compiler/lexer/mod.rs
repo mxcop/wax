@@ -2,7 +2,7 @@ pub mod token;
 pub mod html;
 
 use std::slice::Iter;
-use peekmore::{PeekMore, PeekMoreIterator};
+use peekmore::PeekMoreIterator;
 use token::Token;
 
 
@@ -10,13 +10,13 @@ fn is_tag_name(ch: char) -> bool {
   'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
 }
 
-fn is_letter(ch: char) -> bool {
-  'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-' || ch == '#'
-}
+// fn is_letter(ch: char) -> bool {
+//   'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-' || ch == '#'
+// }
 
-fn is_digit(ch: char) -> bool {
-  '0' <= ch && ch <= '9'
-}
+// fn is_digit(ch: char) -> bool {
+//   '0' <= ch && ch <= '9'
+// }
 
 
 pub struct Lexer<'a> {

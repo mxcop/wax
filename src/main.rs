@@ -1,10 +1,6 @@
-// use clap::Parser;
-// use args::Commands;
-
 use compiler::lexer::{token::Token, Lexer};
-//use compiler::parser::Parser;
 
-use compiler::parser::node::{NodeType, Attribute};
+use compiler::parser::node::NodeType;
 use compiler::parser::tree::ArenaTree;
 use peekmore::PeekMore;
 
@@ -34,113 +30,18 @@ fn main() {
   for (index, token) in tk.iter().enumerate() {
     match token {
       Token::OpeningTag(tag) => {
-        curr = tree.add_child(curr, tag.to_string(), NodeType::OpeningTag { attributes: vec![] });
+        curr = tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
       },
-      Token::ClosingTag(tag) => {
-        tree.add_child(curr, tag.to_string(), NodeType::ClosingTag);
+      Token::ClosingTag(_) => {
+        //tree.add_child(curr, tag.to_string(), NodeType::ClosingTag);
         curr = tree.get_parent(curr);
       },
       Token::ClosedTag(tag) => {
-        tree.add_child(curr, tag.to_string(), NodeType::ClosedTag);
-      },
-      _ => {}
+        tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
+      }
     }
     println!("{} : {:?}", index, token);
   }
-
-  // fn parse_tag(
-  //   start: usize,
-  //   tag: &String,
-  //   tokens: &Vec<Token>,
-  //   tree: &mut ArenaTree<NodeType>,
-  //   curr: usize,
-  // ) {
-  //   println!("Found a tag <{}>", tag);
-
-  //   match tag.as_str() {
-  //     "script" => {
-  //       let mut attrs: Vec<Attribute> = Vec::new();
-
-  //       let mut j = start;
-  //       loop {
-  //         match &tokens[j] {
-  //           Token::GT(_) => {
-  //             break;
-  //           }
-  //           Token::IDENT(attr) => {
-  //             println!("Found an attribute {}", attr);
-  //             attrs.push(Attribute { name: attr.into(), value: "".into() });
-  //           }
-  //           Token::EOF => {
-  //             break;
-  //           }
-  //           _ => {}
-  //         }
-  //         j += 1;
-  //       }
-
-  //       let node = NodeType::Script {
-  //         attributes: attrs,
-  //       };
-
-  //       tree.add_child(curr, "Script".into(), node);
-  //     }
-  //     "style" => {
-  //       let mut attrs: Vec<Attribute> = Vec::new();
-
-  //       let mut j = start;
-  //       loop {
-  //         match &tokens[j] {
-  //           Token::GT(_) => {
-  //             break;
-  //           }
-  //           Token::IDENT(attr) => {
-  //             println!("Found an attribute {}", attr);
-  //             attrs.push(Attribute { name: attr.into(), value: "".into() });
-  //           }
-  //           Token::EOF => {
-  //             break;
-  //           }
-  //           _ => {}
-  //         }
-  //         j += 1;
-  //       }
-
-  //       let node = NodeType::Style {
-  //         attributes: attrs,
-  //       };
-
-  //       tree.add_child(curr, "Style".into(), node);
-  //     }
-  //     _ => {
-  //       let mut attrs: Vec<Attribute> = Vec::new();
-
-  //       let mut j = start;
-  //       loop {
-  //         match &tokens[j] {
-  //           Token::GT(_) => {
-  //             break;
-  //           }
-  //           Token::IDENT(attr) => {
-  //             println!("Found an attribute {}", attr);
-  //             attrs.push(Attribute { name: attr.into(), value: "".into() });
-  //           }
-  //           Token::EOF => {
-  //             break;
-  //           }
-  //           _ => {}
-  //         }
-  //         j += 1;
-  //       }
-
-  //       let node = NodeType::Tag {
-  //         attributes: attrs,
-  //       };
-
-  //       tree.add_child(curr, tag.into(), node);
-  //     }
-  //   }
-  // }
 
   println!("\nAST : \n{}", tree);
 }

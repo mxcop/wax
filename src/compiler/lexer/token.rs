@@ -1,60 +1,23 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
-  ILLEGAL,
-  EOF,
-  IDENT(String),
-
   OpeningTag(String),
   ClosedTag(String),
   ClosingTag(String),
-
-  INT(Vec<char>),
-  EQUALS(char),
-  PLUS(char),
-  COMMA(char),
-  SEMI(char),
-  COLON(char),
-  LPAREN(char),
-  RPAREN(char),
-  QUEST(char),
-  LBRACE(char),
-  RBRACE(char),
-  IMPORT,
-  EXPORT,
-  FROM,
-  FUNCTION,
-  LET,
-  CONST,
-  TRUE,
-  FALSE,
-  IF,
-  ELSE,
-  RETURN,
-  MINUS(char),
-  BANG(char),
-  AST(char),
-  SLASH(char),
-  LT(char),
-  GT(char),
-  QUOT(char),
-  APOS(char),
-  DOT(char),
-  COMMAT(char),
 }
 
-pub fn get_keyword_token(ident: &String) -> Result<Token, String> {
-  match &ident[..] {
-    "import" => Ok(Token::IMPORT),
-    "export" => Ok(Token::EXPORT),
-    "from" => Ok(Token::FROM),
-    "function" => Ok(Token::FUNCTION),
-    "let" => Ok(Token::LET),
-    "const" => Ok(Token::CONST),
-    "true" => Ok(Token::TRUE),
-    "false" => Ok(Token::FALSE),
-    "if" => Ok(Token::IF),
-    "else" => Ok(Token::ELSE),
-    "return" => Ok(Token::RETURN),
-    _ => Err(String::from("Not a keyword")),
-  }
-}
+// pub fn get_keyword_token(ident: &String) -> Result<Token, String> {
+//   match &ident[..] {
+//     "import" => Ok(Token::IMPORT),
+//     "export" => Ok(Token::EXPORT),
+//     "from" => Ok(Token::FROM),
+//     "function" => Ok(Token::FUNCTION),
+//     "let" => Ok(Token::LET),
+//     "const" => Ok(Token::CONST),
+//     "true" => Ok(Token::TRUE),
+//     "false" => Ok(Token::FALSE),
+//     "if" => Ok(Token::IF),
+//     "else" => Ok(Token::ELSE),
+//     "return" => Ok(Token::RETURN),
+//     _ => Err(String::from("Not a keyword")),
+//   }
+// }
