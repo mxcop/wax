@@ -55,6 +55,15 @@ fn main() {
 
   println!("\nAST : \n{}", tree);
 
+  logging::warn(
+    "non-default component import!",
+    "src/pages/hive.wx",
+    Some("<script>"),
+    2,
+    r#"import { comp } from "../lib/comp.wx";"#,
+    Some(r#"try using `import <name> from "...";`"#)
+  );
+
   logging::bail(
     "non-default component import!",
     "src/pages/hive.wx",

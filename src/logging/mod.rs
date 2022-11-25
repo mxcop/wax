@@ -44,6 +44,46 @@ pub fn bail(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line:
   std::process::exit(0);
 }
 
+/// ### Formatting
+/// ```
+/// warning: <desc>
+///           --> <file> : <?crumbs>
+///            |
+/// <line_num> |  <line>
+///            |
+///            = tip: <?tip>
+/// ```
+pub fn warn(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line: &str, tip: Option<&str>) {
+
+  let level = "warning".yellow();
+  let left_margin = usize_log10(line_num) + 1;
+
+  println!("{}", format!("{}: {}", level, desc).bold()); 
+
+  add_space(left_margin - 1);
+  match crumbs {
+    Some(crumbs) 
+      => println!("{}", format!("--> {} : {}", file.italic(), crumbs.italic()).bright_black()),
+    None 
+      => println!("{} {}", "-->".bright_black(), file.bright_black().italic()),
+  }
+
+  add_space(left_margin);
+  println!("{}", "|".bright_black());
+
+  println!("{} {}  {}", line_num, "|".bright_black(), line);
+
+  add_space(left_margin);
+  println!("{}", "|".bright_black());
+
+  if let Some(tip) = tip {
+    add_space(left_margin);
+    println!("{} {}: {}", "=".bright_black(), "tip".cyan().bold(), tip.italic());
+  }
+
+  println!("");
+}
+
 /// Add a number of spaces to the current line.
 fn add_space(n: usize) {
   for _ in 0..n {
