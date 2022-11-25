@@ -164,6 +164,8 @@ impl<'a> Lexer<'a> {
   }
 }
 
+// Functions below were sourced from `https://github.com/vallentin/line-span/blob/master/src/lib.rs`
+
 fn find_line_start(text: &str, index: usize) -> usize {
   text[..index].rfind('\n').map_or(0, |i| i + 1)
 }
