@@ -476,6 +476,7 @@ name = "wax_lexer"
 version = "0.1.0"
 dependencies = [
  "peekmore",
+ "wax_logger",
 ]
 
 [[package]]

@@ -10,14 +10,25 @@ use token::Token;
 use self::char::{is_tag_name, is_whitespace};
 
 pub struct Lexer<'a> {
+  file: String,
+  filename: String,
   iter: PeekMoreIterator<Iter<'a, char>>,
+  index: usize,
 }
 
 impl<'a> Lexer<'a> {
-  pub fn new(input: PeekMoreIterator<Iter<'a, char>>) -> Self {
+  pub fn new(file: String, filename: String, input: PeekMoreIterator<Iter<'a, char>>) -> Self {
     Self {
+      file,
+      filename,
       iter: input,
+      index: 0
     }
+  }
+
+  fn next(&mut self) -> Option<&char> {
+    self.index += 1;
+    self.iter.next()
   }
 
   /// ### Read next Tag
@@ -25,7 +36,7 @@ impl<'a> Lexer<'a> {
     let mut word: Vec<char> = Vec::new();
     while let Some(&ch) = self.iter.peek() {
       if is_tag_name(*ch) {
-        self.iter.next();
+        self.next();
         word.push(*ch);
       } else {
         break;
@@ -44,7 +55,7 @@ impl<'a> Lexer<'a> {
   fn cmove(&mut self, ch: char) -> bool {
     match self.iter.peek() {
       Some(&ch2) if *ch2 == ch => {
-        self.iter.next();
+        self.next();
         true
       }
       _ => false
@@ -59,6 +70,7 @@ impl<'a> Lexer<'a> {
 
     // Move through all the characters:
     while let Some(ch) = self.iter.next() {
+      self.index += 1;
 
       // Script part of the file:
       if script {
@@ -70,6 +82,7 @@ impl<'a> Lexer<'a> {
       match ch {
         '<' => {
           if self.cmove('/') {
+            let s_index = self.index.clone();
 
             // Read the next word as the tag name...
             if let Some(word) = self.rtag() {
@@ -78,20 +91,19 @@ impl<'a> Lexer<'a> {
               }
               tokens.push(Token::ClosingTag(word.clone()));
             } else {
-              // If there's no word then panic!
-              panic!("Closing tag missing tag name");
+              self.bail("tag missing name", s_index, Some("tags should have a name `</tag>`"));
             }
 
             while let Some(&ch) = self.iter.peek() {
               if !is_whitespace(*ch) {
                 break;
               }
-              self.iter.next();
+              self.next();
             }
 
             // Read the next char which should be '>' if not panic!
             if !self.cmove('>') {
-              panic!("Closing tag missing closing bracket");
+              self.bail("unclosed end tag", s_index, Some("make sure to close the tag `</tag>`"));
             }
 
           } else {
@@ -101,8 +113,8 @@ impl<'a> Lexer<'a> {
             if let Some(word) = self.rtag() {
               name = word;
             } else {
-              // If there's no word then panic!
-              panic!("Closing tag missing tag name");
+              self.bail("tag missing name", self.index, Some("tags should have a name `<tag>`"));
+              unreachable!();
             }
 
             // Read the next words as attributes...
@@ -111,7 +123,7 @@ impl<'a> Lexer<'a> {
               // Until we reach the '>'
               if *ch == '>' {
                 if name == "script" {
-                  self.iter.next();
+                  self.next();
                   script = true;
                 }
                 tokens.push(Token::OpeningTag(name));
@@ -121,17 +133,17 @@ impl<'a> Lexer<'a> {
               // Or until we reach the '/'
               if *ch == '/' {
                 tokens.push(Token::ClosedTag(name));
-                self.iter.next();
+                self.next();
                 
                 // Read the next char which should be '>' if not panic!
                 if !self.cmove('>') {
-                  panic!("Closing tag missing closing bracket");
+                  self.bail("closed tag left open", self.index, Some("self closing tags should look like: `<tag />`"));
                 }
 
                 break;
               }
 
-              self.iter.next();
+              self.next();
             }
           }
         }
@@ -140,5 +152,30 @@ impl<'a> Lexer<'a> {
     }
 
     tokens
+  }
+
+  fn bail(&self, desc: &str, idx: usize, tip: Option<&str>) {
+    use wax_logger::bail;
+
+    let line_num = self.file[..idx].chars().filter(|x| *x == '\n').count();
+    let line = find_line_start(&self.file, idx)..find_line_end(&self.file, idx);
+  
+    bail(desc, &self.filename, None, line_num, &self.file[line], tip);
+  }
+}
+
+fn find_line_start(text: &str, index: usize) -> usize {
+  text[..index].rfind('\n').map_or(0, |i| i + 1)
+}
+
+fn find_line_end(text: &str, index: usize) -> usize {
+  let end = text[index..]
+      .find('\n')
+      .map_or_else(|| text.len(), |i| index + i);
+
+  if (end > 0) && (text.as_bytes()[end - 1] == b'\r') {
+      end - 1
+  } else {
+      end
   }
 }

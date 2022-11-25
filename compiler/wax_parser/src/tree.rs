@@ -41,8 +41,8 @@ impl<T> ArenaTree<T>
   }
 
   /// Get the parent of a node in the tree by its id.
-  pub fn get_parent(&self, idx: usize) -> usize {
-    self.arena[idx].parent.unwrap()
+  pub fn get_parent(&self, idx: usize) -> Option<usize> {
+    self.arena[idx].parent
   }
 }
 

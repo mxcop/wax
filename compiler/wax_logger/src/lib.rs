@@ -14,6 +14,8 @@ use colored::Colorize;
 /// ```
 pub fn bail(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line: &str, tip: Option<&str>) {
 
+  println!("");
+
   let level = "error".red();
   let left_margin = usize_log10(line_num) + 1;
 
@@ -56,6 +58,8 @@ pub fn bail(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line:
 /// ```
 pub fn warn(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line: &str, tip: Option<&str>) {
 
+  println!("");
+
   let level = "warning".yellow();
   let left_margin = usize_log10(line_num) + 1;
 
@@ -81,8 +85,6 @@ pub fn warn(desc: &str, file: &str, crumbs: Option<&str>, line_num: usize, line:
     add_space(left_margin);
     println!("{} {}: {}", "=".bright_black(), "tip".cyan().bold(), tip.italic());
   }
-
-  println!("");
 }
 
 /// Add a number of spaces to the current line.
