@@ -16,9 +16,9 @@ name = "wax"
 path = "src/main.rs"
 
 [dependencies]
-wax_lexer = { path = "./compiler/wax_lexer" }
-wax_logger = { path = "./compiler/wax_logger" }
-wax_parser = { path = "./compiler/wax_parser" }
+wax_lexer = { path = "compiler/wax_lexer" }
+wax_logger = { path = "compiler/wax_logger" }
+wax_parser = { path = "compiler/wax_parser" }
 
 regex = "1.6.0"
 peekmore = "1.0.0"

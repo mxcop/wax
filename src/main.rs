@@ -1,5 +1,6 @@
 use peekmore::PeekMore;
 use wax_lexer::{Lexer, token::Token};
+use wax_logger::{bail, warn};
 use wax_parser::{tree::ArenaTree, node::NodeType};
 
 mod args;
@@ -50,21 +51,21 @@ fn main() {
 
   println!("\nAST : \n{}", tree);
 
-  wax_logger::warn(
+  warn!(
     "non-default component import!",
     "src/pages/hive.wx",
-    Some("<script>"),
+    "<script>",
     2,
     r#"import { comp } from "../lib/comp.wx";"#,
-    Some(r#"try using `import <name> from "...";`"#)
+    r#"try using `import <name> from "...";`"#
   );
 
-  wax_logger::bail(
+  bail!(
     "non-default component import!",
     "src/pages/hive.wx",
-    Some("<script>"),
+    "<script>",
     2,
     r#"import { comp } from "../lib/comp.wx";"#,
-    Some(r#"try using `import <name> from "...";`"#)
+    r#"try using `import <name> from "...";`"#
   );
 }

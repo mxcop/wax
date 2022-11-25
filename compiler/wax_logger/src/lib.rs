@@ -1,5 +1,6 @@
 // Wax Logging Output Logic
 
+mod macros;
 use colored::Colorize;
 
 /// ### Formatting
