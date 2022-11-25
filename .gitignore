@@ -2,7 +2,4 @@
 .wax
 
 # Rust build dir
-/target
-
-# Wax build dir
-*/build
+target

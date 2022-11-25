@@ -1,16 +1,11 @@
-use compiler::lexer::{token::Token, Lexer};
-
-use compiler::parser::node::NodeType;
-use compiler::parser::tree::ArenaTree;
 use peekmore::PeekMore;
+use wax_lexer::{Lexer, token::Token};
+use wax_parser::{tree::ArenaTree, node::NodeType};
 
 mod args;
 mod build;
 mod create;
-mod logging;
 mod utils;
-
-mod compiler;
 
 fn main() {
   // Enable colors in the command prompt.
@@ -55,7 +50,7 @@ fn main() {
 
   println!("\nAST : \n{}", tree);
 
-  logging::warn(
+  wax_logger::warn(
     "non-default component import!",
     "src/pages/hive.wx",
     Some("<script>"),
@@ -64,7 +59,7 @@ fn main() {
     Some(r#"try using `import <name> from "...";`"#)
   );
 
-  logging::bail(
+  wax_logger::bail(
     "non-default component import!",
     "src/pages/hive.wx",
     Some("<script>"),

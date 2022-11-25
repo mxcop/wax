@@ -4,9 +4,8 @@ mod char;
 
 use std::slice::Iter;
 use peekmore::PeekMoreIterator;
+use script::ScriptLexer;
 use token::Token;
-
-use crate::compiler::lexer::script::ScriptLexer;
 
 use self::char::{is_tag_name, is_whitespace};
 
