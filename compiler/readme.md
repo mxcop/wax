@@ -1,4 +1,4 @@
-# The Wax Compiler ⚡
+# The Wax Compiler <sup>:pager:</sup>
 
 This is the location of all the source code for the Wax compiler.
 
