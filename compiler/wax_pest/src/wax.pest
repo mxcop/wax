@@ -1,20 +1,21 @@
 // Source : https://github.com/mathiversen/html-parser/blob/master/src/grammar/rules.pest
 
 //
-// HTML
+// Comb (Wax component)
 //
-html = _{
-    SOI
-    ~ node_comment*
-    ~ doctype?
-    ~ node*
-    ~ EOI
+comb = _{
+  SOI
+  ~ html
+  ~ EOI
 }
 
 //
-// DOCTYPE
+// HTML
 //
-doctype = { chevron_left_bang ~ ^"doctype" ~ attr* ~ chevron_right_normal}
+html = {
+  node_comment*
+  ~ node*
+}
 
 //
 // NODES
