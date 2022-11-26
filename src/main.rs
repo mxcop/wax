@@ -45,6 +45,13 @@ fn main() {
             source: path.to_string()
           }
         );
+      },
+      Token::Text(text) => {
+        tree.add_child(
+          curr, 
+          "text".into(), 
+          NodeType::Text(text.clone())
+        );
       }
     }
     println!("{} : {:?}", index, token);
