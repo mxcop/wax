@@ -1,0 +1,16 @@
+<script>
+  import comp from "../lib/comp.wx";
+</script>
+
+
+<div class="hive">
+  <comp />
+</div>
+
+
+<style global>
+  body {
+    background-color: #222;
+    color: #eee;
+  }
+</style>
