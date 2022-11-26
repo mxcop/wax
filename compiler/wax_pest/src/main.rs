@@ -10,9 +10,13 @@ fn main() {
   println!("");
 
   if let Ok(file) = std::fs::read_to_string("./examples/example.wx") {
+    let start = std::time::Instant::now();
+
     if let Ok(pairs) = WaxParser::parse(Rule::html, &file) {
       recurse(pairs, 0);
     }
+
+    println!("\nPest took {}ms to parse the file", start.elapsed().as_millis());
   }
 }
 
