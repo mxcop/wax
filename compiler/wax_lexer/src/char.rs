@@ -11,7 +11,7 @@ pub fn is_letter(ch: char) -> bool {
 }
 
 pub fn is_string(ch: char) -> bool {
-  'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '.' || ch == '/'
+  '0' <= ch && ch <= '9' || 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '.' || ch == '/' || ch == '-' || ch == '_' || ch == '#' || ch == '@'
 }
 
 // fn is_digit(ch: char) -> bool {

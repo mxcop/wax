@@ -13,9 +13,9 @@ impl<'a> ScriptLexer for Lexer<'a> {
     let mut word: Vec<char> = vec![];
     while let Some(&ch) = self.iter.peek() {
       if word.len() == 0 && is_whitespace(*ch) {
-        self.iter.next();
+        self.next();
       } else if is_letter(*ch) {
-        self.iter.next();
+        self.next();
         word.push(*ch);
       } else {
         break;
@@ -33,11 +33,11 @@ impl<'a> ScriptLexer for Lexer<'a> {
     let mut word: Vec<char> = vec![];
     while let Some(&ch) = self.iter.peek() {
       if word.len() == 0 && is_whitespace(*ch) {
-        self.iter.next();
+        self.next();
       } else if word.len() == 0 && *ch == '"' {
-        self.iter.next();
+        self.next();
       } else if is_string(*ch) {
-        self.iter.next();
+        self.next();
         word.push(*ch);
       } else {
         break;
@@ -84,7 +84,7 @@ impl<'a> ScriptLexer for Lexer<'a> {
 
                 if let Some(from) = self.rword() {
                   if from.as_str() != "from" {
-                    panic!("import missing path");
+                    self.bail("import without path", self.index, None);
                   }
                 }
 
@@ -100,7 +100,7 @@ impl<'a> ScriptLexer for Lexer<'a> {
               }
             }
           } else {
-            panic!("illegal character ({})", ch);
+            self.bail(&format!("illegal character `{}`", ch), self.index, None);
           }
         }
       }

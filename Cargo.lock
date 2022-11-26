@@ -466,6 +466,31 @@ dependencies = [
  "regex",
  "serde",
  "toml",
+ "wax_lexer",
+ "wax_logger",
+ "wax_parser",
+]
+
+[[package]]
+name = "wax_lexer"
+version = "0.1.0"
+dependencies = [
+ "peekmore",
+ "wax_logger",
+]
+
+[[package]]
+name = "wax_logger"
+version = "0.1.0"
+dependencies = [
+ "colored",
+]
+
+[[package]]
+name = "wax_parser"
+version = "0.1.0"
+dependencies = [
+ "colored",
 ]
 
 [[package]]

@@ -1,5 +1,7 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
+  Text(String),
+
   OpeningTag(String),
   ClosedTag(String),
   ClosingTag(String),
