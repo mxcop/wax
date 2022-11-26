@@ -84,7 +84,7 @@ impl<'a> ScriptLexer for Lexer<'a> {
 
                 if let Some(from) = self.rword() {
                   if from.as_str() != "from" {
-                    panic!("import missing path");
+                    self.bail("import without path", self.index, None);
                   }
                 }
 
@@ -100,7 +100,7 @@ impl<'a> ScriptLexer for Lexer<'a> {
               }
             }
           } else {
-            panic!("illegal character ({})", ch);
+            self.bail(&format!("illegal character `{}`", ch), self.index, None);
           }
         }
       }

@@ -1,6 +1,5 @@
 <script>
   import comp from "../lib/comp.wx";
-  import { func } from "../lib/sc.js";
 </script>
 
 
