@@ -1,26 +1,19 @@
 pub mod token;
-pub mod script;
 mod char;
 
 use std::slice::Iter;
+use self::char::{is_ident_start, is_ident, is_whitespace, is_number};
 use peekmore::PeekMoreIterator;
-use script::ScriptLexer;
-use token::Token;
-
-use self::char::{is_tag_name, is_string};
+use token::{Token, get_keyword_token};
 
 pub struct Lexer<'a> {
-  file: String,
-  filename: String,
   iter: PeekMoreIterator<Iter<'a, char>>,
   index: usize,
 }
 
 impl<'a> Lexer<'a> {
-  pub fn new(file: String, filename: String, input: PeekMoreIterator<Iter<'a, char>>) -> Self {
+  pub fn new(input: PeekMoreIterator<Iter<'a, char>>) -> Self {
     Self {
-      file,
-      filename,
       iter: input,
       index: 0
     }
@@ -31,40 +24,42 @@ impl<'a> Lexer<'a> {
     self.iter.next()
   }
 
-  /// ### Read next Tag
-  fn rtag(&mut self) -> Option<String> {
+  /// ### Read next number
+  fn number(&mut self, first_ch: char) -> Option<String> {
     let mut word: Vec<char> = Vec::new();
-    while let Some(&ch) = self.iter.peek() {
-      if is_tag_name(*ch) {
-        self.next();
-        word.push(*ch);
-      } else {
-        break;
+
+    if is_number(first_ch) {
+      word.push(first_ch);
+      while let Some(&ch) = self.iter.peek() {
+        if is_number(*ch) {
+          self.next();
+          word.push(*ch);
+        } else {
+          return Some(word.iter().collect());
+        }
       }
     }
-    if word.len() > 0 {
-      Some(word.into_iter().collect())
-    } else {
-      None
-    }
+
+    None
   }
 
-  /// ### Read next Text
-  fn rtext(&mut self) -> Option<String> {
+  /// ### Read next identity
+  fn ident(&mut self, first_ch: char) -> Option<String> {
     let mut word: Vec<char> = Vec::new();
-    while let Some(&ch) = self.iter.peek() {
-      if (*ch == ' ' && word.len() > 0) || is_string(*ch) {
-        self.next();
-        word.push(*ch);
-      } else {
-        break;
+
+    if is_ident_start(first_ch) {
+      word.push(first_ch);
+      while let Some(&ch) = self.iter.peek() {
+        if is_ident(*ch) {
+          self.next();
+          word.push(*ch);
+        } else {
+          return Some(word.iter().collect());
+        }
       }
     }
-    if word.len() > 0 {
-      Some(word.into_iter().collect())
-    } else {
-      None
-    }
+
+    None
   }
 
   /// ### Conditional Move
@@ -84,101 +79,100 @@ impl<'a> Lexer<'a> {
   /// Analize the input and convert it into an array of tokens.
   pub fn lex(&mut self) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
-    let mut script: bool = false;
 
     // Move through all the characters:
-    while let Some(ch) = self.iter.next() {
+    while let Some(&ch) = self.iter.next() {
       self.index += 1;
 
-      // Script part of the file:
-      if script {
-        script = self.next_script_token(*ch, &mut tokens);
+      // Ignore whitespace.
+      if is_whitespace(ch) {
         continue;
       }
 
       // Html part of the file:
-      match ch {
-        '<' => {
-          if self.cmove('/') {
-            // Read the next word as the tag name...
-            if let Some(word) = self.rtag() {
-              if word == "script" {
-                script = false;
-              }
-              tokens.push(Token::ClosingTag(word.clone()));
-            }
+      let token: Token = match ch {
+        // Generic
+        ',' => Token::Comma,
+        '.' => Token::Dot,
+        '\'' => Token::SingleQuote,
+        '"' => Token::DoubleQuote,
+        '`' => Token::Grave,
+        ':' => Token::Colon,
+        ';' => Token::Semicolon,
 
-          } else {
-            let name: String;
+        '+' => Token::Plus,
+        '-' => { if self.cmove('>') { Token::RightArrow } else { Token::Minus } },
+        '=' => Token::Equals,
+        '*' => Token::Star,
 
-            // Read the next word as the tag name...
-            if let Some(word) = self.rtag() {
-              name = word;
-            } else {
-              continue;
-            }
+        '#' => Token::Hash,
+        '%' => Token::Percent,
+        '&' => Token::Ampersand,
+        '@' => Token::Atsign,
+        '$' => Token::Dollarsign,
+        '~' => Token::Tilde,
+        '/' => Token::Slash,
+        '\\' => Token::BackSlash,
+        '!' => Token::Bang,
+        '?' => Token::Quest,
 
-            // Read the next words as attributes...
-            while let Some(&ch) = self.iter.peek() {
+        '<' => { if self.cmove('-') { Token::LeftArrow } else { Token::LessThen } },
+        '>' => Token::GreaterThen,
+        '(' => Token::LeftParenthesis,
+        ')' => Token::RightParenthesis,
+        '{' => Token::LeftCurlyBracket,
+        '}' => Token::RightCurlyBracket,
+        '[' => Token::LeftSquareBracket,
+        ']' => Token::RightSquareBracket,
 
-              // Until we reach the '>'
-              if *ch == '>' {
-                if name == "script" {
-                  self.next();
-                  script = true;
-                }
-                tokens.push(Token::OpeningTag(name));
-                break;
-              }
-
-              // Or until we reach the '/'
-              if *ch == '/' {
-                tokens.push(Token::ClosedTag(name));
-                self.next();
-                
-                break;
-              }
-
-              self.next();
-            }
-          }
-        }
         _ => {
-          // Read the next word as the tag name...
-          if let Some(text) = self.rtext() {
-            tokens.push(Token::Text(text));
+          // Read the next word as an identity:
+          if let Some(identity) = self.ident(ch) {
+            if let Some(keyword) = get_keyword_token(&identity) {
+              keyword // Keyword found
+            } else {
+              Token::Ident(identity)
+            }
+          } else if let Some(number) = self.number(ch) {
+            Token::Number(number)
+          } else {
+            // If the char wasn't matched and isn't an identity, it's illegal.
+            Token::Illegal(ch)
           }
         }
-      }
+      };
+
+      tokens.push(token);
     }
 
+    tokens.push(Token::EOF);
     tokens
   }
 
-  fn bail(&self, desc: &str, idx: usize, tip: Option<&str>) {
-    use wax_logger::bail;
+  // fn bail(&self, desc: &str, idx: usize, tip: Option<&str>) {
+  //   use wax_logger::bail;
 
-    let line_num = self.file[..idx].chars().filter(|x| *x == '\n').count();
-    let line = find_line_start(&self.file, idx)..find_line_end(&self.file, idx);
+  //   let line_num = self.file[..idx].chars().filter(|x| *x == '\n').count();
+  //   let line = find_line_start(&self.file, idx)..find_line_end(&self.file, idx);
   
-    bail(desc, &self.filename, None, line_num, &self.file[line], tip);
-  }
+  //   bail(desc, &self.filename, None, line_num, &self.file[line], tip);
+  // }
 }
 
 // Functions below were sourced from `https://github.com/vallentin/line-span/blob/master/src/lib.rs`
 
-fn find_line_start(text: &str, index: usize) -> usize {
-  text[..index].rfind('\n').map_or(0, |i| i + 1)
-}
+// fn find_line_start(text: &str, index: usize) -> usize {
+//   text[..index].rfind('\n').map_or(0, |i| i + 1)
+// }
 
-fn find_line_end(text: &str, index: usize) -> usize {
-  let end = text[index..]
-      .find('\n')
-      .map_or_else(|| text.len(), |i| index + i);
+// fn find_line_end(text: &str, index: usize) -> usize {
+//   let end = text[index..]
+//       .find('\n')
+//       .map_or_else(|| text.len(), |i| index + i);
 
-  if (end > 0) && (text.as_bytes()[end - 1] == b'\r') {
-      end - 1
-  } else {
-      end
-  }
-}
+//   if (end > 0) && (text.as_bytes()[end - 1] == b'\r') {
+//       end - 1
+//   } else {
+//       end
+//   }
+// }

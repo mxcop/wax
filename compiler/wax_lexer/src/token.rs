@@ -1,27 +1,81 @@
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub enum Token {
-  Text(String),
+  // Systematic
+  Illegal(char),
+  EOF,
 
-  OpeningTag(String),
-  ClosedTag(String),
-  ClosingTag(String),
+  // Generic
+  Ident(String),       // ([a-zA-Z][a-zA-Z0-9_-]+)
+  Number(String),      // ([.0-9]+)
+  Comma,               // ,
+  Dot,                 // .
+  SingleQuote,         // '
+  DoubleQuote,         // "
+  Grave,               // `
+  Colon,               // :
+  Semicolon,           // ;
+  Plus,                // +
+  Minus,               // -
+  Equals,              // =
+  Star,                // *
+  Hash,                // #
+  Percent,             // %
+  Ampersand,           // &
+  Atsign,              // @
+  Dollarsign,          // $
+  Tilde,               // ~
+  Slash,               // /
+  BackSlash,           // \
+  Bang,                // !
+  Quest,               // ?
+  LessThen,            // <
+  GreaterThen,         // >
+  LeftArrow,           // <-
+  RightArrow,          // ->
+  LeftParenthesis,     // (
+  RightParenthesis,    // )
+  LeftCurlyBracket,    // {
+  RightCurlyBracket,   // }
+  LeftSquareBracket,   // [
+  RightSquareBracket,  // ]
 
-  DefaultImport{ name: String, path: String }
+  // Special Keywords
+  Template,            // tmpl
+  Implementation,      // impl
+  Stylesheet,          // styl
+
+  // Keywords
+  Let,                 // let
+  Const,               // const
+  Import,              // import
+  Export,              // export
+  From,                // from
+  Function,            // function
+  True,                // true
+  False,               // false
+  If,                  // if
+  Else,                // else
+  Return,              // return
 }
 
-// pub fn get_keyword_token(ident: &String) -> Result<Token, String> {
-//   match &ident[..] {
-//     "import" => Ok(Token::IMPORT),
-//     "export" => Ok(Token::EXPORT),
-//     "from" => Ok(Token::FROM),
-//     "function" => Ok(Token::FUNCTION),
-//     "let" => Ok(Token::LET),
-//     "const" => Ok(Token::CONST),
-//     "true" => Ok(Token::TRUE),
-//     "false" => Ok(Token::FALSE),
-//     "if" => Ok(Token::IF),
-//     "else" => Ok(Token::ELSE),
-//     "return" => Ok(Token::RETURN),
-//     _ => Err(String::from("Not a keyword")),
-//   }
-// }
+/** Try to convert an identity to a keyword. */
+pub fn get_keyword_token(ident: &String) -> Option<Token> {
+  match &ident[..] {
+    "tmpl"     => Some(Token::Template),
+    "impl"     => Some(Token::Implementation),
+    "styl"     => Some(Token::Stylesheet),
+
+    "let"      => Some(Token::Let),
+    "const"    => Some(Token::Const),
+    "import"   => Some(Token::Import),
+    "export"   => Some(Token::Export),
+    "from"     => Some(Token::From),
+    "function" => Some(Token::Function),
+    "true"     => Some(Token::True),
+    "false"    => Some(Token::False),
+    "if"       => Some(Token::If),
+    "else"     => Some(Token::Else),
+    "return"   => Some(Token::Return),
+    _ => None,
+  }
+}
