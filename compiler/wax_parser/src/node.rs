@@ -1,13 +1,11 @@
-#[derive(Debug)]
-pub struct Attribute {
-  pub name: String,
-  pub value: String,
-}
+// #[derive(Debug)]
+// pub struct Attribute {
+//   pub name: String,
+//   pub value: String,
+// }
 
 #[derive(Debug)]
-pub enum NodeType {
+pub enum SyntaxNode {
   Root,
-  Text(String),
-  Tag { attributes: Vec<Attribute> },
-  DefaultImport { specifier: String, source: String },
+  // TODO: build the enum ...
 }

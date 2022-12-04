@@ -7,20 +7,17 @@ use peekmore::PeekMoreIterator;
 use token::{Token, get_keyword_token};
 
 pub struct Lexer<'a> {
-  iter: PeekMoreIterator<Iter<'a, char>>,
-  index: usize,
+  iter: PeekMoreIterator<Iter<'a, char>>
 }
 
 impl<'a> Lexer<'a> {
   pub fn new(input: PeekMoreIterator<Iter<'a, char>>) -> Self {
     Self {
-      iter: input,
-      index: 0
+      iter: input
     }
   }
 
   fn next(&mut self) -> Option<&char> {
-    self.index += 1;
     self.iter.next()
   }
 
@@ -81,8 +78,7 @@ impl<'a> Lexer<'a> {
     let mut tokens: Vec<Token> = Vec::new();
 
     // Move through all the characters:
-    while let Some(&ch) = self.iter.next() {
-      self.index += 1;
+    while let Some(&ch) = self.next() {
 
       // Ignore whitespace.
       if is_whitespace(ch) {

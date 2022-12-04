@@ -1,6 +1,7 @@
 use peekmore::PeekMore;
 use wax_lexer::{Lexer, token::Token};
-//use wax_parser::{tree::ArenaTree, node::NodeType};
+use wax_parser::Parser;
+use wax_parser::{tree::ArenaTree, node::SyntaxNode};
 
 mod args;
 mod build;
@@ -15,47 +16,14 @@ fn main() {
   let chars: Vec<char> = input.chars().collect();
 
   // Tokenize :
-  let mut l = Lexer::new(chars.iter().peekmore());
-  let tk: Vec<Token> = l.lex();
+  let mut lexer = Lexer::new(chars.iter().peekmore());
+  let tokens: Vec<Token> = lexer.lex();
+
+  println!("\nTokens : \n{:?}", tokens);
 
   // Parse :
-  //let mut tree: ArenaTree<NodeType> = ArenaTree::new();
-  //let mut curr = tree.add_node("Root".into(), NodeType::Root);
+  let mut parser = Parser::new(input, "src/pages/hive.wx".into(), tokens.iter().peekmore());
+  let tree: ArenaTree<SyntaxNode> = parser.parse();
 
-  for (index, token) in tk.iter().enumerate() {
-    // match token {
-    //   Token::OpeningTag(tag) => {
-    //     curr = tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
-    //   },
-    //   Token::ClosingTag(_) => {
-    //     //tree.add_child(curr, tag.to_string(), NodeType::ClosingTag);
-    //     if let Some(parent) = tree.get_parent(curr) {
-    //       curr = parent;
-    //     }
-    //   },
-    //   Token::ClosedTag(tag) => {
-    //     tree.add_child(curr, tag.to_string(), NodeType::Tag { attributes: vec![] });
-    //   },
-    //   Token::DefaultImport{ name, path } => {
-    //     tree.add_child(
-    //       curr, 
-    //       name.to_string(), 
-    //       NodeType::DefaultImport { 
-    //         specifier: name.to_string(), 
-    //         source: path.to_string()
-    //       }
-    //     );
-    //   },
-    //   Token::Text(text) => {
-    //     tree.add_child(
-    //       curr, 
-    //       "text".into(), 
-    //       NodeType::Text(text.clone())
-    //     );
-    //   }
-    // }
-    println!("{} : {:?}", index, token);
-  }
-
-  //println!("\nAST : \n{}", tree);
+  println!("\nAST : \n{}", tree);
 }
