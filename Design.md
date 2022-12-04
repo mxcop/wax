@@ -10,35 +10,49 @@
   EOF,
 
   # Generic
-  Ident(String),
-  Comma,       # ,
-  Dot,         # .
-  Colon,       # :
-  Semicolon,   # ;
-  Plus,        # +
-  Minus,       # -
-  Star,        # *
-  Slash,       # /
-  Bang,        # !
-  Quest,       # ?
+  Ident(String),       # ([a-zA-Z][a-zA-Z0-9_-]+)
+  Comma,               # ,
+  Dot,                 # .
+  Colon,               # :
+  Semicolon,           # ;
+  Plus,                # +
+  Minus,               # -
+  Equals,              # =
+  Star,                # *
+  Hash,                # #
+  Percent,             # %
+  Ampersand,           # &
+  Atsign,              # @
+  Dollarsign,          # $
+  Tilde,               # ~
+  Slash,               # /
+  Bang,                # !
+  Quest,               # ?
+  LessThen,            # <
+  GreaterThen,         # >
+  LeftArrow,           # <-
+  RightArrow,          # ->
+  LeftParenthesis,     # (
+  RightParenthesis,    # )
+  LeftCurlyBracket,    # {
+  RightCurlyBracket,   # }
 
-  # Script
-  Let,
-  Const,
-  Import,
-  Export,
-  From,
-  Function,
-  True,
-  False,
-  If,
-  Else,
-  Return,
+  # Special Keywords
+  Template,            # tmpl
+  Implementation,      # impl
+  Stylesheet,          # styl
 
-  # Template
-  HashIdent(String),
-  LessThen,    # <
-  GreaterThen, # >
-  Insert,      # <-
+  # Keywords
+  Let,                 # let
+  Const,               # const
+  Import,              # import
+  Export,              # export
+  From,                # from
+  Function,            # function
+  True,                # true
+  False,               # false
+  If,                  # if
+  Else,                # else
+  Return,              # return
 
 ```
