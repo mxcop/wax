@@ -1,19 +1,22 @@
-pub fn is_tag_name(ch: char) -> bool {
-  'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
-}
-
 pub fn is_whitespace(ch: char) -> bool {
   ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }
 
-pub fn is_letter(ch: char) -> bool {
-  'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
+/** Is this character the start of a new identity? */
+pub fn is_ident_start(ch: char) -> bool {
+  'a' <= ch && ch <= 'z' || 
+  'A' <= ch && ch <= 'Z'
 }
 
-pub fn is_string(ch: char) -> bool {
-  '0' <= ch && ch <= '9' || 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '.' || ch == '/' || ch == '-' || ch == '_' || ch == '#' || ch == '@'
+/** Is this character still part of the identity? */
+pub fn is_ident(ch: char) -> bool {
+  'a' <= ch && ch <= 'z' || 
+  'A' <= ch && ch <= 'Z' || 
+  '0' <= ch && ch <= '9' ||
+
+  ch == '_' || ch == '-'
 }
 
-// fn is_digit(ch: char) -> bool {
-//   '0' <= ch && ch <= '9'
-// }
+pub fn is_number(ch: char) -> bool {
+  '0' <= ch && ch <= '9' || ch == '.'
+}

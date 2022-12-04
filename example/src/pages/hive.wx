@@ -1,16 +1,29 @@
-<script>
-  import comp from "../lib/comp.wx";
-</script>
+/* Html Template */
+tmpl card:
+  <div class="card">
+    <h2 #title></h2>
+    <p #desc></p>
+  </div>;
 
+/* Template Implementation */
+impl card(title: str, desc: str) {
+  #title.inner_text = title;
+  #desc.inner_text = desc;
+}
 
-<div class="hive">
-  <comp />
-</div>
-
-
-<style global>
-  body {
-    background-color: #222;
-    color: #eee;
+/* Css Stylesheet */
+styl card() {
+  .card {
+    width: 300px;
+    height: 400px;
   }
-</style>
+}
+
+/* Root Html Template */
+tmpl @html:
+  <body>
+    <-card title="Card 1" desc="This is card one" />
+    <-card title="Card 2" desc="This is card two">
+      <p>Hello world</p>
+    <-/card>
+  </body>;

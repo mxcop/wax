@@ -13,6 +13,9 @@
   Ident(String),       # ([a-zA-Z][a-zA-Z0-9_-]+)
   Comma,               # ,
   Dot,                 # .
+  SingleQuote,         # '
+  DoubleQuote,         # "
+  Grave,               # `
   Colon,               # :
   Semicolon,           # ;
   Plus,                # +
@@ -36,6 +39,8 @@
   RightParenthesis,    # )
   LeftCurlyBracket,    # {
   RightCurlyBracket,   # }
+  LeftSquareBracket,   # [
+  RightSquareBracket,  # ]
 
   # Special Keywords
   Template,            # tmpl

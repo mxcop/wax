@@ -1,9 +1,17 @@
-//[derive(PartialEq, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub enum Token {
+  // Systematic
+  Illegal(char),
+  EOF,
+
   // Generic
   Ident(String),       // ([a-zA-Z][a-zA-Z0-9_-]+)
+  Number(String),      // ([.0-9]+)
   Comma,               // ,
   Dot,                 // .
+  SingleQuote,         // '
+  DoubleQuote,         // "
+  Grave,               // `
   Colon,               // :
   Semicolon,           // ;
   Plus,                // +
@@ -17,6 +25,7 @@ pub enum Token {
   Dollarsign,          // $
   Tilde,               // ~
   Slash,               // /
+  BackSlash,           // \
   Bang,                // !
   Quest,               // ?
   LessThen,            // <
@@ -27,6 +36,8 @@ pub enum Token {
   RightParenthesis,    // )
   LeftCurlyBracket,    // {
   RightCurlyBracket,   // }
+  LeftSquareBracket,   // [
+  RightSquareBracket,  // ]
 
   // Special Keywords
   Template,            // tmpl
@@ -48,23 +59,23 @@ pub enum Token {
 }
 
 /** Try to convert an identity to a keyword. */
-pub fn get_keyword_token(ident: &String) -> Result<Token, String> {
+pub fn get_keyword_token(ident: &String) -> Option<Token> {
   match &ident[..] {
-    "tmpl"     => Ok(Token::Template),
-    "impl"     => Ok(Token::Implementation),
-    "styl"     => Ok(Token::Stylesheet),
+    "tmpl"     => Some(Token::Template),
+    "impl"     => Some(Token::Implementation),
+    "styl"     => Some(Token::Stylesheet),
 
-    "let"      => Ok(Token::Let),
-    "const"    => Ok(Token::Const),
-    "import"   => Ok(Token::Import),
-    "export"   => Ok(Token::Export),
-    "from"     => Ok(Token::From),
-    "function" => Ok(Token::Function),
-    "true"     => Ok(Token::True),
-    "false"    => Ok(Token::False),
-    "if"       => Ok(Token::If),
-    "else"     => Ok(Token::Else),
-    "return"   => Ok(Token::Return),
-    _ => Err(String::from("Not a keyword")),
+    "let"      => Some(Token::Let),
+    "const"    => Some(Token::Const),
+    "import"   => Some(Token::Import),
+    "export"   => Some(Token::Export),
+    "from"     => Some(Token::From),
+    "function" => Some(Token::Function),
+    "true"     => Some(Token::True),
+    "false"    => Some(Token::False),
+    "if"       => Some(Token::If),
+    "else"     => Some(Token::Else),
+    "return"   => Some(Token::Return),
+    _ => None,
   }
 }
