@@ -2,6 +2,8 @@
 pub enum Token {
   // Systematic
   Illegal(char),
+  Whitespace(usize),
+  Newline,
   EOF,
 
   // Generic

@@ -21,6 +21,22 @@ impl<'a> Lexer<'a> {
     self.iter.next()
   }
 
+  /// ### Get length of next whitespace
+  fn whitespace(&mut self, first_ch: char) -> usize {
+    let mut space: Vec<char> = vec![first_ch];
+
+    while let Some(&ch) = self.iter.peek() {
+      if *ch == ' ' {
+        self.next();
+        space.push(*ch);
+      } else {
+        break;
+      }
+    }
+
+    space.len()
+  }
+
   /// ### Read next number
   fn number(&mut self, first_ch: char) -> Option<String> {
     let mut word: Vec<char> = Vec::new();
@@ -80,13 +96,25 @@ impl<'a> Lexer<'a> {
     // Move through all the characters:
     while let Some(&ch) = self.next() {
 
-      // Ignore whitespace.
-      if is_whitespace(ch) {
+      // Handle spaces.
+      if ch == ' ' {
+        tokens.push(Token::Whitespace(self.whitespace(ch)));
+        continue;
+      }
+
+      // Handle newlines.
+      if ch == '\n' {
+        tokens.push(Token::Newline);
         continue;
       }
 
       // Html part of the file:
       let token: Token = match ch {
+        // Systematic
+        ' ' => Token::Whitespace(self.whitespace(ch)),
+        '\n' => Token::Newline,
+        '\r' => continue,
+
         // Generic
         ',' => Token::Comma,
         '.' => Token::Dot,
