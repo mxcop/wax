@@ -71,12 +71,18 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
           writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?;
         } else {
           match &child.val {
-            // Template scopes:
+
+            /* Templates */
             SyntaxNode::Template { name } => { 
               if name.starts_with('@') { writeln!(f, "{} {}: {{", "impl".red(), name.blue())?; }
               else { writeln!(f, "{} {}: {{", "impl".red(), name.green())?; }
             }
-            // Default scopes:
+
+            /* Comb Tags */
+            SyntaxNode::Comb { name, .. } => {
+              writeln!(f, "{}{}: {{", "<-".bright_black(), name.green())?;
+            }
+            
             _ => { writeln!(f, "{}: {{", child.name)?; }
           }
           recurse(f, &tree, &child, level + 1)?;

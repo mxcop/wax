@@ -42,19 +42,50 @@ impl TemplateParser {
 
         /* < */
         Token::LessThen => {
-          /* Opening Tag <tag> */
-          if let Some(Token::Ident(ident)) = iter.peek() {
-            *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Tag { 
-              name: ident.clone(), 
-              attributes: vec![], 
-              self_closing: false 
-            });
-          /* Closing Tag </tag> */
-          } else if let Some(Token::Slash) = iter.peek() {
-            if let Some(Token::Ident(_)) = iter.peek_next() {
-              *curr = tree.get_parent(*curr).expect("No parent");
-            } else {
-              iter.move_cursor_back().expect("failed to move back cursor");
+          if let Some(tk) = iter.peek() {
+            match tk {
+              /* Opening Tag <tag> */
+              Token::Ident(ident) => {
+                *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Tag { 
+                  name: ident.clone(), 
+                  attributes: vec![], 
+                  self_closing: false 
+                });
+              }
+              /* Closing Tag </tag> */
+              Token::Slash => {
+                if let Some(Token::Ident(_)) = iter.peek_next() {
+                  *curr = tree.get_parent(*curr).expect("No parent");
+                } else {
+                  iter.move_cursor_back().expect("failed to move back cursor");
+                }
+              }
+              _ => {}
+            }
+          }
+        }
+
+        /* <- */
+        Token::LeftArrow => {
+          if let Some(tk) = iter.peek() {
+            match tk {
+              /* Comb Opening Tag <-comb> */
+              Token::Ident(ident) => {
+                *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Comb { 
+                  name: ident.clone(), 
+                  attributes: vec![], 
+                  self_closing: false 
+                });
+              }
+              /* Comb Closing Tag <-/comb> */
+              Token::Slash => {
+                if let Some(Token::Ident(_)) = iter.peek_next() {
+                  *curr = tree.get_parent(*curr).expect("No parent");
+                } else {
+                  iter.move_cursor_back().expect("failed to move back cursor");
+                }
+              }
+              _ => {}
             }
           }
         }

@@ -8,7 +8,8 @@ pub struct Attribute {
 pub enum SyntaxNode {
   Root,
 
+  /** Template definition */
   Template{ name: String },
-  Tag{ name: String, attributes: Vec<Attribute>, self_closing: bool }
-  // TODO: build the enum ...
+  Tag{ name: String, attributes: Vec<Attribute>, self_closing: bool }, /* Html tag */
+  Comb{ name: String, attributes: Vec<Attribute>, self_closing: bool }, /* Comb tag */
 }
