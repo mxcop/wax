@@ -2,6 +2,8 @@
 
 use std::fmt::Debug;
 
+use crate::node::SyntaxNode;
+
 #[derive(Default)]
 pub struct ArenaTree<T> 
   where T : Debug
@@ -46,8 +48,7 @@ impl<T> ArenaTree<T>
   }
 }
 
-impl<T> std::fmt::Display for ArenaTree<T> 
-  where T : Debug
+impl std::fmt::Display for ArenaTree<SyntaxNode>
 {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     use colored::Colorize;
@@ -59,8 +60,7 @@ impl<T> std::fmt::Display for ArenaTree<T>
       Ok(())
     }
 
-    fn recurse<T>(f: &mut std::fmt::Formatter, tree: &ArenaTree<T>, node: &Node<T>, level: u32) -> std::fmt::Result 
-      where T : Debug
+    fn recurse(f: &mut std::fmt::Formatter, tree: &ArenaTree<SyntaxNode>, node: &Node<SyntaxNode>, level: u32) -> std::fmt::Result
     {
       for child in &node.children {
         let child = tree.get(*child);
@@ -70,7 +70,15 @@ impl<T> std::fmt::Display for ArenaTree<T>
         if child.children.len() == 0 {
           writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?;
         } else {
-          writeln!(f, "{}: {{", child.name)?;
+          match &child.val {
+            // Template scopes:
+            SyntaxNode::Template { name } => { 
+              if name.starts_with('@') { writeln!(f, "{} {}: {{", "impl".red(), name.blue())?; }
+              else { writeln!(f, "{} {}: {{", "impl".red(), name.green())?; }
+            }
+            // Default scopes:
+            _ => { writeln!(f, "{}: {{", child.name)?; }
+          }
           recurse(f, &tree, &child, level + 1)?;
 
           append_tabs(f, level)?;

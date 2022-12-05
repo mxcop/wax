@@ -2,7 +2,7 @@ pub mod token;
 mod char;
 
 use std::slice::Iter;
-use self::char::{is_ident_start, is_ident, is_whitespace, is_number};
+use self::char::{is_ident_start, is_ident, is_number};
 use peekmore::PeekMoreIterator;
 use token::{Token, get_keyword_token};
 
@@ -172,31 +172,4 @@ impl<'a> Lexer<'a> {
     tokens.push(Token::EOF);
     tokens
   }
-
-  // fn bail(&self, desc: &str, idx: usize, tip: Option<&str>) {
-  //   use wax_logger::bail;
-
-  //   let line_num = self.file[..idx].chars().filter(|x| *x == '\n').count();
-  //   let line = find_line_start(&self.file, idx)..find_line_end(&self.file, idx);
-  
-  //   bail(desc, &self.filename, None, line_num, &self.file[line], tip);
-  // }
 }
-
-// Functions below were sourced from `https://github.com/vallentin/line-span/blob/master/src/lib.rs`
-
-// fn find_line_start(text: &str, index: usize) -> usize {
-//   text[..index].rfind('\n').map_or(0, |i| i + 1)
-// }
-
-// fn find_line_end(text: &str, index: usize) -> usize {
-//   let end = text[index..]
-//       .find('\n')
-//       .map_or_else(|| text.len(), |i| index + i);
-
-//   if (end > 0) && (text.as_bytes()[end - 1] == b'\r') {
-//       end - 1
-//   } else {
-//       end
-//   }
-// }

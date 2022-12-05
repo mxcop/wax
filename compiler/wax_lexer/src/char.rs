@@ -1,7 +1,3 @@
-pub fn is_whitespace(ch: char) -> bool {
-  ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
-}
-
 /** Is this character the start of a new identity? */
 pub fn is_ident_start(ch: char) -> bool {
   'a' <= ch && ch <= 'z' || 

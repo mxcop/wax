@@ -1,10 +1,12 @@
 // Functions below were sourced from `https://github.com/vallentin/line-span/blob/master/src/lib.rs`
 
+#[allow(unused)]
 /// For an index within a string find the starting index of it's line.
 pub fn find_line_start(text: &str, idx: usize) -> usize {
   text[..idx].rfind('\n').map_or(0, |i| i + 1)
 }
 
+#[allow(unused)]
 /// For an index within a string find the ending index of it's line.
 pub fn find_line_end(text: &str, idx: usize) -> usize {
   let end = text[idx..]
@@ -18,6 +20,7 @@ pub fn find_line_end(text: &str, idx: usize) -> usize {
   }
 }
 
+#[allow(unused)]
 /// For an index within a string get the amount of lines before it.
 pub fn get_line_num(text: &str, idx: usize) -> usize {
   text[..idx].chars().filter(|ch| *ch == '\n').count()

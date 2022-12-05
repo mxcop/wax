@@ -44,7 +44,7 @@ impl<'a> Parser<'a> {
     while let Some(tk) = self.next() {
       match tk {
         Token::Template => {
-          TemplateParser::parse_tmpl(&mut self.iter, &mut tree);
+          TemplateParser::parse_tmpl(&mut self.iter, &mut curr, &mut tree);
         }
         _ => {}
       }
@@ -53,6 +53,7 @@ impl<'a> Parser<'a> {
     tree
   }
 
+  #[allow(unused)]
   /// Bail out of parsing, and throw an error.
   fn bail(&self, desc: &str, idx: usize, tip: Option<&str>) {
     use wax_logger::bail;
