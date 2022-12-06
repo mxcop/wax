@@ -2,7 +2,7 @@ use peekmore::PeekMoreIterator;
 use wax_lexer::token::Token;
 use std::slice::Iter;
 
-use crate::{tree::ArenaTree, node::SyntaxNode};
+use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
 
 /// Wax template parser.
 pub struct TemplateParser {}
@@ -111,5 +111,84 @@ impl TemplateParser {
 
     // Move back out of this template.
     *curr = tree.get_parent(*curr).expect("No parent");
+  }
+
+  /// Parse the attributes of a tag.
+  fn parse_attributes<'a>(name: String, iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> SyntaxNode {
+    let mut attributes = Vec::new();
+    let mut self_closing = false;
+    
+    while let Some(tk) = iter.next() {
+      match tk {
+
+        Token::Ident(ident) => {
+          if let Some(Token::Equals) = Self::next_token(iter) {
+            if let Some(value) = Self::parse_string(iter) {
+              // Attribute with value:
+              attributes.push(Attribute { 
+                name: ident.clone(), 
+                value: Some(value)
+              });
+            } else {
+              panic!("attribute is missing its value");
+            }
+          } else {
+            // Attribute without value:
+            attributes.push(Attribute { 
+              name: ident.clone(), 
+              value: None 
+            });
+          }
+        }
+
+        /* / */
+        Token::Slash => {
+          // Found self closing tag.
+          if let Some(Token::GreaterThen) = iter.peek() {
+            self_closing = true;
+            break;
+          }
+        }
+
+        /* > */
+        Token::GreaterThen => {
+          break;
+        }
+
+        _ => {}
+      }
+    }
+
+    SyntaxNode::Tag {
+      name, attributes, self_closing
+    }
+  }
+
+  fn parse_string<'a>(iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> Option<String> {
+    let mut word: Vec<char> = Vec::new();
+    
+    /* " */
+    if let Some(Token::DoubleQuote) = iter.next() {
+      while let Some(tk) = iter.next() {
+         /* " */
+        if let Token::DoubleQuote = tk {
+          return Some(word.iter().collect());
+        }
+      }
+    }
+
+    None
+  }
+
+  /// Get the next token skipping any whitespace tokens.
+  fn next_token<'a>(iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> Option<&'a Token> {
+    while let Some(tk) = iter.next() {
+      if let Token::Whitespace(_) = tk {
+        continue;
+      } else {
+        return Some(tk);
+      }
+    }
+    None
   }
 }
