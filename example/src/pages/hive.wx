@@ -1,7 +1,7 @@
 /* Html Template */
 tmpl card:
   <div class="card">
-    <h2 #title></h2>
+    <h2 #title title="let const"></h2>
     <p #desc></p>
   </div>;
 

@@ -3,9 +3,16 @@
 <br>
 
 - [x] Lexer
-  - [x] Tokens
-  - [x] Keywords
-  - [x] Whitespace
+  - [x] Generic
+    - [x] Tokens
+    - [x] Whitespace
+  - [ ] Templates
+    - [ ] Tokens
+  - [ ] Implementations
+    - [ ] Tokens
+    - [ ] Keywords
+  - [ ] Stylesheets
+    - [ ] Tokens
 - [ ] Parser
   - [ ] Templates
     - [x] Tags
