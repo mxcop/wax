@@ -2,7 +2,7 @@
 
 <br>
 
-- [x] Lexer
+- [ ] Lexer
   - [x] Generic
     - [x] Tokens
     - [x] Whitespace
