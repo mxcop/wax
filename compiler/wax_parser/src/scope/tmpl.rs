@@ -49,11 +49,18 @@ impl TemplateParser {
             match tk {
               /* Opening Tag <tag> */
               Token::Ident(ident) => {
-                *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Tag { 
-                  name: ident.clone(), 
-                  attributes: vec![], 
-                  self_closing: false 
-                });
+                iter.next();
+                let tag = Self::parse_attributes(ident.clone(), iter, false);
+
+                let tag_idx = tree.add_child(
+                  *curr, 
+                  ident.clone(), 
+                  tag.clone()
+                );
+
+                if let SyntaxNode::Tag { self_closing: false, .. } = tag {
+                  *curr = tag_idx;
+                }
               }
               /* Closing Tag </tag> */
               Token::Slash => {
@@ -74,11 +81,18 @@ impl TemplateParser {
             match tk {
               /* Comb Opening Tag <-comb> */
               Token::Ident(ident) => {
-                *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Comb { 
-                  name: ident.clone(), 
-                  attributes: vec![], 
-                  self_closing: false 
-                });
+                iter.next();
+                let tag = Self::parse_attributes(ident.clone(), iter, true);
+
+                let tag_idx = tree.add_child(
+                  *curr, 
+                  ident.clone(), 
+                  tag.clone()
+                );
+
+                if let SyntaxNode::Comb { self_closing: false, .. } = tag {
+                  *curr = tag_idx;
+                }
               }
               /* Comb Closing Tag <-/comb> */
               Token::Slash => {
@@ -114,7 +128,7 @@ impl TemplateParser {
   }
 
   /// Parse the attributes of a tag.
-  fn parse_attributes<'a>(name: String, iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> SyntaxNode {
+  fn parse_attributes<'a>(name: String, iter: &mut PeekMoreIterator<Iter<'a, Token>>, is_comb: bool) -> SyntaxNode {
     let mut attributes = Vec::new();
     let mut self_closing = false;
     
@@ -122,7 +136,11 @@ impl TemplateParser {
       match tk {
 
         Token::Ident(ident) => {
-          if let Some(Token::Equals) = Self::next_token(iter) {
+          if let Some(Token::Equals) = Self::peek_next_token(iter) {
+            // Advance the cursor.
+            iter.truncate_iterator_to_cursor(); iter.next();
+
+            // Parse the value of the attribute.
             if let Some(value) = Self::parse_string(iter) {
               // Attribute with value:
               attributes.push(Attribute { 
@@ -145,6 +163,7 @@ impl TemplateParser {
         Token::Slash => {
           // Found self closing tag.
           if let Some(Token::GreaterThen) = iter.peek() {
+            iter.next();
             self_closing = true;
             break;
           }
@@ -159,21 +178,40 @@ impl TemplateParser {
       }
     }
 
-    SyntaxNode::Tag {
-      name, attributes, self_closing
+    if is_comb {
+      SyntaxNode::Comb {
+        name, attributes, self_closing
+      }
+    } else {
+      SyntaxNode::Tag {
+        name, attributes, self_closing
+      }
     }
   }
 
+  /// Parse a string pattern.
   fn parse_string<'a>(iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> Option<String> {
-    let mut word: Vec<char> = Vec::new();
-    
+    let mut word: String = String::new();
+    let mut escaped: bool = false;
+
     /* " */
     if let Some(Token::DoubleQuote) = iter.next() {
       while let Some(tk) = iter.next() {
-         /* " */
-        if let Token::DoubleQuote = tk {
-          return Some(word.iter().collect());
+        match tk {
+          /* Be aware of escape chars */
+          Token::BackSlash => escaped = true,
+          /* " */
+          Token::DoubleQuote => {
+            if escaped {
+              escaped = false;
+            } else {
+              return Some(word);
+            }
+          }
+          _ => {}
         }
+        // Add the token to the string.
+        word.push_str(&tk.to_string());
       }
     }
 
@@ -181,8 +219,15 @@ impl TemplateParser {
   }
 
   /// Get the next token skipping any whitespace tokens.
-  fn next_token<'a>(iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> Option<&'a Token> {
-    while let Some(tk) = iter.next() {
+  fn peek_next_token<'a>(iter: &mut PeekMoreIterator<Iter<'a, Token>>) -> Option<&'a Token> {
+    
+    if let Some(tk) = iter.peek() {
+      if let Token::Whitespace(_) = tk {} else {
+        return Some(tk);
+      }
+    }
+
+    while let Some(tk) = iter.peek_next() {
       if let Token::Whitespace(_) = tk {
         continue;
       } else {

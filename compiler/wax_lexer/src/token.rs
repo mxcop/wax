@@ -60,24 +60,81 @@ pub enum Token {
   Return,              // return
 }
 
-/** Try to convert an identity to a keyword. */
-pub fn get_keyword_token(ident: &String) -> Option<Token> {
-  match &ident[..] {
-    "tmpl"     => Some(Token::Template),
-    "impl"     => Some(Token::Implementation),
-    "styl"     => Some(Token::Stylesheet),
+impl Token {
+  pub fn to_string(&self) -> String {
+    match &self {
+        Token::Whitespace(_) => " ",
+        Token::Newline => "\n",
+        Token::Ident(ident) => ident,
+        Token::Number(num) => num,
+        Token::Comma => ",",
+        Token::Dot => ".",
+        Token::SingleQuote => "'",
+        Token::DoubleQuote => r#"""#,
+        Token::Grave => "`",
+        Token::Colon => ":",
+        Token::Semicolon => ";",
+        Token::Plus => "+",
+        Token::Minus => "-",
+        Token::Equals => "=",
+        Token::Star => "*",
+        Token::Hash => "#",
+        Token::Percent => "%",
+        Token::Ampersand => "&",
+        Token::Atsign => "@",
+        Token::Dollarsign => "$",
+        Token::Tilde => "~",
+        Token::Slash => "/",
+        Token::BackSlash => r"\",
+        Token::Bang => "!",
+        Token::Quest => "?",
+        Token::LessThen => "<",
+        Token::GreaterThen => ">",
+        Token::LeftArrow => "<-",
+        Token::RightArrow => "->",
+        Token::LeftParenthesis => "(",
+        Token::RightParenthesis => ")",
+        Token::LeftCurlyBracket => "{",
+        Token::RightCurlyBracket => "}",
+        Token::LeftSquareBracket => "[",
+        Token::RightSquareBracket => "]",
+        Token::Template => "tmpl",
+        Token::Implementation => "impl",
+        Token::Stylesheet => "styl",
+        Token::Let => "let",
+        Token::Const => "const",
+        Token::Import => "import",
+        Token::Export => "export",
+        Token::From => "from",
+        Token::Function => "function",
+        Token::True => "true",
+        Token::False => "false",
+        Token::If => "if",
+        Token::Else => "else",
+        Token::Return => "return",
+        _ => { panic!("unknown token"); }
+    }.into()
+  }
 
-    "let"      => Some(Token::Let),
-    "const"    => Some(Token::Const),
-    "import"   => Some(Token::Import),
-    "export"   => Some(Token::Export),
-    "from"     => Some(Token::From),
-    "function" => Some(Token::Function),
-    "true"     => Some(Token::True),
-    "false"    => Some(Token::False),
-    "if"       => Some(Token::If),
-    "else"     => Some(Token::Else),
-    "return"   => Some(Token::Return),
-    _ => None,
+  /** Try to convert a string to a keyword. */
+  pub fn from_string(s: &str) -> Option<Self> {
+    match s {
+      "tmpl"     => Some(Token::Template),
+      "impl"     => Some(Token::Implementation),
+      "styl"     => Some(Token::Stylesheet),
+  
+      "let"      => Some(Token::Let),
+      "const"    => Some(Token::Const),
+      "import"   => Some(Token::Import),
+      "export"   => Some(Token::Export),
+      "from"     => Some(Token::From),
+      "function" => Some(Token::Function),
+      "true"     => Some(Token::True),
+      "false"    => Some(Token::False),
+      "if"       => Some(Token::If),
+      "else"     => Some(Token::Else),
+      "return"   => Some(Token::Return),
+      _ => None,
+    }
   }
 }

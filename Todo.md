@@ -2,22 +2,16 @@
 
 <br>
 
-- [ ] Lexer
+- [x] Lexer
   - [x] Generic
     - [x] Tokens
     - [x] Whitespace
-  - [ ] Templates
-    - [ ] Tokens
-  - [ ] Implementations
-    - [ ] Tokens
-    - [ ] Keywords
-  - [ ] Stylesheets
-    - [ ] Tokens
+    - [x] Keywords
 - [ ] Parser
   - [ ] Templates
     - [x] Tags
-    - [ ] Attributes
-    - [ ] Self-closing Tags
+    - [x] Attributes
+    - [x] Self-closing Tags
     - [ ] Special Tags (img...)
     - [ ] Links (#id)
   - [ ] Implementations

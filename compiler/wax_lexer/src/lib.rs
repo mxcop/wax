@@ -1,11 +1,10 @@
 pub mod token;
 mod char;
-mod scope;
 
 use std::slice::Iter;
 use self::char::{is_ident_start, is_ident, is_number};
 use peekmore::PeekMoreIterator;
-use token::{Token, get_keyword_token};
+use token::Token;
 
 pub struct Lexer<'a> {
   iter: PeekMoreIterator<Iter<'a, char>>
@@ -153,8 +152,8 @@ impl<'a> Lexer<'a> {
         _ => {
           // Read the next word as an identity:
           if let Some(identity) = self.ident(ch) {
-            if let Some(keyword) = get_keyword_token(&identity) {
-              keyword // Keyword found
+            if let Some(keyword) = Token::from_string(&identity) {
+              keyword // Found keyword.
             } else {
               Token::Ident(identity)
             }
@@ -167,7 +166,8 @@ impl<'a> Lexer<'a> {
         }
       };
 
-      tokens.push(token);
+      // Push the token onto the stack.
+      tokens.push(token.clone());
     }
 
     tokens.push(Token::EOF);

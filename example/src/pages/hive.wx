@@ -1,13 +1,14 @@
 /* Html Template */
 tmpl card:
   <div class="card">
-    <h2 #title title="let const"></h2>
+    <h2 #header title="let \" const"></h2>
     <p #desc></p>
+    <img src="img.png" />
   </div>;
 
 /* Template Implementation */
-impl card(title: str, desc: str) {
-  #title.inner_text = title;
+impl card(header: str, desc: str) {
+  #header.inner_text = header;
   #desc.inner_text = desc;
 }
 
@@ -22,8 +23,8 @@ styl card() {
 /* Root Html Template */
 tmpl @html:
   <body>
-    <-card title="Card 1" desc="This is card one" /><-/card>
-    <-card title="Card 2" desc="This is card two">
+    <-card header="Card 1" desc="This is card one" />
+    <-card header="Card 2" desc="This is card two">
       <p>Hello world</p>
     <-/card>
   </body>;
