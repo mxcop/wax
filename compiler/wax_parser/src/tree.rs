@@ -68,7 +68,18 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
         append_tabs(f, level)?;
 
         if child.children.len() == 0 {
-          writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?;
+
+          match &child.val {
+
+            /* Comb Tags */
+            SyntaxNode::Comb { name, .. } => {
+              writeln!(f, "{}{} {}", "<-".bright_black(), name.green(), format!("({:?})", child.val).bright_black())?;
+            }
+            
+            _ => { writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?; }
+          }
+
+          
         } else {
           match &child.val {
 
