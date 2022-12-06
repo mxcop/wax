@@ -4,7 +4,7 @@ pub mod tree;
 mod lines;
 mod scope;
 
-use std::slice::Iter;
+use std::{slice::Iter, sync::Arc};
 use node::SyntaxNode;
 use peekmore::PeekMoreIterator;
 use tree::ArenaTree;
@@ -13,7 +13,7 @@ use wax_lexer::token::Token;
 
 pub struct Parser<'a> {
   /* File information */
-  file: String,
+  file: Arc<String>,
   filename: String,
 
   /* Debug information */
@@ -23,7 +23,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-  pub fn new(file: String, filename: String, input: PeekMoreIterator<Iter<'a, Token>>) -> Self {
+  pub fn new(file: Arc<String>, filename: String, input: PeekMoreIterator<Iter<'a, Token>>) -> Self {
     Self {
       file, filename,
       pos: 0, iter: input

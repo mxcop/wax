@@ -37,8 +37,6 @@ impl TemplateParser {
     else { panic!("No name after `tmpl`"); }
     let scope = *curr;
 
-    println!("found tmpl {:?}", tree.get(scope).get_name());
-
     // Move through all tokens until we reach a semicolon:
     while let Some(tk) = iter.next() {
       match tk {
@@ -109,8 +107,7 @@ impl TemplateParser {
 
         /* ; */
         Token::Semicolon => {
-          println!("\n - found semicolon level {} - ", *curr);
-          if *curr == scope { println!("\n - found template ending - "); break; }
+          if *curr == scope { break; }
         }
 
         /* End of File */
@@ -131,11 +128,27 @@ impl TemplateParser {
   fn parse_attributes<'a>(name: String, iter: &mut PeekMoreIterator<Iter<'a, Token>>, is_comb: bool) -> SyntaxNode {
     let mut attributes = Vec::new();
     let mut self_closing = false;
+    let mut hashed_attrib = false;
     
     while let Some(tk) = iter.next() {
       match tk {
 
+        /* # */
+        Token::Hash => {
+          hashed_attrib = true;
+        }
+
+        /* name */
         Token::Ident(ident) => {
+          let mut ident = ident.clone();
+
+          /* # */
+          if hashed_attrib {
+            ident.insert(0, '#');
+            hashed_attrib = false;
+          }
+
+          /* = */
           if let Some(Token::Equals) = Self::peek_next_token(iter) {
             // Advance the cursor.
             iter.truncate_iterator_to_cursor(); iter.next();
@@ -144,7 +157,7 @@ impl TemplateParser {
             if let Some(value) = Self::parse_string(iter) {
               // Attribute with value:
               attributes.push(Attribute { 
-                name: ident.clone(), 
+                name: ident, 
                 value: Some(value)
               });
             } else {
@@ -153,7 +166,7 @@ impl TemplateParser {
           } else {
             // Attribute without value:
             attributes.push(Attribute { 
-              name: ident.clone(), 
+              name: ident, 
               value: None 
             });
           }

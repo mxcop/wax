@@ -1,17 +1,16 @@
 pub mod token;
 mod char;
 
-use std::slice::Iter;
+use std::{slice::Iter, iter::Peekable};
 use self::char::{is_ident_start, is_ident, is_number};
-use peekmore::PeekMoreIterator;
 use token::Token;
 
 pub struct Lexer<'a> {
-  iter: PeekMoreIterator<Iter<'a, char>>
+  iter: Peekable<Iter<'a, char>>
 }
 
 impl<'a> Lexer<'a> {
-  pub fn new(input: PeekMoreIterator<Iter<'a, char>>) -> Self {
+  pub fn new(input: Peekable<Iter<'a, char>>) -> Self {
     Self {
       iter: input
     }

@@ -71,16 +71,21 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
 
           match &child.val {
 
+            /* Tags */
+            SyntaxNode::Tag { name, attributes, .. } => {
+              writeln!(f, "{} {}", name, format!("({:?})", attributes).bright_black())?;
+            }
+
             /* Comb Tags */
-            SyntaxNode::Comb { name, .. } => {
-              writeln!(f, "{}{} {}", "<-".bright_black(), name.green(), format!("({:?})", child.val).bright_black())?;
+            SyntaxNode::Comb { name, attributes, .. } => {
+              writeln!(f, "{}{} {}", "<-".bright_black(), name.green(), format!("({:?})", attributes).bright_black())?;
             }
             
             _ => { writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?; }
           }
-
           
         } else {
+
           match &child.val {
 
             /* Templates */
@@ -96,6 +101,7 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
             
             _ => { writeln!(f, "{}: {{", child.name)?; }
           }
+
           recurse(f, &tree, &child, level + 1)?;
 
           append_tabs(f, level)?;
