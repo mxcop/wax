@@ -35,6 +35,9 @@ impl TemplateParser {
       } 
     }
     else { panic!("No name after `tmpl`"); }
+    let scope = *curr;
+
+    println!("found tmpl {:?}", tree.get(scope).get_name());
 
     // Move through all tokens until we reach a semicolon:
     while let Some(tk) = iter.next() {
@@ -92,7 +95,14 @@ impl TemplateParser {
 
         /* ; */
         Token::Semicolon => {
-          break;
+          println!("\n - found semicolon level {} - ", *curr);
+          if *curr == scope { println!("\n - found template ending - "); break; }
+        }
+
+        /* End of File */
+        Token::EOF => {
+          if *curr != scope { panic!("template overflow, forgot to close a tag within <{}>", tree.get(*curr).get_name()); }
+          else { panic!("dangling template, (don't forget to close your templates using `;`)"); }
         }
 
         _ => {}

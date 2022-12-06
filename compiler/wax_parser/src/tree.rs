@@ -131,4 +131,9 @@ impl<T> Node<T>
       children: vec![],
     }
   }
+
+  /// Get a reference to the name of the node.
+  pub fn get_name(&self) -> &str {
+    &self.name
+  }
 }
