@@ -1,5 +1,6 @@
 pub mod token;
 mod char;
+mod scope;
 
 use std::slice::Iter;
 use self::char::{is_ident_start, is_ident, is_number};

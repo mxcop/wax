@@ -22,7 +22,7 @@ styl card() {
 /* Root Html Template */
 tmpl @html:
   <body>
-    <-card title="Card 1" desc="This is card one" />
+    <-card title="Card 1" desc="This is card one" /><-/card>
     <-card title="Card 2" desc="This is card two">
       <p>Hello world</p>
     <-/card>
