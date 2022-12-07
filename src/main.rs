@@ -1,4 +1,6 @@
-use std::sync::Arc;
+#![feature(let_else)]
+
+use std::{sync::Arc, collections::HashMap};
 
 use wax_lexer::{Lexer, token::SyntaxToken, iter::TrackingIter};
 use wax_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
@@ -62,7 +64,12 @@ fn run_thread_safe(input: Arc<String>, chars: Vec<char>) -> ArenaTree<SyntaxNode
 
   // Parse :
   let mut parser = Parser::new(input, "src/pages/hive.wx".into(), &tokens);
-  let tree: ArenaTree<SyntaxNode> = parser.parse();
+  let parsed_result = parser.parse();
+
+  let Ok(tree) = parsed_result else {
+    println!("{}", parsed_result.err().unwrap());
+    std::process::exit(0);
+  };
 
   tree
 }
@@ -79,13 +86,38 @@ fn run(input: String) {
 
   let lex_time = start.elapsed().as_micros();
 
-  println!("\nTokens : \n{:?}", tokens);
+  println!("Char  count : {}", chars.len());
+  println!("Token count : {}", tokens.len());
+
+  let mut scores: HashMap<String, usize> = HashMap::new();
+
+  for token in &tokens {
+    let name = format!("{:?}", token.kind).split('(').collect::<Vec<&str>>().first().unwrap().to_string();
+    if scores.contains_key(&name) {
+      let mut score = scores.get_mut(&name).unwrap();
+      *score += 1;
+    } else {
+      scores.insert(name, 1);
+    }
+  }
+
+  for token in scores.keys() {
+    let score = scores[token];
+    println!("{} : {}", token, score);
+  }
+
+  //println!("\nTokens : \n{:?}", tokens);
 
   let start = std::time::Instant::now();
 
   // Parse :
   let mut parser = Parser::new(Arc::new(input), "src/pages/hive.wx".into(), &tokens);
-  let tree: ArenaTree<SyntaxNode> = parser.parse();
+  let parsed_result = parser.parse();
+
+  let Ok(tree) = parsed_result else {
+    println!("{}", parsed_result.err().unwrap());
+    std::process::exit(0);
+  };
 
   let parse_time = start.elapsed().as_micros();
 

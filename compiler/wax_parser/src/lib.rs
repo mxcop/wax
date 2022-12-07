@@ -1,10 +1,12 @@
 pub mod node;
 pub mod tree;
+pub mod error;
 
 mod lines;
 mod scope;
 
 use std::sync::Arc;
+use error::WaxError;
 use node::SyntaxNode;
 use tree::ArenaTree;
 use scope::tmpl::TemplateParser;
@@ -27,20 +29,20 @@ impl<'a> Parser<'a> {
 
   /// ### Syntactic Analysis
   /// Analize the input tokens and convert it into an abstract syntax tree.
-  pub fn parse(&mut self) -> ArenaTree<SyntaxNode> {
+  pub fn parse(&mut self) -> Result<ArenaTree<SyntaxNode>, WaxError> {
     let mut tree: ArenaTree<SyntaxNode> = ArenaTree::new();
     let mut curr = tree.add_node("Root".to_string(), SyntaxNode::Root);
 
     while let Some(tk) = self.iter.next() {
       match tk {
         Token::Template => {
-          TemplateParser::parse_tmpl(&mut self.iter, &mut curr, &mut tree);
+          TemplateParser::parse_tmpl(&mut self.iter, &mut curr, &mut tree)?;
         }
-        _ => {}
+        _ => { return Err(WaxError {}); }
       }
     }
 
-    tree
+    Ok(tree)
   }
 
   #[allow(unused)]

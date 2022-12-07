@@ -1,6 +1,6 @@
 use wax_lexer::{token::Token, iter::TokenIter};
 
-use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
+use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}, error::WaxError};
 
 /// Wax template parser.
 pub struct TemplateParser {}
@@ -11,7 +11,7 @@ impl TemplateParser {
     iter: &mut TokenIter<'a>, 
     curr: &mut usize,
     tree: &mut ArenaTree<SyntaxNode>)
-  {
+  -> Result<(), WaxError> {
     // Make sure that the next token is whitespace.
     if let Some(Token::Whitespace(_)) = iter.next() {} 
     else { panic!("No whitespace after `tmpl`"); }
@@ -120,6 +120,8 @@ impl TemplateParser {
 
     // Move back out of this template.
     *curr = tree.get_parent(*curr).expect("No parent");
+
+    Ok(())
   }
 
   /// Parse the attributes of a tag.
