@@ -1,9 +1,7 @@
 use std::sync::Arc;
 
-use peekmore::PeekMore;
-use wax_lexer::{token::Token, Lexer};
-use wax_parser::Parser;
-use wax_parser::{node::SyntaxNode, tree::ArenaTree};
+use wax_lexer::{Lexer, token::SyntaxToken, iter::TrackingIter};
+use wax_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
 
 mod args;
 mod build;
@@ -59,11 +57,11 @@ fn run_threads(input: String) {
 /// Run a thread safe version of the parsing.
 fn run_thread_safe(input: Arc<String>, chars: Vec<char>) -> ArenaTree<SyntaxNode> {
   // Tokenize :
-  let mut lexer = Lexer::new(chars.iter().peekable());
-  let tokens: Vec<Token> = lexer.lex();
+  let mut lexer = Lexer::new(TrackingIter::new(&chars));
+  let tokens: Vec<SyntaxToken> = lexer.lex();
 
   // Parse :
-  let mut parser = Parser::new(input, "src/pages/hive.wx".into(), tokens.iter().peekmore());
+  let mut parser = Parser::new(input, "src/pages/hive.wx".into(), &tokens);
   let tree: ArenaTree<SyntaxNode> = parser.parse();
 
   tree
@@ -76,8 +74,8 @@ fn run(input: String) {
   let start = std::time::Instant::now();
 
   // Tokenize :
-  let mut lexer = Lexer::new(chars.iter().peekable());
-  let tokens: Vec<Token> = lexer.lex();
+  let mut lexer = Lexer::new(TrackingIter::new(&chars));
+  let tokens: Vec<SyntaxToken> = lexer.lex();
 
   let lex_time = start.elapsed().as_micros();
 
@@ -86,7 +84,7 @@ fn run(input: String) {
   let start = std::time::Instant::now();
 
   // Parse :
-  let mut parser = Parser::new(Arc::new(input), "src/pages/hive.wx".into(), tokens.iter().peekmore());
+  let mut parser = Parser::new(Arc::new(input), "src/pages/hive.wx".into(), &tokens);
   let tree: ArenaTree<SyntaxNode> = parser.parse();
 
   let parse_time = start.elapsed().as_micros();

@@ -1,16 +1,18 @@
 pub mod token;
+pub mod span;
+pub mod iter;
 mod char;
 
-use std::{slice::Iter, iter::Peekable};
 use self::char::{is_ident_start, is_ident, is_number};
-use token::Token;
+use iter::TrackingIter;
+use token::{Token, SyntaxToken};
 
 pub struct Lexer<'a> {
-  iter: Peekable<Iter<'a, char>>
+  iter: TrackingIter<'a, char>
 }
 
 impl<'a> Lexer<'a> {
-  pub fn new(input: Peekable<Iter<'a, char>>) -> Self {
+  pub fn new(input: TrackingIter<'a, char>) -> Self {
     Self {
       iter: input
     }
@@ -89,21 +91,28 @@ impl<'a> Lexer<'a> {
 
   /// ### Lexical Analysis
   /// Analize the input and convert it into an array of tokens.
-  pub fn lex(&mut self) -> Vec<Token> {
-    let mut tokens: Vec<Token> = Vec::new();
+  pub fn lex(&mut self) -> Vec<SyntaxToken> {
+    let mut tokens: Vec<SyntaxToken> = Vec::new();
 
     // Move through all the characters:
     while let Some(&ch) = self.next() {
 
       // Handle spaces.
       if ch == ' ' {
-        tokens.push(Token::Whitespace(self.whitespace(ch)));
+        let len = self.whitespace(ch);
+        tokens.push(SyntaxToken::new(
+          Token::Whitespace(len), 
+          self.iter.current_pos(), len
+        ));
         continue;
       }
 
       // Handle newlines.
       if ch == '\n' {
-        tokens.push(Token::Newline);
+        tokens.push(SyntaxToken::new(
+          Token::Newline, 
+          self.iter.current_pos(), 1
+        ));
         continue;
       }
 
@@ -166,10 +175,17 @@ impl<'a> Lexer<'a> {
       };
 
       // Push the token onto the stack.
-      tokens.push(token.clone());
+      tokens.push(SyntaxToken::new(
+        token.clone(),
+        self.iter.current_pos(), token.to_string().len()
+      ));
     }
 
-    tokens.push(Token::EOF);
+    // End of File reached.
+    tokens.push(SyntaxToken::new(
+      Token::EOF,
+      self.iter.current_pos(), 0
+    ));
     tokens
   }
 }

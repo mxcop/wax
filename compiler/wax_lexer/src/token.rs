@@ -1,3 +1,30 @@
+use super::span::Span;
+
+#[derive(Debug, Clone)]
+pub struct SyntaxToken {
+  pub kind: Token,
+  span: Span,
+}
+
+impl SyntaxToken {
+  pub fn new(kind: Token, idx: usize, len: usize) -> Self {
+    Self {
+      kind,
+      span: Span::new(idx, len)
+    }
+  }
+
+  /// Get the span of the token.
+  pub fn get_span(&self) -> &Span {
+    &self.span
+  }
+
+  /// Get the string representation of the token.
+  pub fn get_str(&self) -> String {
+    self.kind.to_string()
+  }
+}
+
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
   // Systematic
@@ -63,56 +90,56 @@ pub enum Token {
 impl Token {
   pub fn to_string(&self) -> String {
     match &self {
-        Token::Whitespace(_) => " ",
-        Token::Newline => "\n",
-        Token::Ident(ident) => ident,
-        Token::Number(num) => num,
-        Token::Comma => ",",
-        Token::Dot => ".",
-        Token::SingleQuote => "'",
-        Token::DoubleQuote => r#"""#,
-        Token::Grave => "`",
-        Token::Colon => ":",
-        Token::Semicolon => ";",
-        Token::Plus => "+",
-        Token::Minus => "-",
-        Token::Equals => "=",
-        Token::Star => "*",
-        Token::Hash => "#",
-        Token::Percent => "%",
-        Token::Ampersand => "&",
-        Token::Atsign => "@",
-        Token::Dollarsign => "$",
-        Token::Tilde => "~",
-        Token::Slash => "/",
-        Token::BackSlash => r"\",
-        Token::Bang => "!",
-        Token::Quest => "?",
-        Token::LessThen => "<",
-        Token::GreaterThen => ">",
-        Token::LeftArrow => "<-",
-        Token::RightArrow => "->",
-        Token::LeftParenthesis => "(",
-        Token::RightParenthesis => ")",
-        Token::LeftCurlyBracket => "{",
-        Token::RightCurlyBracket => "}",
-        Token::LeftSquareBracket => "[",
-        Token::RightSquareBracket => "]",
-        Token::Template => "tmpl",
-        Token::Implementation => "impl",
-        Token::Stylesheet => "styl",
-        Token::Let => "let",
-        Token::Const => "const",
-        Token::Import => "import",
-        Token::Export => "export",
-        Token::From => "from",
-        Token::Function => "function",
-        Token::True => "true",
-        Token::False => "false",
-        Token::If => "if",
-        Token::Else => "else",
-        Token::Return => "return",
-        _ => { panic!("unknown token"); }
+      Token::Whitespace(_) => " ",
+      Token::Newline => "\n",
+      Token::Ident(ident) => ident,
+      Token::Number(num) => num,
+      Token::Comma => ",",
+      Token::Dot => ".",
+      Token::SingleQuote => "'",
+      Token::DoubleQuote => r#"""#,
+      Token::Grave => "`",
+      Token::Colon => ":",
+      Token::Semicolon => ";",
+      Token::Plus => "+",
+      Token::Minus => "-",
+      Token::Equals => "=",
+      Token::Star => "*",
+      Token::Hash => "#",
+      Token::Percent => "%",
+      Token::Ampersand => "&",
+      Token::Atsign => "@",
+      Token::Dollarsign => "$",
+      Token::Tilde => "~",
+      Token::Slash => "/",
+      Token::BackSlash => r"\",
+      Token::Bang => "!",
+      Token::Quest => "?",
+      Token::LessThen => "<",
+      Token::GreaterThen => ">",
+      Token::LeftArrow => "<-",
+      Token::RightArrow => "->",
+      Token::LeftParenthesis => "(",
+      Token::RightParenthesis => ")",
+      Token::LeftCurlyBracket => "{",
+      Token::RightCurlyBracket => "}",
+      Token::LeftSquareBracket => "[",
+      Token::RightSquareBracket => "]",
+      Token::Template => "tmpl",
+      Token::Implementation => "impl",
+      Token::Stylesheet => "styl",
+      Token::Let => "let",
+      Token::Const => "const",
+      Token::Import => "import",
+      Token::Export => "export",
+      Token::From => "from",
+      Token::Function => "function",
+      Token::True => "true",
+      Token::False => "false",
+      Token::If => "if",
+      Token::Else => "else",
+      Token::Return => "return",
+      _ => { panic!("unknown token"); }
     }.into()
   }
 

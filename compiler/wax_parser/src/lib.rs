@@ -4,35 +4,25 @@ pub mod tree;
 mod lines;
 mod scope;
 
-use std::{slice::Iter, sync::Arc};
+use std::sync::Arc;
 use node::SyntaxNode;
-use peekmore::PeekMoreIterator;
 use tree::ArenaTree;
 use scope::tmpl::TemplateParser;
-use wax_lexer::token::Token;
+use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
 
 pub struct Parser<'a> {
   /* File information */
   file: Arc<String>,
   filename: String,
 
-  /* Debug information */
-  pos: usize,
-
-  iter: PeekMoreIterator<Iter<'a, Token>>
+  iter: TokenIter<'a>
 }
 
 impl<'a> Parser<'a> {
-  pub fn new(file: Arc<String>, filename: String, input: PeekMoreIterator<Iter<'a, Token>>) -> Self {
+  pub fn new(file: Arc<String>, filename: String, input: &'a Vec<SyntaxToken>) -> Self {
     Self {
-      file, filename,
-      pos: 0, iter: input
+      file, filename, iter: TokenIter::new(input)
     }
-  }
-
-  fn next(&mut self) -> Option<&Token> {
-    self.pos += 1;
-    self.iter.next()
   }
 
   /// ### Syntactic Analysis
@@ -41,7 +31,7 @@ impl<'a> Parser<'a> {
     let mut tree: ArenaTree<SyntaxNode> = ArenaTree::new();
     let mut curr = tree.add_node("Root".to_string(), SyntaxNode::Root);
 
-    while let Some(tk) = self.next() {
+    while let Some(tk) = self.iter.next() {
       match tk {
         Token::Template => {
           TemplateParser::parse_tmpl(&mut self.iter, &mut curr, &mut tree);
