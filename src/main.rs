@@ -18,7 +18,7 @@ fn main() {
   //let chars: Vec<char> = input.chars().collect();
 
   //run_threads(input);
-  run(input);
+  run(input, "src/pages/hive.wx");
 }
 
 #[allow(unused)]
@@ -35,7 +35,7 @@ fn run_threads(input: String) {
     let handle = std::thread::spawn(move || {
       let start = std::time::Instant::now();
       let chars = input.chars().collect();
-      let tree = run_thread_safe(input, chars);
+      let tree = run_thread_safe(input, "test.wx", chars);
       (tree, start.elapsed().as_micros())
     });
 
@@ -57,17 +57,17 @@ fn run_threads(input: String) {
 
 #[allow(unused)]
 /// Run a thread safe version of the parsing.
-fn run_thread_safe(input: Arc<String>, chars: Vec<char>) -> ArenaTree<SyntaxNode> {
+fn run_thread_safe(input: Arc<String>, filename: &str, chars: Vec<char>) -> ArenaTree<SyntaxNode> {
   // Tokenize :
   let mut lexer = Lexer::new(TrackingIter::new(&chars));
   let tokens: Vec<SyntaxToken> = lexer.lex();
 
   // Parse :
-  let mut parser = Parser::new(input, "src/pages/hive.wx".into(), &tokens);
+  let mut parser = Parser::new(&tokens);
   let parsed_result = parser.parse();
 
   let Ok(tree) = parsed_result else {
-    println!("{}", parsed_result.err().unwrap());
+    parsed_result.err().unwrap().print(&input, filename);
     std::process::exit(0);
   };
 
@@ -76,7 +76,7 @@ fn run_thread_safe(input: Arc<String>, chars: Vec<char>) -> ArenaTree<SyntaxNode
 
 #[allow(unused)]
 /// Run a single parsing.
-fn run(input: String) {
+fn run(input: String, filename: &str) {
   let chars: Vec<char> = input.chars().collect();
   let start = std::time::Instant::now();
 
@@ -111,11 +111,11 @@ fn run(input: String) {
   let start = std::time::Instant::now();
 
   // Parse :
-  let mut parser = Parser::new(Arc::new(input), "src/pages/hive.wx".into(), &tokens);
+  let mut parser = Parser::new(&tokens);
   let parsed_result = parser.parse();
 
   let Ok(tree) = parsed_result else {
-    println!("{}", parsed_result.err().unwrap());
+    parsed_result.err().unwrap().print(&input, filename);
     std::process::exit(0);
   };
 

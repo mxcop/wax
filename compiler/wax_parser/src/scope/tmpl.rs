@@ -1,6 +1,7 @@
 use wax_lexer::{token::Token, iter::TokenIter};
+use wax_logger::error::WaxError;
 
-use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}, error::WaxError};
+use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
 
 /// Wax template parser.
 pub struct TemplateParser {}
@@ -11,7 +12,7 @@ impl TemplateParser {
     iter: &mut TokenIter<'a>, 
     curr: &mut usize,
     tree: &mut ArenaTree<SyntaxNode>)
-  -> Result<(), WaxError> {
+  -> Result<(), WaxError<'a>> {
     // Make sure that the next token is whitespace.
     if let Some(Token::Whitespace(_)) = iter.next() {} 
     else { panic!("No whitespace after `tmpl`"); }

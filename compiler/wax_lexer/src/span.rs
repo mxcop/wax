@@ -1,8 +1,8 @@
 #[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Span {
-  start_index: usize,
-  length: usize,
+  pub start_index: usize,
+  pub length: usize,
 }
 
 pub struct Line<'a> {
@@ -16,10 +16,5 @@ impl Span {
       start_index: idx,
       length: len
     }
-  }
-
-  #[allow(unused)]
-  pub fn get_line<'a>(&self, file: &'a str) -> Line<'a> {
-    todo!();
   }
 }
