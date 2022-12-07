@@ -5,6 +5,8 @@ mod macros;
 mod lines;
 use colored::Colorize;
 
+use lines::{add_space, usize_log10};
+
 /// ### Formatting
 /// ```
 /// error: <desc>
@@ -111,25 +113,4 @@ pub fn warn(
       tip.italic()
     );
   }
-}
-
-/// Add a number of spaces to the current line.
-fn add_space(n: usize) {
-  for _ in 0..n {
-    print!(" ");
-  }
-}
-
-/// Get the length in digits of a usize.
-fn usize_log10(mut i: usize) -> usize {
-  let mut len = 0;
-  let zero = 0usize;
-  let ten = 10usize;
-
-  while i > zero {
-    i /= ten;
-    len += 1;
-  }
-
-  len
 }

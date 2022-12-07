@@ -2,6 +2,8 @@
 
 use std::fmt::Debug;
 
+use wax_lexer::span::Span;
+
 use crate::node::SyntaxNode;
 
 #[derive(Default)]
@@ -19,17 +21,17 @@ impl<T> ArenaTree<T>
   }
 
   /// Add a new node to the tree. (without parent)
-  pub fn add_node(&mut self, name: String, val: T) -> usize {
+  pub fn add_node(&mut self, name: String, span: Span, val: T) -> usize {
     let idx = self.arena.len();
-    self.arena.push(Node::new(idx, name, val));
+    self.arena.push(Node::new(idx, name, span, val));
     idx
   }
 
   /// Add a new node to the tree as child of an existing node.
-  pub fn add_child(&mut self, parent_idx: usize, name: String, val: T) -> usize {
+  pub fn add_child(&mut self, parent_idx: usize, name: String, span: Span, val: T) -> usize {
     let idx = self.arena.len();
     // Create and add the node :
-    let mut node = Node::new(idx, name, val);
+    let mut node = Node::new(idx, name, span, val);
     node.parent = Some(parent_idx);
     // Add the node into the arena and the children array on the parent :
     self.arena.push(node);
@@ -131,6 +133,7 @@ pub struct Node<T>
 {
   _idx: usize,
   name: String,
+  span: Span,
   pub val: T,
   parent: Option<usize>,
   children: Vec<usize>,
@@ -139,10 +142,11 @@ pub struct Node<T>
 impl<T> Node<T> 
   where T : Debug
 {
-  pub fn new(_idx: usize, name: String, val: T) -> Self {
+  pub fn new(_idx: usize, name: String, span: Span, val: T) -> Self {
     Self {
       _idx,
       name,
+      span,
       val,
       parent: None,
       children: vec![],
@@ -152,5 +156,10 @@ impl<T> Node<T>
   /// Get a reference to the name of the node.
   pub fn get_name(&self) -> &str {
     &self.name
+  }
+
+  /// Get a reference to the span of the node.
+  pub fn get_span(&self) -> &Span {
+    &self.span
   }
 }

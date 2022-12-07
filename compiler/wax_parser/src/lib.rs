@@ -6,7 +6,7 @@ use node::SyntaxNode;
 use tree::ArenaTree;
 use scope::tmpl::TemplateParser;
 
-use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
+use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter, span::Span};
 use wax_logger::error::WaxError;
 
 /// The Wax parser.
@@ -26,7 +26,7 @@ impl<'a> Parser<'a> {
   /// Analize the input tokens and convert it into an abstract syntax tree.
   pub fn parse(&mut self) -> Result<ArenaTree<SyntaxNode>, WaxError> {
     let mut tree: ArenaTree<SyntaxNode> = ArenaTree::new();
-    let mut curr = tree.add_node("Root".to_string(), SyntaxNode::Root);
+    let mut curr = tree.add_node("Root".to_string(), Span::new(0, 0), SyntaxNode::Root);
 
     while let Some((dtk, tk)) = self.iter.next_de() {
       match tk {

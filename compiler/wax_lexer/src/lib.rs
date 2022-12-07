@@ -91,8 +91,8 @@ impl<'a> Lexer<'a> {
 
   /// ### Lexical Analysis
   /// Analize the input and convert it into an array of tokens.
-  pub fn lex(&mut self) -> Vec<SyntaxToken> {
-    let mut tokens: Vec<SyntaxToken> = Vec::new();
+  pub fn lex(&mut self, char_count: usize) -> Vec<SyntaxToken> {
+    let mut tokens: Vec<SyntaxToken> = Vec::with_capacity(char_count);
 
     // Move through all the characters:
     while let Some(&ch) = self.next() {
@@ -184,7 +184,7 @@ impl<'a> Lexer<'a> {
     // End of File reached.
     tokens.push(SyntaxToken::new(
       Token::EOF,
-      self.iter.current_pos(), 0
+      self.iter.current_pos() - 1, 0
     ));
     tokens
   }

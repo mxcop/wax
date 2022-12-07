@@ -8,6 +8,7 @@
     - [x] Whitespace
     - [x] Keywords
 - [ ] Parser
+  - [x] Error handling
   - [ ] Templates
     - [x] Tags
     - [x] Attributes

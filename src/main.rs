@@ -1,6 +1,4 @@
-#![feature(let_else)]
-
-use std::{sync::Arc, collections::HashMap};
+use std::sync::Arc;
 
 use wax_lexer::{Lexer, token::SyntaxToken, iter::TrackingIter};
 use wax_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
@@ -60,7 +58,7 @@ fn run_threads(input: String) {
 fn run_thread_safe(input: Arc<String>, filename: &str, chars: Vec<char>) -> ArenaTree<SyntaxNode> {
   // Tokenize :
   let mut lexer = Lexer::new(TrackingIter::new(&chars));
-  let tokens: Vec<SyntaxToken> = lexer.lex();
+  let tokens: Vec<SyntaxToken> = lexer.lex(chars.len() / 2);
 
   // Parse :
   let mut parser = Parser::new(&tokens);
@@ -82,29 +80,29 @@ fn run(input: String, filename: &str) {
 
   // Tokenize :
   let mut lexer = Lexer::new(TrackingIter::new(&chars));
-  let tokens: Vec<SyntaxToken> = lexer.lex();
+  let tokens: Vec<SyntaxToken> = lexer.lex(chars.len() / 2);
 
   let lex_time = start.elapsed().as_micros();
 
   println!("Char  count : {}", chars.len());
   println!("Token count : {}", tokens.len());
 
-  let mut scores: HashMap<String, usize> = HashMap::new();
+  // let mut scores: HashMap<String, usize> = HashMap::new();
 
-  for token in &tokens {
-    let name = format!("{:?}", token.kind).split('(').collect::<Vec<&str>>().first().unwrap().to_string();
-    if scores.contains_key(&name) {
-      let mut score = scores.get_mut(&name).unwrap();
-      *score += 1;
-    } else {
-      scores.insert(name, 1);
-    }
-  }
+  // for token in &tokens {
+  //   let name = format!("{:?}", token.kind).split('(').collect::<Vec<&str>>().first().unwrap().to_string();
+  //   if scores.contains_key(&name) {
+  //     let mut score = scores.get_mut(&name).unwrap();
+  //     *score += 1;
+  //   } else {
+  //     scores.insert(name, 1);
+  //   }
+  // }
 
-  for token in scores.keys() {
-    let score = scores[token];
-    println!("{} : {}", token, score);
-  }
+  // for token in scores.keys() {
+  //   let score = scores[token];
+  //   println!("{} : {}", token, score);
+  // }
 
   //println!("\nTokens : \n{:?}", tokens);
 

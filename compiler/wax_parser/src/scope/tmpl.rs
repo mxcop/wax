@@ -1,5 +1,5 @@
 use wax_lexer::{token::Token, iter::TokenIter};
-use wax_logger::error::WaxError;
+use wax_logger::error::{WaxError, WaxHint};
 
 use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
 
@@ -14,30 +14,59 @@ impl TemplateParser {
     tree: &mut ArenaTree<SyntaxNode>)
   -> Result<(), WaxError<'a>> {
     // Make sure that the next token is whitespace.
-    if let Some(Token::Whitespace(_)) = iter.next() {} 
-    else { panic!("No whitespace after `tmpl`"); }
+    if let Some((dtk, tk)) = iter.next_de() {
+      match tk {
+        Token::Whitespace(_) => {},
+        _ => { 
+          return Err(WaxError::from_token(dtk.clone(), 
+            "`tmpl` must be followed by whitespace", 
+            WaxHint::Example("`tmpl name:`")
+          )); 
+        }
+      }
+    }
 
     // And then there should be an indentifier for the template.
-    if let Some(Token::Ident(ident)) = iter.peek() {
-      *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Template {
-        name: ident.clone()
-      });
-      iter.next();
-    } 
-    // Also check if the identifier starts with an atsign.
-    else if let Some(Token::Atsign) = iter.next() {
-      if let Some(Token::Ident(ident)) = iter.next() {
-        let ident = format!("@{ident}");
-        *curr = tree.add_child(*curr, ident.clone(), SyntaxNode::Template {
-          name: ident.clone()
-        });
-      } 
+    if let Some((dtk, tk)) = iter.next_de() {
+      match tk {
+        /* <name> */
+        Token::Ident(ident) => {
+          *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
+            name: ident.clone()
+          });
+        },
+        /* @ */
+        Token::Atsign => {
+          if let Some((dtk, tk)) = iter.next_de() {
+            /* <name> */
+            if let Token::Ident(ident) = tk {
+              let ident = format!("@{ident}");
+              *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
+                name: ident.clone()
+              });
+            } else {
+              return Err(WaxError::from_token(dtk.clone(), 
+                "template name cannot only consist of `@`", 
+                WaxHint::Hint("you can add a name after the `@`".into())
+              )); 
+            }
+          }
+        },
+        _ => {
+          return Err(WaxError::from_token(dtk.clone(), 
+            "templates must have a name", 
+            WaxHint::Example("`tmpl name:`")
+          )); 
+        }
+      }
     }
-    else { panic!("No name after `tmpl`"); }
+
+    /* TODO: check for DoubleDot after the template name */
+
     let scope = *curr;
 
     // Move through all tokens until we reach a semicolon:
-    while let Some(tk) = iter.next() {
+    while let Some((dtk, tk)) = iter.next_de() {
       match tk {
 
         /* < */
@@ -52,6 +81,7 @@ impl TemplateParser {
                 let tag_idx = tree.add_child(
                   *curr, 
                   ident.clone(), 
+                  dtk.get_span().clone(),
                   tag.clone()
                 );
 
@@ -61,7 +91,18 @@ impl TemplateParser {
               }
               /* Closing Tag </tag> */
               Token::Slash => {
-                if let Some(Token::Ident(_)) = iter.peek_next() {
+                if let Some(Token::Ident(ident)) = iter.peek_next() {
+
+                  // Make sure we're closing the current scope:
+                  if ident != tree.get(*curr).get_name() {
+                    let tag = tree.get(*curr);
+                    let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
+                    return Err(WaxError::from_span(tag.get_span().clone(), 
+                      "misnested tag", 
+                      WaxHint::Hint(hint)
+                    ));
+                  }
+
                   *curr = tree.get_parent(*curr).expect("No parent");
                 } else {
                   iter.retreat_cursor().expect("failed to move back cursor");
@@ -74,7 +115,7 @@ impl TemplateParser {
 
         /* <- */
         Token::LeftArrow => {
-          if let Some(tk) = iter.peek() {
+          if let Some((dtk, tk)) = iter.peek_de() {
             match tk {
               /* Comb Opening Tag <-comb> */
               Token::Ident(ident) => {
@@ -84,6 +125,7 @@ impl TemplateParser {
                 let tag_idx = tree.add_child(
                   *curr, 
                   ident.clone(), 
+                  dtk.get_span().clone(),
                   tag.clone()
                 );
 
@@ -93,7 +135,18 @@ impl TemplateParser {
               }
               /* Comb Closing Tag <-/comb> */
               Token::Slash => {
-                if let Some(Token::Ident(_)) = iter.peek_next() {
+                if let Some(Token::Ident(ident)) = iter.peek_next() {
+
+                  // Make sure we're closing the current scope:
+                  if ident != tree.get(*curr).get_name() {
+                    let tag = tree.get(*curr);
+                    let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
+                    return Err(WaxError::from_span(tag.get_span().clone(), 
+                      "misnested tag", 
+                      WaxHint::Hint(hint)
+                    ));
+                  }
+
                   *curr = tree.get_parent(*curr).expect("No parent");
                 } else {
                   iter.retreat_cursor().expect("failed to move back cursor");
@@ -107,12 +160,22 @@ impl TemplateParser {
         /* ; */
         Token::Semicolon => {
           if *curr == scope { break; }
+          if *curr > scope {
+            return Err(WaxError::from_span(tree.get(scope).get_span().clone(), 
+              "dangling template", 
+              WaxHint::Hint("make sure all tags witin the template are closed".into())
+            ));
+          }
         }
 
         /* End of File */
         Token::EOF => {
-          if *curr != scope { panic!("template overflow, forgot to close a tag within <{}>", tree.get(*curr).get_name()); }
-          else { panic!("dangling template, (don't forget to close your templates using `;`)"); }
+          if *curr == scope {
+            return Err(WaxError::from_token(dtk.clone(), 
+              "dangling template", 
+              WaxHint::Hint("templates should end with a `;`".into())
+            ));
+          }
         }
 
         _ => {}

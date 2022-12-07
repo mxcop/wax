@@ -9,7 +9,7 @@ repository = "https://github.com/mxcop/wax/"
 license = "MIT"
 keywords = ["html", "parser", "cli"]
 categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
-exclude = ["/assets"]
+exclude = ["/assets", "/example"]
 
 [[bin]]
 name = "wax"
