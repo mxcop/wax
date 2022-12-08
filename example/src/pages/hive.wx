@@ -1,5 +1,5 @@
 /* Html Template */
-tmpl card:
+tmpl name:
   <div class="card">
     <h2 #header title="let \" const"></h2>
     <p #desc></p>

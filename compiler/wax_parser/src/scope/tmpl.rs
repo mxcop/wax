@@ -1,4 +1,4 @@
-use wax_lexer::{token::Token, iter::TokenIter};
+use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
 use wax_logger::error::{WaxError, WaxHint};
 
 use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
@@ -10,58 +10,67 @@ impl TemplateParser {
   /// ### Parse Template
   pub fn parse_tmpl<'a>(
     iter: &mut TokenIter<'a>, 
+    tmpl_tk: &'a SyntaxToken,
     curr: &mut usize,
     tree: &mut ArenaTree<SyntaxNode>)
   -> Result<(), WaxError<'a>> {
-    // Make sure that the next token is whitespace.
-    if let Some((dtk, tk)) = iter.next_de() {
-      match tk {
-        Token::Whitespace(_) => {},
-        _ => { 
-          return Err(WaxError::from_token(dtk.clone(), 
-            "`tmpl` must be followed by whitespace", 
-            WaxHint::Example("`tmpl name:`")
-          )); 
-        }
-      }
-    }
+
+    // Check if there is whitespace after the `tmpl` keyword:
+    let Some((dtk, Token::Whitespace(_))) = iter.next_de() else {
+      return Err(WaxError::from_token(tmpl_tk.clone(), 
+        "templates must be followed by whitespace", 
+        WaxHint::Example("`tmpl name:`")
+      )); 
+    };
+
+    let Some((dtk, tk)) = iter.next_de() else {
+      return Err(WaxError::from_token(dtk.clone(), 
+        "templates must have a name", 
+        WaxHint::Example("`tmpl name:`")
+      )); 
+    };
 
     // And then there should be an indentifier for the template.
-    if let Some((dtk, tk)) = iter.next_de() {
-      match tk {
-        /* <name> */
-        Token::Ident(ident) => {
+    match tk {
+      /* <name> */
+      Token::Ident(ident) => {
+        *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
+          name: ident.clone()
+        });
+      },
+      /* @ */
+      Token::Atsign => {
+        if let Some((dtk, tk)) = iter.next_de() {
+          /* <name> */
+          let Token::Ident(ident) = tk else {
+            return Err(WaxError::from_token(dtk.clone(), 
+              "template name cannot only consist of `@`", 
+              WaxHint::Hint("you can add a name after the `@`".into())
+            ));
+          };
+
+          let ident = format!("@{ident}");
           *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
             name: ident.clone()
           });
-        },
-        /* @ */
-        Token::Atsign => {
-          if let Some((dtk, tk)) = iter.next_de() {
-            /* <name> */
-            if let Token::Ident(ident) = tk {
-              let ident = format!("@{ident}");
-              *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
-                name: ident.clone()
-              });
-            } else {
-              return Err(WaxError::from_token(dtk.clone(), 
-                "template name cannot only consist of `@`", 
-                WaxHint::Hint("you can add a name after the `@`".into())
-              )); 
-            }
-          }
-        },
-        _ => {
-          return Err(WaxError::from_token(dtk.clone(), 
-            "templates must have a name", 
-            WaxHint::Example("`tmpl name:`")
-          )); 
         }
+      },
+      _ => {
+        return Err(WaxError::from_token(dtk.clone(), 
+          "templates must have a name", 
+          WaxHint::Example("`tmpl name:`")
+        )); 
       }
     }
 
-    /* TODO: check for DoubleDot after the template name */
+    // Check if there is a double dot after the name:
+    let Some(Token::Colon) = Self::peek_next_token(iter) else {
+      return Err(WaxError::from_token(dtk.clone(), 
+        "templates must be opened using `:`", 
+        WaxHint::Example("`tmpl name:`")
+      )); 
+    };
+    iter.next_until_cursor();
 
     let scope = *curr;
 
@@ -213,26 +222,27 @@ impl TemplateParser {
           }
 
           /* = */
-          if let Some(Token::Equals) = Self::peek_next_token(iter) {
-            // Advance the cursor.
-            iter.next_until_cursor(); iter.next();
-
-            // Parse the value of the attribute.
-            if let Some(value) = Self::parse_string(iter) {
-              // Attribute with value:
-              attributes.push(Attribute { 
-                name: ident, 
-                value: Some(value)
-              });
-            } else {
-              panic!("attribute is missing its value");
-            }
-          } else {
+          let Some(Token::Equals) = Self::peek_next_token(iter) else {
             // Attribute without value:
             attributes.push(Attribute { 
               name: ident, 
               value: None 
             });
+            continue;
+          };
+
+          // Advance the cursor.
+          iter.next_until_cursor(); iter.next();
+
+          // Parse the value of the attribute.
+          if let Some(value) = Self::parse_string(iter) {
+            // Attribute with value:
+            attributes.push(Attribute { 
+              name: ident, 
+              value: Some(value)
+            });
+          } else {
+            panic!("attribute is missing its value");
           }
         }
 
@@ -272,24 +282,26 @@ impl TemplateParser {
     let mut escaped: bool = false;
 
     /* " */
-    if let Some(Token::DoubleQuote) = iter.next() {
-      while let Some((stk, tk)) = iter.next_de() {
-        match tk {
-          /* Be aware of escape chars */
-          Token::BackSlash => escaped = true,
-          /* " */
-          Token::DoubleQuote => {
-            if escaped {
-              escaped = false;
-            } else {
-              return Some(word);
-            }
+    let Some(Token::DoubleQuote) = iter.next() else {
+      return None;
+    };
+
+    while let Some((stk, tk)) = iter.next_de() {
+      match tk {
+        /* Be aware of escape chars */
+        Token::BackSlash => escaped = true,
+        /* " */
+        Token::DoubleQuote => {
+          if escaped {
+            escaped = false;
+          } else {
+            return Some(word);
           }
-          _ => {}
         }
-        // Add the token to the string.
-        word.push_str(&stk.get_str());
+        _ => ()
       }
+      // Add the token to the string.
+      word.push_str(&stk.get_str());
     }
 
     None
@@ -298,18 +310,15 @@ impl TemplateParser {
   /// Get the next token skipping any whitespace tokens.
   fn peek_next_token<'a>(iter: &mut TokenIter<'a>) -> Option<&'a Token> {
     
-    if let Some(tk) = iter.peek() {
-      if let Token::Whitespace(_) = tk {} else {
-        return Some(tk);
-      }
-    }
+    let tk = iter.peek();
+    let Some(Token::Whitespace(_)) = tk else {
+      return tk;
+    };
 
     while let Some(tk) = iter.peek_next() {
-      if let Token::Whitespace(_) = tk {
-        continue;
-      } else {
+      let Token::Whitespace(_) = tk else {
         return Some(tk);
-      }
+      };
     }
     None
   }

@@ -31,7 +31,7 @@ impl<'a> Parser<'a> {
     while let Some((dtk, tk)) = self.iter.next_de() {
       match tk {
         Token::Template => {
-          TemplateParser::parse_tmpl(&mut self.iter, &mut curr, &mut tree)?;
+          TemplateParser::parse_tmpl(&mut self.iter, dtk, &mut curr, &mut tree)?;
         }
         // Token::Slash => { return Err(WaxError::from_token(dtk.clone(), "test msg", None)); }
         _ => {}

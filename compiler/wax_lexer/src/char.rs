@@ -12,6 +12,7 @@ pub fn is_ident(is_first: bool, ch: &char) -> bool {
   }
 }
 
+/* Is this character part of a number? */
 pub fn is_number(_: bool, ch: &char) -> bool {
   '0' <= *ch && *ch <= '9' || *ch == '.'
 }
