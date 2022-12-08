@@ -1,6 +1,6 @@
 use colored::Colorize;
 use wax_lexer::{token::SyntaxToken, span::Span};
-use crate::lines::{add_space, usize_log10, get_lines};
+use crate::lines::{add_space, usize_log10, get_lines, get_char_num};
 
 /// Wax parser tip.
 #[derive(Debug, Clone)]
@@ -67,23 +67,32 @@ impl<'a> WaxError<'a> {
     add_space(left_margin);
     println!("{}", ":".bright_black());
 
-    if line_num > 1 { 
+    if line_num > 2 { 
       println!("{} {}  {}", 
-        (line_num - 1).to_string().bright_black(), 
+        (line_num - 2).to_string().bright_black(), 
         "|".bright_black(), 
         lines[0].bright_black()
       ); 
     }
 
-    println!("{}{}  {}", line_num.to_string().yellow(), "->".yellow(), lines[1]);
-
-    if lines[2] != "" { 
+    if line_num > 1 { 
       println!("{} {}  {}", 
-        (line_num + 1).to_string().bright_black(), 
+        (line_num - 1).to_string().bright_black(), 
         "|".bright_black(), 
-        lines[2].bright_black()
+        lines[1].bright_black()
       ); 
     }
+
+    println!("{}{}  {}", line_num.to_string().yellow(), "->".yellow(), lines[2]);
+
+    // Error pointer:
+    add_space(left_margin);
+    print!("{}", "|".bright_black());
+    add_space(get_char_num(file, self.span.start_index - self.span.length + 2));
+    for _ in 0..self.span.length {
+      print!("{}", "^".bright_yellow());
+    }
+    print!("\n");
 
     add_space(left_margin);
     println!("{}", ":".bright_black());

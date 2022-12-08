@@ -59,6 +59,8 @@ impl<'a> Lexer<'a> {
           return Some(word.iter().collect());
         }
       }
+      // Return word if we reach the end of the file.
+      return Some(word.iter().collect());
     }
 
     None

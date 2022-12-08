@@ -23,6 +23,12 @@ pub fn get_line_num(text: &str, idx: usize) -> usize {
   text[..idx].chars().filter(|ch| *ch == '\n').count()
 }
 
+/// For an index within a string get the offset on it's line.
+pub fn get_char_num(text: &str, idx: usize) -> usize {
+  let start = find_line_start(text, idx);
+  idx - start
+}
+
 #[allow(unused)]
 /// Get the entire line that contains a char. returns ``(line_num: usize, line: &str)``
 pub fn get_line(file: &str, idx: usize) -> (usize, &str) {
@@ -33,12 +39,24 @@ pub fn get_line(file: &str, idx: usize) -> (usize, &str) {
 
 /// Get the line and two serrounding lines that contains a char. returns ``(center_line_num: usize, lines: [&str; 3])``
 pub fn get_lines(file: &str, idx: usize) -> (usize, [&str; 3]) {
-  let start = find_line_start(file, idx);
+  let mut start = find_line_start(file, idx);
   let end = find_line_end(file, idx);
 
-  let line_1 = &file[start..end];
-  let line_0;
+  let line_2 = &file[start..end];
+  let line_1;
   
+  if start >= 1 {
+    let idx = start - 1;
+    start = find_line_start(file, idx);
+    let end = find_line_end(file, idx);
+
+    line_1 = &file[start..end];
+  } else {
+    line_1 = "";
+  }
+
+  let line_0;
+
   if start >= 1 {
     let idx = start - 1;
     let start = find_line_start(file, idx);
@@ -47,18 +65,6 @@ pub fn get_lines(file: &str, idx: usize) -> (usize, [&str; 3]) {
     line_0 = &file[start..end];
   } else {
     line_0 = "";
-  }
-
-  let line_2;
-
-  if end < file.len() - 2 {
-    let idx = end + 2;
-    let start = find_line_start(file, idx);
-    let end = find_line_end(file, idx);
-
-    line_2 = &file[start..end];
-  } else {
-    line_2 = "";
   }
 
   (get_line_num(file, idx) + 1, [line_0, line_1, line_2])

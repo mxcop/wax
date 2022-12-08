@@ -19,6 +19,14 @@ impl SyntaxToken {
     &self.span
   }
 
+  /// Get the span of the token with an offset.
+  pub fn get_span_offset(&self, left: usize, right: usize) -> Span {
+    let mut span = self.span.clone();
+    span.start_index += left;
+    span.length += right + left;
+    span
+  }
+
   /// Get the string representation of the token.
   pub fn get_str(&self) -> String {
     self.kind.to_string()
@@ -139,7 +147,7 @@ impl Token {
       Token::If => "if",
       Token::Else => "else",
       Token::Return => "return",
-      _ => { panic!("unknown token"); }
+      _ => { panic!("unknown token ({:?})", &self); }
     }.into()
   }
 

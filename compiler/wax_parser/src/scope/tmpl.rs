@@ -12,7 +12,7 @@ pub fn parse<'a>(
 -> Result<(), WaxError<'a>> {
 
   // Check if there is whitespace after the `tmpl` keyword:
-  let Some((dtk, Token::Whitespace(_))) = iter.next_de() else {
+  let Some(Token::Whitespace(_)) = iter.next() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
       "`tmpl` must be followed by whitespace", 
       WaxHint::Example("`tmpl name:`")
@@ -20,8 +20,8 @@ pub fn parse<'a>(
   };
 
   let Some((dtk, tk)) = iter.next_de() else {
-    return Err(WaxError::from_token(dtk.clone(), 
-      "templates must have a name", 
+    return Err(WaxError::from_token(tmpl_tk.clone(), 
+      "missing name on template definition", 
       WaxHint::Example("`tmpl name:`")
     )); 
   };
@@ -40,7 +40,7 @@ pub fn parse<'a>(
         /* <name> */
         let Token::Ident(ident) = tk else {
           return Err(WaxError::from_token(dtk.clone(), 
-            "template name cannot only consist of `@`", 
+            "invalid template name `@`", 
             WaxHint::Hint("you can add a name after the `@`".into())
           ));
         };
@@ -52,8 +52,8 @@ pub fn parse<'a>(
       }
     },
     _ => {
-      return Err(WaxError::from_token(dtk.clone(), 
-        "templates must have a name", 
+      return Err(WaxError::from_token(tmpl_tk.clone(), 
+        "missing name on template definition", 
         WaxHint::Example("`tmpl name:`")
       )); 
     }
@@ -61,8 +61,8 @@ pub fn parse<'a>(
 
   // Check if there is a double dot after the name:
   let Some(Token::Colon) = peek_next_token(iter) else {
-    return Err(WaxError::from_token(dtk.clone(), 
-      "templates must be opened using `:`", 
+    return Err(WaxError::from_token(tmpl_tk.clone(), 
+      "missing `:` on template definition", 
       WaxHint::Example("`tmpl name:`")
     )); 
   };
@@ -76,7 +76,7 @@ pub fn parse<'a>(
 
       /* < */
       Token::LessThen => {
-        let Some(tk) = iter.peek() else {
+        let Some((dtk, tk)) = iter.peek_de() else {
           continue;
         };
 
@@ -84,12 +84,12 @@ pub fn parse<'a>(
           /* Opening Tag <tag> */
           Token::Ident(ident) => {
             iter.next();
-            let tag = parse_attributes(ident.clone(), iter, false);
+            let tag = parse_attributes(ident.clone(), iter, false)?;
 
             let tag_idx = tree.add_child(
               *curr, 
               ident.clone(), 
-              dtk.get_span().clone(),
+              dtk.get_span_offset(1, 1).clone(),
               tag.clone()
             );
 
@@ -131,7 +131,7 @@ pub fn parse<'a>(
           /* Comb Opening Tag <-comb> */
           Token::Ident(ident) => {
             iter.next();
-            let tag = parse_attributes(ident.clone(), iter, true);
+            let tag = parse_attributes(ident.clone(), iter, true)?;
 
             let tag_idx = tree.add_child(
               *curr, 
@@ -173,7 +173,7 @@ pub fn parse<'a>(
         if *curr == scope { break; }
         if *curr > scope {
           return Err(WaxError::from_span(tree.get(scope).get_span().clone(), 
-            "dangling template", 
+            "overflowing template", 
             WaxHint::Hint("make sure all tags witin the template are closed".into())
           ));
         }
@@ -200,12 +200,12 @@ pub fn parse<'a>(
 }
 
 /// Parse the attributes of a tag.
-fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -> SyntaxNode {
+fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -> Result<SyntaxNode, WaxError<'a>> {
   let mut attributes = Vec::new();
   let mut self_closing = false;
   let mut hashed_attrib = false;
   
-  while let Some(tk) = iter.next() {
+  while let Some((dtk, tk)) = iter.next_de() {
     match tk {
 
       /* # */
@@ -244,7 +244,10 @@ fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -
             value: Some(value)
           });
         } else {
-          panic!("attribute is missing its value");
+          return Err(WaxError::from_token(dtk.clone(), 
+            "attribute missing value", 
+            WaxHint::Hint("attributes should have a value after the `=`".into())
+          ));
         }
       }
 
@@ -268,13 +271,13 @@ fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -
   }
 
   if is_comb {
-    SyntaxNode::Comb {
+    Ok(SyntaxNode::Comb {
       name, attributes, self_closing
-    }
+    })
   } else {
-    SyntaxNode::Tag {
+    Ok(SyntaxNode::Tag {
       name, attributes, self_closing
-    }
+    })
   }
 }
 
@@ -300,6 +303,7 @@ fn parse_string<'a>(iter: &mut TokenIter<'a>) -> Option<String> {
           return Some(word);
         }
       }
+      Token::EOF => return None,
       _ => ()
     }
     // Add the token to the string.
