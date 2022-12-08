@@ -28,10 +28,10 @@ impl<T> ArenaTree<T>
   }
 
   /// Add a new node to the tree as child of an existing node.
-  pub fn add_child(&mut self, parent_idx: usize, name: String, span: Span, val: T) -> usize {
+  pub fn add_child(&mut self, parent_idx: usize, name: String, span: &Span, val: T) -> usize {
     let idx = self.arena.len();
     // Create and add the node :
-    let mut node = Node::new(idx, name, span, val);
+    let mut node = Node::new(idx, name, *span, val);
     node.parent = Some(parent_idx);
     // Add the node into the arena and the children array on the parent :
     self.arena.push(node);

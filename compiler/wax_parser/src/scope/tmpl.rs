@@ -30,7 +30,7 @@ pub fn parse<'a>(
   match tk {
     /* <name> */
     Token::Ident(ident) => {
-      *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
+      *curr = tree.add_child(*curr, ident.clone(), dtk.get_span(), SyntaxNode::Template {
         name: ident.clone()
       });
     },
@@ -46,8 +46,8 @@ pub fn parse<'a>(
         };
 
         let ident = format!("@{ident}");
-        *curr = tree.add_child(*curr, ident.clone(), dtk.get_span().clone(), SyntaxNode::Template {
-          name: ident.clone()
+        *curr = tree.add_child(*curr, ident.clone(), dtk.get_span(), SyntaxNode::Template {
+          name: ident
         });
       }
     },
@@ -89,7 +89,7 @@ pub fn parse<'a>(
             let tag_idx = tree.add_child(
               *curr, 
               ident.clone(), 
-              dtk.get_span_offset(1, 1).clone(),
+              &dtk.get_span_offset(1, 1),
               tag.clone()
             );
 
@@ -109,7 +109,7 @@ pub fn parse<'a>(
             if ident != tree.get(*curr).get_name() {
               let tag = tree.get(*curr);
               let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
-              return Err(WaxError::from_span(tag.get_span().clone(), 
+              return Err(WaxError::from_span(tag.get_span(), 
                 "misnested tag", 
                 WaxHint::Hint(hint)
               ));
@@ -136,7 +136,7 @@ pub fn parse<'a>(
             let tag_idx = tree.add_child(
               *curr, 
               ident.clone(), 
-              dtk.get_span().clone(),
+              dtk.get_span(),
               tag.clone()
             );
 
@@ -156,7 +156,7 @@ pub fn parse<'a>(
             if ident != tree.get(*curr).get_name() {
               let tag = tree.get(*curr);
               let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
-              return Err(WaxError::from_span(tag.get_span().clone(), 
+              return Err(WaxError::from_span(tag.get_span(), 
                 "misnested tag", 
                 WaxHint::Hint(hint)
               ));
@@ -172,7 +172,7 @@ pub fn parse<'a>(
       Token::Semicolon => {
         if *curr == scope { break; }
         if *curr > scope {
-          return Err(WaxError::from_span(tree.get(scope).get_span().clone(), 
+          return Err(WaxError::from_span(tree.get(scope).get_span(), 
             "overflowing template", 
             WaxHint::Hint("make sure all tags witin the template are closed".into())
           ));

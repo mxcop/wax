@@ -1,5 +1,5 @@
 #[allow(unused)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Span {
   pub start_index: usize,
   pub length: usize,

@@ -25,17 +25,17 @@ impl<'a> WaxError<'a> {
     Self {
       desc: msg.to_string(),
       crumbs: None,
-      span: token.get_span().clone(),
+      span: *token.get_span(),
       hint
     }
   }
 
   /// Generate a Wax error from a span.
-  pub fn from_span(span: Span, msg: &str, hint: WaxHint<'a>) -> Self {
+  pub fn from_span(span: &Span, msg: &str, hint: WaxHint<'a>) -> Self {
     Self {
       desc: msg.to_string(),
       crumbs: None,
-      span,
+      span: *span,
       hint
     }
   }
