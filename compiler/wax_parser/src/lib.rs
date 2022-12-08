@@ -3,8 +3,8 @@ pub mod tree;
 mod scope;
 
 use node::SyntaxNode;
+use scope::tmpl;
 use tree::ArenaTree;
-use scope::tmpl::TemplateParser;
 
 use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter, span::Span};
 use wax_logger::error::WaxError;
@@ -31,7 +31,7 @@ impl<'a> Parser<'a> {
     while let Some((dtk, tk)) = self.iter.next_de() {
       match tk {
         Token::Template => {
-          TemplateParser::parse_tmpl(&mut self.iter, dtk, &mut curr, &mut tree)?;
+          tmpl::parse(&mut self.iter, dtk, &mut curr, &mut tree)?;
         }
         // Token::Slash => { return Err(WaxError::from_token(dtk.clone(), "test msg", None)); }
         _ => {}
