@@ -14,7 +14,7 @@ pub fn parse<'a>(
   // Check if there is whitespace after the `tmpl` keyword:
   let Some((dtk, Token::Whitespace(_))) = iter.next_de() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
-      "templates must be followed by whitespace", 
+      "`tmpl` must be followed by whitespace", 
       WaxHint::Example("`tmpl name:`")
     )); 
   };
