@@ -2,7 +2,7 @@
 
 use std::fmt::Debug;
 
-use wax_lexer::span::Span;
+use waxc_lexer::span::Span;
 
 use crate::node::SyntaxNode;
 

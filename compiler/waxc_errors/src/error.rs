@@ -1,5 +1,5 @@
 use colored::Colorize;
-use wax_lexer::{token::SyntaxToken, span::Span};
+use waxc_lexer::{token::SyntaxToken, span::Span};
 use crate::lines::{add_space, usize_log10, get_lines, get_char_num};
 
 /// Wax parser tip.

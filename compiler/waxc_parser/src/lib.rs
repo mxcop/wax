@@ -6,8 +6,8 @@ use node::SyntaxNode;
 use scope::tmpl;
 use tree::ArenaTree;
 
-use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter, span::Span};
-use wax_logger::error::WaxError;
+use waxc_lexer::{token::{Token, SyntaxToken}, iter::TokenIter, span::Span};
+use waxc_errors::error::WaxError;
 
 /// The Wax parser.
 pub struct Parser<'a> {

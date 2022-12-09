@@ -1,13 +1,13 @@
 [package]
-name = "wax_parser"
+name = "waxc_parser"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wax_logger = { path = "../wax_logger" }
-wax_lexer = { path = "../wax_lexer" }
+waxc_errors = { path = "../waxc_errors" }
+waxc_lexer = { path = "../waxc_lexer" }
 peekmore = "1.0.0"
 
 colored = "2.0.0" #! Temporary for testing...

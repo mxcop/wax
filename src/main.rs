@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use wax_lexer::{Lexer, token::SyntaxToken, iter::TrackingIter};
-use wax_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
+use waxc_lexer::{Lexer, token::SyntaxToken, iter::TrackingIter};
+use waxc_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
 
 mod args;
 mod build;

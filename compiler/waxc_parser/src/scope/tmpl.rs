@@ -1,5 +1,5 @@
-use wax_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
-use wax_logger::error::{WaxError, WaxHint};
+use waxc_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
+use waxc_errors::error::{WaxError, WaxHint};
 
 use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
 
