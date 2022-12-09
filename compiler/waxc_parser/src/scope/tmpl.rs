@@ -1,7 +1,13 @@
+mod void;
+mod attrib;
+
 use waxc_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
 use waxc_errors::error::{WaxError, WaxHint};
 
-use crate::{tree::ArenaTree, node::{SyntaxNode, Attribute}};
+use crate::{tree::ArenaTree, node::SyntaxNode};
+
+use void::is_void;
+use attrib::parse_attributes;
 
 /// ### Parse Template
 pub fn parse<'a>(
@@ -15,14 +21,14 @@ pub fn parse<'a>(
   let Some(Token::Whitespace(_)) = iter.next() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
       "`tmpl` must be followed by whitespace", 
-      WaxHint::Example("`tmpl name:`")
+      WaxHint::Example("`tmpl name:`".into())
     )); 
   };
 
   let Some((dtk, tk)) = iter.next_de() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
       "missing name on template definition", 
-      WaxHint::Example("`tmpl name:`")
+      WaxHint::Example("`tmpl name:`".into())
     )); 
   };
 
@@ -54,19 +60,20 @@ pub fn parse<'a>(
     _ => {
       return Err(WaxError::from_token(tmpl_tk.clone(), 
         "missing name on template definition", 
-        WaxHint::Example("`tmpl name:`")
+        WaxHint::Example("`tmpl name:`".into())
       )); 
     }
   }
 
+  iter.eat_whitespace();
+
   // Check if there is a double dot after the name:
-  let Some(Token::Colon) = peek_next_token(iter) else {
+  let Some(Token::Colon) = iter.next() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
       "missing `:` on template definition", 
-      WaxHint::Example("`tmpl name:`")
+      WaxHint::Example("`tmpl name:`".into())
     )); 
   };
-  iter.next_until_cursor();
 
   let scope = *curr;
 
@@ -104,6 +111,15 @@ pub fn parse<'a>(
               iter.retreat_cursor().expect("failed to move back cursor");
               continue;
             };
+
+            /* Void Tag */
+            if is_void(ident) {
+              let example = format!("void elements should only have a start tag `<{}>`", ident);
+              return Err(WaxError::from_token(dtk.clone(), 
+                "void element with end tag", 
+                WaxHint::Example(example)
+              ));
+            }
 
             // Make sure we're closing the current scope:
             if ident != tree.get(*curr).get_name() {
@@ -197,134 +213,4 @@ pub fn parse<'a>(
   *curr = tree.get_parent(*curr).expect("No parent");
 
   Ok(())
-}
-
-/// Parse the attributes of a tag.
-fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -> Result<SyntaxNode, WaxError<'a>> {
-  let mut attributes = Vec::new();
-  let mut self_closing = false;
-  let mut hashed_attrib = false;
-  
-  while let Some((dtk, tk)) = iter.next_de() {
-    match tk {
-
-      /* # */
-      Token::Hash => {
-        hashed_attrib = true;
-      }
-
-      /* name */
-      Token::Ident(ident) => {
-        let mut ident = ident.clone();
-
-        /* # */
-        if hashed_attrib {
-          ident.insert(0, '#');
-          hashed_attrib = false;
-        }
-
-        /* = */
-        let Some(Token::Equals) = peek_next_token(iter) else {
-          // Attribute without value:
-          attributes.push(Attribute { 
-            name: ident, 
-            value: None 
-          });
-          continue;
-        };
-
-        // Advance the cursor.
-        iter.next_until_cursor(); iter.next();
-
-        // Parse the value of the attribute.
-        if let Some(value) = parse_string(iter) {
-          // Attribute with value:
-          attributes.push(Attribute { 
-            name: ident, 
-            value: Some(value)
-          });
-        } else {
-          return Err(WaxError::from_token(dtk.clone(), 
-            "attribute missing value", 
-            WaxHint::Hint("attributes should have a value after the `=`".into())
-          ));
-        }
-      }
-
-      /* / */
-      Token::Slash => {
-        // Found self closing tag.
-        if let Some(Token::GreaterThen) = iter.peek() {
-          iter.next();
-          self_closing = true;
-          break;
-        }
-      }
-
-      /* > */
-      Token::GreaterThen => {
-        break;
-      }
-
-      _ => {}
-    }
-  }
-
-  if is_comb {
-    Ok(SyntaxNode::Comb {
-      name, attributes, self_closing
-    })
-  } else {
-    Ok(SyntaxNode::Tag {
-      name, attributes, self_closing
-    })
-  }
-}
-
-/// Parse a string pattern.
-fn parse_string<'a>(iter: &mut TokenIter<'a>) -> Option<String> {
-  let mut word: String = String::new();
-  let mut escaped: bool = false;
-
-  /* " */
-  let Some(Token::DoubleQuote) = iter.next() else {
-    return None;
-  };
-
-  while let Some((stk, tk)) = iter.next_de() {
-    match tk {
-      /* Be aware of escape chars */
-      Token::BackSlash => escaped = true,
-      /* " */
-      Token::DoubleQuote => {
-        if escaped {
-          escaped = false;
-        } else {
-          return Some(word);
-        }
-      }
-      Token::EOF => return None,
-      _ => ()
-    }
-    // Add the token to the string.
-    word.push_str(&stk.get_str());
-  }
-
-  None
-}
-
-/// Get the next token skipping any whitespace tokens.
-fn peek_next_token<'a>(iter: &mut TokenIter<'a>) -> Option<&'a Token> {
-  
-  let tk = iter.peek();
-  let Some(Token::Whitespace(_)) = tk else {
-    return tk;
-  };
-
-  while let Some(tk) = iter.peek_next() {
-    let Token::Whitespace(_) = tk else {
-      return Some(tk);
-    };
-  }
-  None
 }

@@ -4,9 +4,9 @@ use crate::lines::{add_space, usize_log10, get_lines, get_char_num};
 
 /// Wax parser tip.
 #[derive(Debug, Clone)]
-pub enum WaxHint<'a> {
+pub enum WaxHint {
   None,
-  Example(&'a str),
+  Example(String),
   Hint(String)
 }
 
@@ -16,12 +16,12 @@ pub struct WaxError<'a> {
   desc: String,
   crumbs: Option<&'a str>,
   span: Span,
-  hint: WaxHint<'a>,
+  hint: WaxHint,
 }
 
 impl<'a> WaxError<'a> {
   /// Generate a Wax error from a syntax token.
-  pub fn from_token(token: SyntaxToken, msg: &str, hint: WaxHint<'a>) -> Self {
+  pub fn from_token(token: SyntaxToken, msg: &str, hint: WaxHint) -> Self {
     Self {
       desc: msg.to_string(),
       crumbs: None,
@@ -31,7 +31,7 @@ impl<'a> WaxError<'a> {
   }
 
   /// Generate a Wax error from a span.
-  pub fn from_span(span: &Span, msg: &str, hint: WaxHint<'a>) -> Self {
+  pub fn from_span(span: &Span, msg: &str, hint: WaxHint) -> Self {
     Self {
       desc: msg.to_string(),
       crumbs: None,

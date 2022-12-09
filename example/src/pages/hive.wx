@@ -1,9 +1,10 @@
 /* Html Template */
 tmpl name:
   <div class="card">
-    <h2 #header title="let \" const"></h2>
+    <h2 #header title='let " const'></h2>
     <p #desc></p>
-    <img src="img.png" />
+    <br>
+    <img src="img.png">
   </div>;
 
 /* Template Implementation */

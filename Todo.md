@@ -13,8 +13,9 @@
     - [x] Tags
     - [x] Attributes
     - [x] Self-closing Tags
-    - [ ] Special Tags (img...)
-    - [ ] Links (#id)
+    - [x] Void Elements (area, base, br...)
+    - [x] Links (#id)
+    - [ ] Tag contents
   - [ ] Implementations
     - [ ] Links (#id)
   - [ ] Stylesheets

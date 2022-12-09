@@ -79,6 +79,13 @@ impl<'a> TokenIter<'a> {
       Err(e) => Err(e),
     }
   }
+
+  /// Eat all whitespace until another token is found.
+  pub fn eat_whitespace(&mut self) {
+    while let Some(Token::Whitespace(_)) = self.peek() {
+      self.next();
+    }
+  }
 }
 
 /// Custom iterator that tracks the position of the iterator.
