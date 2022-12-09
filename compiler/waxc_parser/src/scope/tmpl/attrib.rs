@@ -7,7 +7,7 @@ use super::void::is_void;
 
 /// Parse the next attributes inside a token iterator.
 pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -> Result<SyntaxNode, WaxError<'a>> {
-  let mut attributes = Vec::new();
+  let mut attributes: Vec<Attribute> = Vec::new();
   let mut self_closing = false;
   let mut hashed_attrib = false;
   
@@ -27,6 +27,14 @@ pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: boo
         if hashed_attrib {
           ident.insert(0, '#');
           hashed_attrib = false;
+        }
+
+        // Check for duplicate attributes:
+        if attributes.iter().any(|attrib| attrib.name == ident) {
+          return Err(WaxError::from_token(dtk.clone(), 
+            "duplicate attribute", 
+            WaxHint::Hint("attribute names should be unique".into())
+          ));
         }
 
         iter.eat_whitespace();
