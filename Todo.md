@@ -16,7 +16,9 @@
     - [x] Void Elements (area, base, br...)
     - [x] Links (#id)
     - [ ] Tag contents
+    - [ ] Unquoted attribute values
+    - [ ] *Unicode character checks
   - [ ] Implementations
     - [ ] Links (#id)
   - [ ] Stylesheets
-- [ ] Builder
+- [ ] Codegen
