@@ -14,8 +14,8 @@ pub fn parse<'a>(
   iter: &mut TokenIter<'a>, 
   tmpl_tk: &'a SyntaxToken,
   curr: &mut usize,
-  tree: &mut ArenaTree<SyntaxNode>)
--> Result<(), WaxError<'a>> {
+  tree: &mut ArenaTree<SyntaxNode>
+) -> Result<(), WaxError<'a>> {
 
   // Check if there is whitespace after the `tmpl` keyword:
   let Some(Token::Whitespace(_)) = iter.next() else {
@@ -86,11 +86,11 @@ pub fn parse<'a>(
         let Some((dtk, tk)) = iter.peek_de() else {
           continue;
         };
+        iter.next();
 
         match tk {
           /* Opening Tag <tag> */
           Token::Ident(ident) => {
-            iter.next();
             let tag = parse_attributes(ident.clone(), iter, false)?;
 
             let tag_idx = tree.add_child(
@@ -107,9 +107,22 @@ pub fn parse<'a>(
           /* Closing Tag </tag> */
           Token::Slash => {
 
-            let Some(Token::Ident(ident)) = iter.peek_next() else {
-              iter.retreat_cursor().expect("failed to move back cursor");
-              continue;
+            iter.eat_whitespace();
+
+            let Some(Token::Ident(ident)) = iter.next() else {
+              return Err(WaxError::from_token(dtk.clone(), 
+                "invalid end tag", 
+                WaxHint::Example("</name>".into())
+              ));
+            };
+
+            iter.eat_whitespace();
+
+            let Some(Token::GreaterThen) = iter.next() else {
+              return Err(WaxError::from_token(dtk.clone(), 
+                "invalid end tag", 
+                WaxHint::Example("</name>".into())
+              ));
             };
 
             /* Void Tag */
@@ -142,11 +155,11 @@ pub fn parse<'a>(
         let Some((dtk, tk)) = iter.peek_de() else {
           continue;
         };
+        iter.next();
 
         match tk {
           /* Comb Opening Tag <-comb> */
           Token::Ident(ident) => {
-            iter.next();
             let tag = parse_attributes(ident.clone(), iter, true)?;
 
             let tag_idx = tree.add_child(
@@ -163,9 +176,22 @@ pub fn parse<'a>(
           /* Comb Closing Tag <-/comb> */
           Token::Slash => {
 
-            let Some(Token::Ident(ident)) = iter.peek_next() else {
-              iter.retreat_cursor().expect("failed to move back cursor");
-              continue;
+            iter.eat_whitespace();
+
+            let Some(Token::Ident(ident)) = iter.next() else {
+              return Err(WaxError::from_token(dtk.clone(), 
+                "invalid end tag", 
+                WaxHint::Example("<-/name>".into())
+              ));
+            };
+
+            iter.eat_whitespace();
+
+            let Some(Token::GreaterThen) = iter.next() else {
+              return Err(WaxError::from_token(dtk.clone(), 
+                "invalid end tag", 
+                WaxHint::Example("<-/name>".into())
+              ));
             };
 
             // Make sure we're closing the current scope:
@@ -205,7 +231,32 @@ pub fn parse<'a>(
         }
       }
 
-      _ => {}
+      /* Whitespace */
+      Token::Whitespace(_) => (),
+      Token::Newline => (),
+
+      /* Illegal */
+      Token::Illegal(_) => {
+        return Err(WaxError::from_token(dtk.clone(), 
+          "illegal character",
+          WaxHint::None
+        ));
+      }
+
+      /* Text */
+      _ => { 
+        let mut text = tk.to_string();
+
+        while let Some(tk) = iter.peek() {
+          match tk {
+            Token::LessThen | Token::LeftArrow => break,
+            Token::Newline => { iter.next(); continue; },
+            _ => { text.push_str(&tk.to_string()); iter.next(); }
+          }
+        }
+
+        tree.add_child(*curr, "text".into(), dtk.get_span(), SyntaxNode::Text(text));
+      }
     }
   }
 
