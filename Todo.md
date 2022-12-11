@@ -7,6 +7,8 @@
     - [x] Tokens
     - [x] Whitespace
     - [x] Keywords
+  - [x] Speed
+    - [x] Iter from Fn (std::iter::from_fn)
 - [ ] Parser
   - [x] Error handling
   - [ ] Templates
@@ -14,7 +16,7 @@
     - [x] Attributes
     - [x] Self-closing Tags
     - [x] Void Elements (area, base, br...)
-    - [x] Links (#id)
+    - [x] IDs (#id)
     - [x] Tag contents
     - [ ] Unquoted attribute values
     - [ ] *Unicode character checks
@@ -22,3 +24,8 @@
     - [ ] Links (#id)
   - [ ] Stylesheets
 - [ ] Codegen
+  - [ ] Templates (HTML)
+    - [ ] IDs (#id)
+  - [ ] Stylesheets (CSS)
+  - [ ] Implementations (JS)
+    - [ ] Links (#id)

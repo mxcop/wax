@@ -1,7 +1,9 @@
 mod void;
 mod attrib;
 
-use waxc_lexer::{token::{Token, SyntaxToken}, iter::TokenIter};
+use std::slice::Iter;
+
+use waxc_lexer::token::{Token, TokenKind};
 use waxc_errors::error::{WaxError, WaxHint};
 
 use crate::{tree::ArenaTree, node::SyntaxNode};
@@ -11,14 +13,14 @@ use attrib::parse_attributes;
 
 /// ### Parse Template
 pub fn parse<'a>(
-  iter: &mut TokenIter<'a>, 
-  tmpl_tk: &'a SyntaxToken,
+  iter: &mut Iter<'a, Token>, 
+  tmpl_tk: &'a Token,
   curr: &mut usize,
   tree: &mut ArenaTree<SyntaxNode>
 ) -> Result<(), WaxError<'a>> {
 
   // Check if there is whitespace after the `tmpl` keyword:
-  let Some(Token::Whitespace(_)) = iter.next() else {
+  let Some(tk) = iter.next() else {
     return Err(WaxError::from_token(tmpl_tk.clone(), 
       "`tmpl` must be followed by whitespace", 
       WaxHint::Example("`tmpl name:`".into())

@@ -1,5 +1,5 @@
 use colored::Colorize;
-use waxc_lexer::{token::SyntaxToken, span::Span};
+use waxc_lexer::token::Token;
 use crate::lines::{add_space, usize_log10, get_lines, get_char_num};
 
 /// Wax parser tip.
@@ -13,29 +13,21 @@ pub enum WaxHint {
 /// Wax parser error.
 #[derive(Debug, Clone)]
 pub struct WaxError<'a> {
+  pos: usize,
+  len: usize,
   desc: String,
   crumbs: Option<&'a str>,
-  span: Span,
   hint: WaxHint,
 }
 
 impl<'a> WaxError<'a> {
   /// Generate a Wax error from a syntax token.
-  pub fn from_token(token: SyntaxToken, msg: &str, hint: WaxHint) -> Self {
+  pub fn from_token(pos: usize, token: Token, msg: &str, hint: WaxHint) -> Self {
     Self {
+      pos,
+      len: *token.get_len(),
       desc: msg.to_string(),
       crumbs: None,
-      span: *token.get_span(),
-      hint
-    }
-  }
-
-  /// Generate a Wax error from a span.
-  pub fn from_span(span: &Span, msg: &str, hint: WaxHint) -> Self {
-    Self {
-      desc: msg.to_string(),
-      crumbs: None,
-      span: *span,
       hint
     }
   }
@@ -44,7 +36,7 @@ impl<'a> WaxError<'a> {
   pub fn print(&self, file: &str, filename: &str) {
 
     // Get the line information:
-    let (line_num, lines) = get_lines(file, self.span.start_index);
+    let (line_num, lines) = get_lines(file, self.pos);
 
     // Setup:
     let level = "error".red();
@@ -88,8 +80,8 @@ impl<'a> WaxError<'a> {
     // Error pointer:
     add_space(left_margin);
     print!("{}", "|".bright_black());
-    add_space(get_char_num(file, self.span.start_index - self.span.length + 2));
-    for _ in 0..self.span.length {
+    add_space(get_char_num(file, self.pos - self.len + 2));
+    for _ in 0..self.len {
       print!("{}", "^".bright_yellow());
     }
     print!("\n");

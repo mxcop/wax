@@ -1,37 +1,31 @@
 // Referenced from https://dev.to/deciduously/no-more-tears-no-more-knots-arena-allocated-trees-in-rust-44k6
 
-use std::fmt::Debug;
-
-use waxc_lexer::span::Span;
-
-use crate::node::SyntaxNode;
+use crate::{span::Span, node::{Node, NodeKind}};
 
 #[derive(Default)]
-pub struct ArenaTree<T> 
-  where T : Debug
+pub struct AST
 {
-  arena: Vec<Node<T>>,
+  arena: Vec<Node>,
 }
 
-impl<T> ArenaTree<T> 
-  where T : Debug
+impl AST
 {
-  pub fn new() -> ArenaTree<T> {
-    ArenaTree { arena: Vec::new() }
+  pub fn new() -> Self {
+    Self { arena: Vec::new() }
   }
 
   /// Add a new node to the tree. (without parent)
-  pub fn add_node(&mut self, name: String, span: Span, val: T) -> usize {
+  pub fn add_node(&mut self, span: Span, kind: NodeKind) -> usize {
     let idx = self.arena.len();
-    self.arena.push(Node::new(idx, name, span, val));
+    self.arena.push(Node::new(idx, span, kind));
     idx
   }
 
   /// Add a new node to the tree as child of an existing node.
-  pub fn add_child(&mut self, parent_idx: usize, name: String, span: &Span, val: T) -> usize {
+  pub fn add_child(&mut self, parent_idx: usize, span: &Span, kind: NodeKind) -> usize {
     let idx = self.arena.len();
     // Create and add the node :
-    let mut node = Node::new(idx, name, *span, val);
+    let mut node = Node::new(idx, *span, kind);
     node.parent = Some(parent_idx);
     // Add the node into the arena and the children array on the parent :
     self.arena.push(node);
@@ -40,7 +34,7 @@ impl<T> ArenaTree<T>
   }
 
   /// Get a node in the tree by its id.
-  pub fn get(&self, idx: usize) -> &Node<T> {
+  pub fn get(&self, idx: usize) -> &Node {
     &self.arena[idx]
   }
 
@@ -50,7 +44,7 @@ impl<T> ArenaTree<T>
   }
 }
 
-impl std::fmt::Display for ArenaTree<SyntaxNode>
+impl std::fmt::Display for AST
 {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     use colored::Colorize;
@@ -62,7 +56,7 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
       Ok(())
     }
 
-    fn recurse(f: &mut std::fmt::Formatter, tree: &ArenaTree<SyntaxNode>, node: &Node<SyntaxNode>, level: u32) -> std::fmt::Result
+    fn recurse(f: &mut std::fmt::Formatter, tree: &AST, node: &Node, level: u32) -> std::fmt::Result
     {
       for child in &node.children {
         let child = tree.get(*child);
@@ -71,37 +65,37 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
 
         if child.children.len() == 0 {
 
-          match &child.val {
+          match &child.kind {
 
             /* Tags */
-            SyntaxNode::Tag { name, attributes, .. } => {
+            NodeKind::Tag { name, attributes, .. } => {
               writeln!(f, "{} {}", name, format!("({:?})", attributes).bright_black())?;
             }
 
             /* Comb Tags */
-            SyntaxNode::Comb { name, attributes, .. } => {
+            NodeKind::Comb { name, attributes, .. } => {
               writeln!(f, "{}{} {}", "<-".bright_black(), name.green(), format!("({:?})", attributes).bright_black())?;
             }
             
-            _ => { writeln!(f, "{} {}", child.name, format!("({:?})", child.val).bright_black())?; }
+            _ => { writeln!(f, "{} {}", child.get_name(), format!("({:?})", child.kind).bright_black())?; }
           }
           
         } else {
 
-          match &child.val {
+          match &child.kind {
 
             /* Templates */
-            SyntaxNode::Template { name } => { 
+            NodeKind::Template { name } => { 
               if name.starts_with('@') { writeln!(f, "{} {}: {{", "impl".red(), name.blue())?; }
               else { writeln!(f, "{} {}: {{", "impl".red(), name.green())?; }
             }
 
             /* Comb Tags */
-            SyntaxNode::Comb { name, .. } => {
+            NodeKind::Comb { name, .. } => {
               writeln!(f, "{}{}: {{", "<-".bright_black(), name.green())?;
             }
             
-            _ => { writeln!(f, "{}: {{", child.name)?; }
+            _ => { writeln!(f, "{}: {{", child.get_name())?; }
           }
 
           recurse(f, &tree, &child, level + 1)?;
@@ -125,41 +119,5 @@ impl std::fmt::Display for ArenaTree<SyntaxNode>
     }
     
     writeln!(f, "}}")
-  }
-}
-
-pub struct Node<T> 
-  where T : Debug
-{
-  _idx: usize,
-  name: String,
-  span: Span,
-  pub val: T,
-  parent: Option<usize>,
-  children: Vec<usize>,
-}
-
-impl<T> Node<T> 
-  where T : Debug
-{
-  pub fn new(_idx: usize, name: String, span: Span, val: T) -> Self {
-    Self {
-      _idx,
-      name,
-      span,
-      val,
-      parent: None,
-      children: vec![],
-    }
-  }
-
-  /// Get a reference to the name of the node.
-  pub fn get_name(&self) -> &str {
-    &self.name
-  }
-
-  /// Get a reference to the span of the node.
-  pub fn get_span(&self) -> &Span {
-    &self.span
   }
 }
