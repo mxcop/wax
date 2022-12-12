@@ -3,18 +3,20 @@ use waxc_lexer::token::{Token, TokenKind};
 use crate::{tree::AST, node::{Node, NodeKind}, span::Span};
 
 /// The Wax parser
-pub(crate) struct Parser<T: Iterator<Item = Token> + Clone> {
+pub(crate) struct Parser<'a, I: Iterator<Item = Token> + Clone + 'a> {
   consumed: usize,
   cursor: usize,
 
   tree: AST,
-  tokens: T,
+  tokens: &'a mut I,
   scope: usize,
   pub file: String,
 }
 
-impl<T: Iterator<Item = Token> + Clone> Parser<T> {
-  pub fn new(file: String, input: T) -> Self {
+impl<'a, I> Parser<'a, I> 
+  where I: Iterator<Item = Token> + Clone + 'a 
+{
+  pub fn new(file: String, tokens: &'a mut I) -> Self {
 
     let mut tree = AST::new();
     let scope = tree.add_node(Span::new(0, 0), NodeKind::Root);
@@ -25,7 +27,7 @@ impl<T: Iterator<Item = Token> + Clone> Parser<T> {
       consumed: 0,
       cursor: 0,
       tree,
-      tokens: input
+      tokens
     }
   }
 
@@ -49,8 +51,8 @@ impl<T: Iterator<Item = Token> + Clone> Parser<T> {
   }
 
   /// Add a new scope to the current scope.
-  pub fn add_scope(&mut self, pos: usize, len: usize, node: NodeKind) {
-    self.scope = self.tree.add_child(self.scope, &Span::new(pos, len), node);
+  pub fn add_scope(&mut self, node: NodeKind) {
+    self.scope = self.tree.add_child(self.scope, &Span::new(self.cursor, self.consumed - self.cursor), node);
   }
 
   /// Moves to the next token.

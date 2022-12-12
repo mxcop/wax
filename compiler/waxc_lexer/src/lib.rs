@@ -7,7 +7,7 @@ use TokenKind::*;
 use LiteralKind::*;
 
 /// Tokenize an input file token by token using an iterater from fn.
-pub fn lex(input: &str) -> impl Iterator<Item = Token> + '_ + Clone {
+pub fn lex(input: &str) -> impl Iterator<Item = Token> + Clone + '_ {
   let mut lexer = Lexer::new(input);
   std::iter::from_fn(move || {
     let token = lexer.advance();
@@ -43,9 +43,14 @@ impl Lexer<'_> {
 
       // Number literal.
       '0'..='9' | '.' => {
-        let literal_kind = self.number();
-        TokenKind::Literal {
-          kind: literal_kind
+        if is_number(self.peek()) == false {
+          TokenKind::Dot
+        } else {
+          self.next();
+          let literal_kind = self.number();
+          TokenKind::Literal {
+            kind: literal_kind
+          }
         }
       }
 

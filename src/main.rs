@@ -14,15 +14,23 @@ fn main() {
 
 /// Run a single parsing.
 fn run(input: &str, _filename: &str) {
-  //let start = std::time::Instant::now();
+  let start = std::time::Instant::now();
 
   // Initialize the lexical iterator:
   let lexer = waxc_lexer::lex(input);
 
+  let lex_time = start.elapsed().as_nanos();
+  let start = std::time::Instant::now();
+
   // Start the parsing process:
   let parser = waxc_parser::parse(input.to_string(), lexer).unwrap();
 
+  let time = start.elapsed().as_nanos();
+
   println!("{}", parser);
+
+  println!("\nLexing time : {}s ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1000f32, lex_time);
+  println!("\nParsing time : {}s ({}µs) ({}ns)", time as f32 / 1_000_000_000f32, time as f32 / 1000f32, time);
 
   // Run some tests:
   //let mut tokens: Vec<Token> = Vec::with_capacity(256);

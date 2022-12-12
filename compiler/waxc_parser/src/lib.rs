@@ -2,9 +2,6 @@ pub mod node;
 pub mod tree;
 pub mod span;
 mod parser;
-//mod scope;
-
-//use std::slice::Iter;
 
 use parser::Parser;
 use tree::AST;
@@ -15,8 +12,8 @@ use waxc_lexer::token::{Token, TokenKind};
 type WaxErrors = Vec<WaxError<'static>>;
 
 /// Parse an input stream of tokens into an abstract syntax tree.
-pub fn parse<'a>(file: String, input: impl Iterator<Item = Token> + Clone + 'a) -> Result<AST, WaxErrors> {
-  let mut parser = Parser::new(file, input);
+pub fn parse<'a>(file: String, mut input: impl Iterator<Item = Token> + Clone + 'a) -> Result<AST, WaxErrors> {
+  let mut parser = Parser::new(file, &mut input);
   let errors: WaxErrors = Vec::new();
 
   /* Move through all the tokens */
@@ -24,18 +21,20 @@ pub fn parse<'a>(file: String, input: impl Iterator<Item = Token> + Clone + 'a) 
     if let Ok(false) = parser.advance() {
       break;
     }
+    parser.reset_cursor();
   }
-
+  
   match errors.len() {
-    0 => Ok(parser.get_tree()),
-    _ => Err(errors)
+   0 => Ok(parser.get_tree()),
+   _ => Err(errors)
   }
 }
 
-impl<T: Iterator<Item = Token> + Clone> Parser<T> {
+impl<'a, I> Parser<'a, I>
+  where I: Iterator<Item = Token> + Clone + 'a 
+{
   pub fn advance(&mut self) -> Result<bool, WaxError> {
-    let position = self.consumed();
-
+    // Read the next token:
     let Some(tk) = self.next() else {
       return Ok(false);
     };
@@ -44,21 +43,19 @@ impl<T: Iterator<Item = Token> + Clone> Parser<T> {
       TokenKind::Ident => {
         let ident = self.read();
         match ident {
-          "tmpl" => self.template(position, *tk.get_len())?,
+          "tmpl" => self.template()?,
           _ => ()
         }
       }
       _ => ()
     }
 
-    self.reset_cursor();
-
     Ok(true)
   }
 
-  fn template(&mut self, pos: usize, len: usize) -> Result<(), WaxError> {
+  fn template(&mut self) -> Result<(), WaxError> {
 
-    self.add_scope(pos, len, 
+    self.add_scope( 
       node::NodeKind::Template { name: "".to_string() }
     );
 
