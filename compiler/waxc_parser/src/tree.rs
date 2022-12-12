@@ -2,7 +2,7 @@
 
 use crate::{span::Span, node::{Node, NodeKind}};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct AST
 {
   arena: Vec<Node>,

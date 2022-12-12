@@ -11,6 +11,13 @@ keywords = ["html", "parser", "cli"]
 categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
 exclude = ["/assets", "/example"]
 
+[workspace]
+members = [
+    "compiler/waxc_errors",
+    "compiler/waxc_lexer",
+    "compiler/waxc_parser",
+]
+
 [[bin]]
 name = "wax"
 path = "src/main.rs"

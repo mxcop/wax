@@ -1,8 +1,3 @@
-use colored::Colorize;
-use waxc_lexer::token::Token;
-
-//use waxc_parser::{Parser, node::SyntaxNode, tree::ArenaTree};
-
 mod args;
 mod build;
 mod create;
@@ -19,30 +14,35 @@ fn main() {
 
 /// Run a single parsing.
 fn run(input: &str, _filename: &str) {
-  let start = std::time::Instant::now();
+  //let start = std::time::Instant::now();
 
   // Initialize the lexical iterator:
-  let mut lexer = waxc_lexer::lex(input);
+  let lexer = waxc_lexer::lex(input);
+
+  // Start the parsing process:
+  let parser = waxc_parser::parse(input.to_string(), lexer).unwrap();
+
+  println!("{}", parser);
 
   // Run some tests:
-  let mut tokens: Vec<Token> = Vec::with_capacity(256);
-  let mut pos = 0usize;
+  //let mut tokens: Vec<Token> = Vec::with_capacity(256);
+  //let mut pos = 0usize;
 
-  while let Some(tk) = lexer.next() {
-    tokens.push(tk);
-  }
+  // while let Some(tk) = lexer.next() {
+  //   tokens.push(tk);
+  // }
 
-  let lex_time = start.elapsed().as_nanos();
+  // let lex_time = start.elapsed().as_nanos();
 
-  // Debug output:
-  for tk in &tokens {
-    let text = input.get(pos..pos+tk.get_len());
-    if let Some(text) = text {
-      println!("{:?} : {}", text, format!("{:?}", tk).bright_black());
-    }
-    pos += tk.get_len();
-  }
+  // // Debug output:
+  // for tk in &tokens {
+  //   let text = input.get(pos..pos+tk.get_len());
+  //   if let Some(text) = text {
+  //     println!("{:?} : {}", text, format!("{:?}", tk).bright_black());
+  //   }
+  //   pos += tk.get_len();
+  // }
 
-  println!("\nLexing time : {}s ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1000f32, lex_time);
-  println!("Token total : {}", tokens.len());
+  //println!("\nLexing time : {}s ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1000f32, lex_time);
+  //println!("Token total : {}", tokens.len());
 }

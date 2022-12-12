@@ -7,7 +7,7 @@ use TokenKind::*;
 use LiteralKind::*;
 
 /// Tokenize an input file token by token using an iterater from fn.
-pub fn lex(input: &str) -> impl Iterator<Item = Token> + '_ {
+pub fn lex(input: &str) -> impl Iterator<Item = Token> + '_ + Clone {
   let mut lexer = Lexer::new(input);
   std::iter::from_fn(move || {
     let token = lexer.advance();

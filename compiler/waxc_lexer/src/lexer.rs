@@ -1,6 +1,7 @@
 use std::str::Chars;
 
 /// The Wax lexer (tokenizer)
+#[derive(Clone)]
 pub(crate) struct Lexer<'a> {
   remaining: usize,
   /* Chars<'a> slightly faster than &'a str */
