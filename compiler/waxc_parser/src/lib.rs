@@ -1,5 +1,6 @@
 pub mod node;
 mod parser;
+//mod scopes;
 pub mod span;
 pub mod tree;
 
@@ -8,80 +9,86 @@ use parser::Parser;
 use tree::AST;
 
 use waxc_errors::error::WaxError;
-use waxc_lexer::token::{Token, TokenKind};
-
-type WaxErrors = Vec<WaxError<'static>>;
+use waxc_lexer::{token::{Token, TokenKind}, iter::LexIter};
 
 /// Parse an input stream of tokens into an abstract syntax tree.
 pub fn parse<'a>(
   file: String,
-  mut input: impl Iterator<Item = Token> + Clone + 'a,
-) -> Result<AST, WaxErrors> {
-  let mut parser = Parser::new(file, &mut input);
-  let errors: WaxErrors = Vec::new();
+  iter: LexIter,
+) -> Result<AST, WaxError> {
+
+  let mut parser 
+    = Parser::new(file, iter);
 
   /* Move through all the tokens */
   loop {
-    if let Ok(false) = parser.advance() {
-      break;
+    if parser.advance()? {
+      continue;
     }
-    parser.reset_cursor();
+    break;
   }
 
-  match errors.len() {
-    0 => Ok(parser.get_tree()),
-    _ => Err(errors),
-  }
+  Ok(parser.get_tree())
 }
 
-impl<'a, I> Parser<'a, I>
-where
-  I: Iterator<Item = Token> + Clone + 'a,
-{
+impl Parser {
+  /// Parse the next token from the lexer.
   pub fn advance(&mut self) -> Result<bool, WaxError> {
     use TokenKind::*;
 
     // Read the next token:
-    let Some(tk) = self.next() else {
-      return Ok(false);
-    };
+    let start = self.consumed();
+    let tk = self.next();
 
     match tk.kind {
-      Ident => match self.read() {
+      
+      Ident => match self.read(start) {
         "tmpl" => self.template()?,
         _ => (),
       },
+
+      EOF => return Ok(false),
+
       _ => (),
     };
 
     Ok(true)
   }
 
+  /// Check if an identity is really the start of a template.
+  /// If so then start the template parser.
   fn template(&mut self) -> Result<(), WaxError> {
     /* Eat whitespace */
     self.eat_while(TokenKind::Whitespace);
-    self.reset_cursor();
+    let start = self.consumed();
 
     /* Match the template name */
     match self.first() {
       TokenKind::Ident => (),
+
+      /* Special names */
       TokenKind::Atsign => {
         self.next();
         let TokenKind::Ident = self.first() else {
           return Ok(())
         };
       }
+
       _ => return Ok(())
     }
 
     /* Read the template name */
     self.next();
-    let name = self.read();
+    let name = self.read(start);
 
     /* Create the template node */
-    self.add_scope(NodeKind::Template {
+    self.add_scope(start, NodeKind::Template {
       name: name.to_string()
     });
+
+    self.eat_until(TokenKind::Semi);
+
+    self.retreat_scope();
 
     Ok(())
   }

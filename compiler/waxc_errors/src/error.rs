@@ -12,15 +12,15 @@ pub enum WaxHint {
 
 /// Wax parser error.
 #[derive(Debug, Clone)]
-pub struct WaxError<'a> {
+pub struct WaxError {
   pos: usize,
   len: usize,
   desc: String,
-  crumbs: Option<&'a str>,
+  crumbs: Option<String>,
   hint: WaxHint,
 }
 
-impl<'a> WaxError<'a> {
+impl WaxError {
   /// Generate a Wax error from a syntax token.
   pub fn from_token(pos: usize, token: Token, msg: &str, hint: WaxHint) -> Self {
     Self {
@@ -47,7 +47,7 @@ impl<'a> WaxError<'a> {
 
     // Error location:
     add_space(left_margin - 1);
-    match self.crumbs {
+    match &self.crumbs {
       Some(crumbs) => println!(
         "{}",
         format!("--> {} : {}", filename.italic(), crumbs.italic()).bright_black()

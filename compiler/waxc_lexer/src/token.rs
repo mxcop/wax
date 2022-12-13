@@ -4,6 +4,8 @@ pub struct Token {
   len: usize,
 }
 
+pub(crate) const EOF_TOKEN: Token = Token { kind: TokenKind::EOF, len: 0 };
+
 impl Token {
   pub fn new(kind: TokenKind, len: usize) -> Self {
     Self {

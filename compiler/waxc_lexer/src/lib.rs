@@ -1,22 +1,24 @@
 mod lexer;
+pub mod iter;
 pub mod token;
 
+use iter::LexIter;
 use lexer::Lexer;
 use token::{Token, TokenKind, LiteralKind};
 use TokenKind::*;
 use LiteralKind::*;
 
 /// Tokenize an input file token by token using an iterater from fn.
-pub fn lex(input: &str) -> impl Iterator<Item = Token> + Clone + '_ {
+pub fn lex(input: &'static str) -> LexIter {
   let mut lexer = Lexer::new(input);
-  std::iter::from_fn(move || {
+  LexIter::new(std::iter::from_fn(move || {
     let token = lexer.advance();
     if token.kind != EOF {
       Some(token)
     } else {
       None
     }
-  })
+  }))
 }
 
 impl Lexer<'_> {
@@ -94,22 +96,6 @@ impl Lexer<'_> {
       '"' => DoubleQuote,
       '\'' => Quote,
       '`' => Grave,
-      // '"' => {
-      //   let terminated = self.double_quoted_string();
-      //   if terminated {
-      //     self.eat_literal_suffix();
-      //   }
-      //   let kind = Str { terminated };
-      //   Literal { kind }
-      // }
-      // '\'' => {
-      //   let terminated = self.single_quoted_string();
-      //   if terminated {
-      //     self.eat_literal_suffix();
-      //   }
-      //   let kind = Str { terminated };
-      //   Literal { kind }
-      // }
 
       _ => Unknown,
     };
@@ -161,27 +147,10 @@ impl Lexer<'_> {
     Ident
   }
 
-  // fn double_quoted_string(&mut self) -> bool {
-  //   self.next();
-  //   self.eat_while(|ch| !matches!(ch, '"'));
-  //   !self.is_eof()
-  // }
-
-  // fn single_quoted_string(&mut self) -> bool {
-  //   self.next();
-  //   self.eat_while(|ch| !matches!(ch, '\''));
-  //   !self.is_eof()
-  // }
-
   fn number(&mut self) -> LiteralKind {
     self.eat_while(is_number);
     Number
   }
-
-  // Just eat the next char for now.
-  // fn eat_literal_suffix(&mut self) {
-  //   self.next();
-  // }
 }
 
 /// Is this character whitespace according to the HTML language definition?

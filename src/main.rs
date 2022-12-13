@@ -1,3 +1,5 @@
+use waxc_lexer::iter::LexIter;
+
 mod args;
 mod build;
 mod create;
@@ -7,13 +9,13 @@ fn main() {
   // Enable colors in the command prompt.
   colored::control::set_virtual_terminal(true).unwrap();
 
-  let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
+  //let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
 
-  run(&input, "src/pages/hive.wx");
+  run(&INPUT, "src/pages/hive.wx");
 }
 
 /// Run a single parsing.
-fn run(input: &str, _filename: &str) {
+fn run(input: &'static str, _filename: &str) {
   let start = std::time::Instant::now();
 
   // Initialize the lexical iterator:
@@ -54,3 +56,35 @@ fn run(input: &str, _filename: &str) {
   //println!("\nLexing time : {}s ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1000f32, lex_time);
   //println!("Token total : {}", tokens.len());
 }
+
+const INPUT: &'static str = r#"/* Html Template */
+tmpl card:
+  <div class="card">
+    <h2 #header title='let " const'>Test</h2>
+    <p #desc>tmpl</p>
+    <br>
+    <img src="img.png">
+  </div>;
+
+/* Template Implementation */
+impl card(header: str, desc: str) {
+  #header.inner_text = header;
+  #desc.inner_text = desc;
+}
+
+/* Css Stylesheet */
+styl card() {
+  .card {
+    width: 300px;
+    height: 400px;
+  }
+}
+
+/* Root Html Template */
+tmpl @html:
+  <body>
+    <-card header="Card 1" desc="This is card one" />
+    <-card header="Card 2" desc="This is card two">
+      <p>Hello world</p>
+    <-/card>
+  </body>;"#;
