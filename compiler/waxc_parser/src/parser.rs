@@ -31,9 +31,21 @@ impl<'a, I> Parser<'a, I>
     }
   }
 
-  /// Read from the input file from a starting location until the consumed position.
+  /// Read from the input file the current token range.
   pub fn read(&self) -> &str {
     &self.file[self.cursor..self.consumed]
+  }
+
+  /// Read from the input file from a starting location until the consumed position.
+  pub fn read_from(&self, start: usize) -> &str {
+    &self.file[start..self.consumed]
+  }
+
+  /// Read the string representation of the next token.
+  pub fn read_next(&mut self) -> String {
+    let prepos = self.consumed;
+    self.next();
+    self.file[prepos..self.consumed].to_string()
   }
 
   pub fn reset_cursor(&mut self) {
@@ -73,6 +85,17 @@ impl<'a, I> Parser<'a, I>
       return TokenKind::EOF;
     };
     token.kind
+  }
+
+  /// Eat while the next token matches a token kind.
+  pub fn eat_while(&mut self, kind: TokenKind) {
+    loop {
+      let next = self.first();
+      if next != kind {
+        return;
+      }
+      self.next();
+    }
   }
 
   /// Returns the number of characters consumed.

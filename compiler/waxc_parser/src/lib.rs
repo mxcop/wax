@@ -1,8 +1,9 @@
 pub mod node;
-pub mod tree;
-pub mod span;
 mod parser;
+pub mod span;
+pub mod tree;
 
+use node::NodeKind;
 use parser::Parser;
 use tree::AST;
 
@@ -12,7 +13,10 @@ use waxc_lexer::token::{Token, TokenKind};
 type WaxErrors = Vec<WaxError<'static>>;
 
 /// Parse an input stream of tokens into an abstract syntax tree.
-pub fn parse<'a>(file: String, mut input: impl Iterator<Item = Token> + Clone + 'a) -> Result<AST, WaxErrors> {
+pub fn parse<'a>(
+  file: String,
+  mut input: impl Iterator<Item = Token> + Clone + 'a,
+) -> Result<AST, WaxErrors> {
   let mut parser = Parser::new(file, &mut input);
   let errors: WaxErrors = Vec::new();
 
@@ -23,41 +27,61 @@ pub fn parse<'a>(file: String, mut input: impl Iterator<Item = Token> + Clone + 
     }
     parser.reset_cursor();
   }
-  
+
   match errors.len() {
-   0 => Ok(parser.get_tree()),
-   _ => Err(errors)
+    0 => Ok(parser.get_tree()),
+    _ => Err(errors),
   }
 }
 
 impl<'a, I> Parser<'a, I>
-  where I: Iterator<Item = Token> + Clone + 'a 
+where
+  I: Iterator<Item = Token> + Clone + 'a,
 {
   pub fn advance(&mut self) -> Result<bool, WaxError> {
+    use TokenKind::*;
+
     // Read the next token:
     let Some(tk) = self.next() else {
       return Ok(false);
     };
 
     match tk.kind {
-      TokenKind::Ident => {
-        let ident = self.read();
-        match ident {
-          "tmpl" => self.template()?,
-          _ => ()
-        }
-      }
-      _ => ()
-    }
+      Ident => match self.read() {
+        "tmpl" => self.template()?,
+        _ => (),
+      },
+      _ => (),
+    };
 
     Ok(true)
   }
 
   fn template(&mut self) -> Result<(), WaxError> {
+    /* Eat whitespace */
+    self.eat_while(TokenKind::Whitespace);
+    self.reset_cursor();
 
-    self.add_scope( 
-      node::NodeKind::Template { name: "".to_string() }
-    );
+    /* Match the template name */
+    match self.first() {
+      TokenKind::Ident => (),
+      TokenKind::Atsign => {
+        self.next();
+        let TokenKind::Ident = self.first() else {
+          return Ok(())
+        };
+      }
+      _ => return Ok(())
+    }
+
+    /* Read the template name */
+    self.next();
+    let name = self.read();
+
+    /* Create the template node */
+    self.add_scope(NodeKind::Template {
+      name: name.to_string()
+    });
 
     Ok(())
   }
