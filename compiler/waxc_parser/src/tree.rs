@@ -1,6 +1,6 @@
 // Referenced from https://dev.to/deciduously/no-more-tears-no-more-knots-arena-allocated-trees-in-rust-44k6
 
-use crate::{span::Span, node::{Node, NodeKind}};
+use crate::node::{Node, NodeKind, Span};
 
 #[derive(Default, Clone)]
 pub struct AST

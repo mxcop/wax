@@ -1,20 +1,20 @@
 pub mod node;
 mod parser;
-//mod scopes;
-pub mod span;
+mod scopes;
 pub mod tree;
 
 use node::NodeKind;
 use parser::Parser;
+use scopes::tmpl;
 use tree::AST;
 
 use waxc_errors::error::WaxError;
-use waxc_lexer::{token::{Token, TokenKind}, iter::LexIter};
+use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
 
 /// Parse an input stream of tokens into an abstract syntax tree.
-pub fn parse<'a>(
+pub fn parse<'a, I: Iterator<Item = Token> + Clone>(
   file: String,
-  iter: LexIter,
+  iter: LexIter<I>,
 ) -> Result<AST, WaxError> {
 
   let mut parser 
@@ -31,18 +31,20 @@ pub fn parse<'a>(
   Ok(parser.get_tree())
 }
 
-impl Parser {
+impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   /// Parse the next token from the lexer.
   pub fn advance(&mut self) -> Result<bool, WaxError> {
     use TokenKind::*;
-
+    self.update_cursor();
+    
     // Read the next token:
-    let start = self.consumed();
-    let tk = self.next();
+    let Some(tk) = self.next() else {
+      return Ok(false);
+    };
 
     match tk.kind {
       
-      Ident => match self.read(start) {
+      Ident => match self.read().as_str() {
         "tmpl" => self.template()?,
         _ => (),
       },
@@ -60,7 +62,7 @@ impl Parser {
   fn template(&mut self) -> Result<(), WaxError> {
     /* Eat whitespace */
     self.eat_while(TokenKind::Whitespace);
-    let start = self.consumed();
+    self.update_cursor();
 
     /* Match the template name */
     match self.first() {
@@ -79,50 +81,18 @@ impl Parser {
 
     /* Read the template name */
     self.next();
-    let name = self.read(start);
+    let name = self.read();
 
     /* Create the template node */
-    self.add_scope(start, NodeKind::Template {
+    self.add_scope(NodeKind::Template {
       name: name.to_string()
     });
 
-    self.eat_until(TokenKind::Semi);
+    tmpl::parse(self)?;
 
+    //self.eat_until(TokenKind::Semi);
     self.retreat_scope();
 
     Ok(())
   }
 }
-
-// The Wax parser.
-// pub struct Parser<'a> {
-//   tokens: Iter<'a, Token>
-// }
-
-// impl<'a> Parser<'a> {
-//   pub fn new(tokens: Iter<Token>) -> Self {
-//     Self {
-//       tokens
-//     }
-//   }
-
-//   #[allow(unused_variables)]
-//   /// ### Syntactic Analysis
-//   /// Analize the input tokens and convert it into an abstract syntax tree.
-//   pub fn parse(&mut self) -> Result<ArenaTree<SyntaxNode>, WaxError> {
-//     let mut tree: ArenaTree<SyntaxNode> = ArenaTree::new();
-//     let mut curr = tree.add_node("Root".to_string(), Span::new(0, 0), SyntaxNode::Root);
-
-//     while let Some((dtk, tk)) = self.iter.next_de() {
-//       match tk {
-//         Token::Template => {
-//           tmpl::parse(&mut self.tokens, dtk, &mut curr, &mut tree)?;
-//         }
-//         // Token::Slash => { return Err(WaxError::from_token(dtk.clone(), "test msg", None)); }
-//         _ => {}
-//       }
-//     }
-
-//     Ok(tree)
-//   }
-// }

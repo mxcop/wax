@@ -1,4 +1,4 @@
-use waxc_lexer::iter::LexIter;
+use waxc_lexer::lexer::LexIter;
 
 mod args;
 mod build;
@@ -9,30 +9,31 @@ fn main() {
   // Enable colors in the command prompt.
   colored::control::set_virtual_terminal(true).unwrap();
 
-  //let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
+  let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
 
-  run(&INPUT, "src/pages/hive.wx");
+  run(&input, "src/pages/hive.wx");
 }
 
 /// Run a single parsing.
-fn run(input: &'static str, _filename: &str) {
+fn run(input: &str, _filename: &str) {
   let start = std::time::Instant::now();
 
   // Initialize the lexical iterator:
   let lexer = waxc_lexer::lex(input);
+  let iter = LexIter::new(lexer);
 
   let lex_time = start.elapsed().as_nanos();
   let start = std::time::Instant::now();
 
   // Start the parsing process:
-  let parser = waxc_parser::parse(input.to_string(), lexer).unwrap();
+  let parser = waxc_parser::parse(input.to_string(), iter).unwrap();
 
   let time = start.elapsed().as_nanos();
 
   println!("{}", parser);
 
-  println!("\nLexing time : {}s ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1000f32, lex_time);
-  println!("\nParsing time : {}s ({}µs) ({}ns)", time as f32 / 1_000_000_000f32, time as f32 / 1000f32, time);
+  println!("\nLexing time : {}s ({}ms) ({}µs) ({}ns)", lex_time as f32 / 1_000_000_000f32, lex_time as f32 / 1_000_000f32, lex_time as f32 / 1000f32, lex_time);
+  println!("\nParsing time : {}s ({}ms) ({}µs) ({}ns)", time as f32 / 1_000_000_000f32, time as f32 / 1_000_000f32, time as f32 / 1000f32, time);
 
   // Run some tests:
   //let mut tokens: Vec<Token> = Vec::with_capacity(256);

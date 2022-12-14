@@ -26,12 +26,15 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
   };
   pars.next();
 
+  let scope = pars.get_scope();
+
   // Move through all tokens until we reach a semicolon:
   while let Some(tk) = pars.next() {
     match tk.kind {
 
       /* < */
       TokenKind::Lt => {
+        pars.update_cursor();
         let Some(tk) = pars.next() else {
           break;
         };
@@ -74,7 +77,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
             };
 
             /* Void Tag */
-            if is_void(ident) {
+            if is_void(&ident) {
               // let example = format!("void elements should only have a start tag `<{}>`", ident);
               // return Err(WaxError::from_token(dtk.clone(), 
               //   "void element with end tag", 
@@ -103,6 +106,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
       /* <- */
       TokenKind::LeftArrow => {
+        pars.update_cursor();
         let Some(tk) = pars.next() else {
           break;
         };
@@ -145,7 +149,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
             };
 
             /* Void Tag */
-            if is_void(ident) {
+            if is_void(&ident) {
               // let example = format!("void elements should only have a start tag `<{}>`", ident);
               // return Err(WaxError::from_token(dtk.clone(), 
               //   "void element with end tag", 
@@ -174,7 +178,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
       /* ; */
       TokenKind::Semi => {
-        // if *curr == scope { break; }
+        if pars.get_scope() == scope { break; }
         // if *curr > scope {
         //   return Err(WaxError::from_span(tree.get(scope).get_span(), 
         //     "overflowing template", 
@@ -191,6 +195,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
         //     WaxHint::Hint("templates should end with a `;`".into())
         //   ));
         // }
+        break;
       }
 
       /* Whitespace */

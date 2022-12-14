@@ -1,55 +1,75 @@
-use waxc_lexer::{token::{Token, TokenKind}, iter::LexIter};
+use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
 
-use crate::{tree::AST, node::{Node, NodeKind}, span::Span};
+use crate::{tree::AST, node::{Node, NodeKind, Span}};
 
 /// The Wax parser
-pub(crate) struct Parser {
+pub struct Parser<I: Iterator<Item = Token> + Clone> {
+  file: String,
+  len_consumed: usize,
+  pos_cursor: usize,
+  /* Lexical iterator */
+  iter: LexIter<I>,
+
   tree: AST,
   scope: usize,
-  iter: LexIter,
-  file: String,
 }
 
-impl Parser {
-  pub fn new(file: String, iter: LexIter) -> Self {
-
+impl<I: Iterator<Item = Token> + Clone> Parser<I> {
+  pub fn new(file: String, iter: LexIter<I>) -> Self {
+    /* Initialize the abstract syntax tree */
     let mut tree = AST::new();
     let scope = tree.add_node(Span::new(0, 0), NodeKind::Root);
 
     Self {
       file,
+      len_consumed: 0,
+      pos_cursor: 0,
       iter,
-      scope,
       tree,
+      scope,
     }
   }
 
   /// Get a clone of the abstract syntax tree.
+  // todo: optimize this so we don't need to clone the entire tree...
   pub fn get_tree(&self) -> AST {
     self.tree.clone()
   }
 
   /// Add a new node to the current scope.
-  pub fn add_node(&mut self, start: usize, node: NodeKind) {
-    self.tree.add_child(self.scope, &Span::new(start, self.consumed() - start), node);
+  pub fn add_node(&mut self, node: NodeKind) {
+    self.tree.add_child(self.scope, 
+      &Span::new(self.pos_cursor, self.len_consumed - self.pos_cursor), 
+    node);
   }
 
   /// Add a new scope to the current scope.
-  pub fn add_scope(&mut self, start: usize, node: NodeKind) {
-    self.scope = self.tree.add_child(self.scope, &Span::new(start, self.consumed() - start), node);
+  pub fn add_scope(&mut self, node: NodeKind) {
+    self.scope = self.tree.add_child(self.scope, 
+      &Span::new(self.pos_cursor, self.len_consumed - self.pos_cursor), 
+    node);
   }
 
+  /// Change the current scope to it's parent scope.
   pub fn retreat_scope(&mut self) {
     match self.tree.get_parent(self.scope) {
       Some(scope) => self.scope = scope,
-      None => todo!()
+      None => println!("went out of scope!!!")
     }
   }
 
+  /// Get the current scope.
+  pub fn get_scope(&self) -> usize {
+    self.scope
+  }
+
   /// Bump the iterator to the next token. 
-  /// Returns an EOF token if the next token doesn't unwrap.
-  pub fn next(&mut self) -> Token {
-    self.iter.next()
+  pub fn next(&mut self) -> Option<Token> {
+    let Some(next) = self.iter.next() else {
+      return None;
+    };
+    self.len_consumed += next.len();
+    Some(next)
   }
 
   /// Returns the next element without consuming it.
@@ -62,35 +82,23 @@ impl Parser {
     self.iter.second()
   }
 
-  /// Read a string from to the end of the last consumed token.
-  pub fn read(&self, from: usize) -> &str {
-    &self.file[self.iter.range_to_consumed(from)]
+  /// Read from the last cursor reset until the end of the last consumed token.
+  pub fn read(&self) -> String {
+    self.file[self.pos_cursor..self.len_consumed].to_string()
   }
 
-  /// Returns the total length of all consumed tokens.
-  pub fn consumed(&self) -> usize {
-    self.iter.consumed()
+  /// Update the cursor position to the end of the last consumed token.
+  pub fn update_cursor(&mut self) {
+    self.pos_cursor = self.len_consumed;
   }
 
-  /// Eat while the next token matches a token kind.
+  /// Eat tokens while they match a kind of token.
   pub fn eat_while(&mut self, kind: TokenKind) {
-    loop {
-      let next = self.first();
-      if next != kind {
-        return;
-      }
-      self.next();
-    }
+    self.len_consumed += self.iter.eat_while(kind);
   }
 
-  /// Eat until the next token matches a token kind.
+  /// Eat tokens until one matches a kind of token.
   pub fn eat_until(&mut self, kind: TokenKind) {
-    loop {
-      let next = self.first();
-      if next != kind {
-        return;
-      }
-      self.next();
-    }
+    self.len_consumed += self.iter.eat_until(kind);
   }
 }

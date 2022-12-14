@@ -25,7 +25,7 @@ impl WaxError {
   pub fn from_token(pos: usize, token: Token, msg: &str, hint: WaxHint) -> Self {
     Self {
       pos,
-      len: *token.get_len(),
+      len: *token.len(),
       desc: msg.to_string(),
       crumbs: None,
       hint

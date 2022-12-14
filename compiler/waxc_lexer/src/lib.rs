@@ -1,24 +1,22 @@
-mod lexer;
-pub mod iter;
+pub mod lexer;
 pub mod token;
 
-use iter::LexIter;
 use lexer::Lexer;
 use token::{Token, TokenKind, LiteralKind};
 use TokenKind::*;
 use LiteralKind::*;
 
 /// Tokenize an input file token by token using an iterater from fn.
-pub fn lex(input: &'static str) -> LexIter {
+pub fn lex<'a>(input: &'a str) -> impl Iterator<Item=Token> + Clone + 'a {
   let mut lexer = Lexer::new(input);
-  LexIter::new(std::iter::from_fn(move || {
+  std::iter::from_fn(move || {
     let token = lexer.advance();
     if token.kind != EOF {
       Some(token)
     } else {
       None
     }
-  }))
+  })
 }
 
 impl Lexer<'_> {

@@ -15,7 +15,7 @@ impl Token {
   }
 
   /// Get the length of the token.
-  pub fn get_len(&self) -> &usize {
+  pub fn len(&self) -> &usize {
     &self.len
   }
 }

@@ -141,7 +141,7 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
       _ => ()
     }
     // Add the token to the string.
-    word.push_str(pars.read());
+    word.push_str(&pars.read());
   }
 
   None
