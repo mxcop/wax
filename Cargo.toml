@@ -22,6 +22,9 @@ members = [
 name = "wax"
 path = "src/main.rs"
 
+[profile.release]
+opt-level = 3
+
 [dependencies]
 waxc_lexer = { path = "compiler/waxc_lexer" }
 waxc_errors = { path = "compiler/waxc_errors" }

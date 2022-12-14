@@ -1,7 +1,7 @@
 mod void;
 mod attrib;
 
-use waxc_errors::error::{WaxError, WaxHint};
+use waxc_errors::error::WaxError;
 
 use void::is_void;
 use attrib::parse_attributes;
@@ -29,7 +29,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
   let scope = pars.get_scope();
 
   // Move through all tokens until we reach a semicolon:
-  while let Some(tk) = pars.next() {
+  while let Some(tk) = pars.next_with_cursor() {
     match tk.kind {
 
       /* < */
@@ -75,6 +75,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
               // ));
               todo!();
             };
+            pars.next();
 
             /* Void Tag */
             if is_void(&ident) {
@@ -147,6 +148,7 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
               // ));
               todo!();
             };
+            pars.next();
 
             /* Void Tag */
             if is_void(&ident) {
@@ -212,17 +214,16 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
       /* Text */
       _ => { 
-        // let mut text = pars.read();
+        let mut text = pars.read();
 
-        // while let tk = pars.first() {
-        //   match tk {
-        //     TokenKind::Lt | TokenKind::LeftArrow => break,
-        //     TokenKind::Whitespace => { pars.next(); continue; },
-        //     _ => { text.push_str(pars.read()); pars.next(); }
-        //   }
-        // }
+        loop {
+          match pars.first() {
+            TokenKind::Lt | TokenKind::LeftArrow | TokenKind::EOF => break,
+            _ => { pars.next_with_cursor(); text.push_str(&pars.read()); }
+          }
+        }
 
-        // tree.add_child(*curr, "text".into(), dtk.get_span(), SyntaxNode::Text(text));
+        pars.add_node(NodeKind::Text(text));
       }
     }
   }

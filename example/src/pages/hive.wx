@@ -1,7 +1,7 @@
 /* Html Template */
 tmpl card:
   <div class="card">
-    <h2 #header title='let " const'>Test</h2>
+    <h2 #header title='let " const'>Test Test Test</h2>
     <p #desc>tmpl</p>
     <br>
     <img src="img.png">

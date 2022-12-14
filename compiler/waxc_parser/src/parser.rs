@@ -1,6 +1,6 @@
 use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
 
-use crate::{tree::AST, node::{Node, NodeKind, Span}};
+use crate::{tree::AST, node::{NodeKind, Span}};
 
 /// The Wax parser
 pub struct Parser<I: Iterator<Item = Token> + Clone> {
@@ -54,13 +54,23 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   pub fn retreat_scope(&mut self) {
     match self.tree.get_parent(self.scope) {
       Some(scope) => self.scope = scope,
-      None => println!("went out of scope!!!")
+      None => () // println!("went out of scope!!!")
     }
   }
 
   /// Get the current scope.
   pub fn get_scope(&self) -> usize {
     self.scope
+  }
+
+  /// Bump the iterator to the next token after updating the cursor. 
+  pub fn next_with_cursor(&mut self) -> Option<Token> {
+    self.update_cursor();
+    let Some(next) = self.iter.next() else {
+      return None;
+    };
+    self.len_consumed += next.len();
+    Some(next)
   }
 
   /// Bump the iterator to the next token. 
@@ -78,6 +88,7 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   }
 
   /// Returns the next next element without consuming it.
+  #[allow(unused)]
   pub fn second(&mut self) -> TokenKind {
     self.iter.second()
   }
@@ -98,6 +109,7 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   }
 
   /// Eat tokens until one matches a kind of token.
+  #[allow(unused)]
   pub fn eat_until(&mut self, kind: TokenKind) {
     self.len_consumed += self.iter.eat_until(kind);
   }

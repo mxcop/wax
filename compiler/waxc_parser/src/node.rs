@@ -28,7 +28,10 @@ impl Node {
   /// Get a reference to the name of the node.
   /// [Debug] This is for debugging purposes!
   pub fn get_name(&self) -> String {
-    format!("{:?}", &self)
+    match &self.kind {
+      NodeKind::Tag { name, .. } => name.clone(),
+      _ => format!("{:?}", &self)
+    }
   }
 
   /// Get a reference to the span of the node.

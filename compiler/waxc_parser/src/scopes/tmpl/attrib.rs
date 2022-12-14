@@ -1,7 +1,7 @@
-use waxc_errors::error::{WaxError, WaxHint};
+use waxc_errors::error::WaxError;
 use waxc_lexer::{token::{Token, TokenKind}};
 
-use crate::{node::{Attribute, Node, NodeKind}, parser::Parser};
+use crate::{node::{Attribute, NodeKind}, parser::Parser};
 
 use super::void::is_void;
 
@@ -11,7 +11,7 @@ pub fn parse_attributes<I: Iterator<Item = Token> + Clone>(name: String, pars: &
   let mut self_closing = false;
   let mut hashed_attrib = false;
   
-  while let Some(tk) = pars.next() {
+  while let Some(tk) = pars.next_with_cursor() {
     match tk.kind {
 
       /* # */
@@ -116,8 +116,9 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
     TokenKind::Quote => double_quoted = false,
     _ => return None,
   }
+  pars.next();
 
-  while let Some(tk) = pars.next() {
+  while let Some(tk) = pars.next_with_cursor() {
     match tk.kind {
       /* Be aware of escape chars */
       TokenKind::BackSlash => escaped = true,
