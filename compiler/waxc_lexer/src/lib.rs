@@ -11,11 +11,7 @@ pub fn lex<'a>(input: &'a str) -> impl Iterator<Item=Token> + Clone + 'a {
   let mut lexer = Lexer::new(input);
   std::iter::from_fn(move || {
     let token = lexer.advance();
-    if token.kind != EOF {
-      Some(token)
-    } else {
-      None
-    }
+    if token.kind != EOF { Some(token) } else { None }
   })
 }
 
