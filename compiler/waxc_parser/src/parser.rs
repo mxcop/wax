@@ -1,3 +1,4 @@
+use waxc_errors::error::WaxError;
 use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
 
 use crate::{tree::AST, node::{NodeKind, Span}};
@@ -112,5 +113,17 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   #[allow(unused)]
   pub fn eat_until(&mut self, kind: TokenKind) {
     self.len_consumed += self.iter.eat_until(kind);
+  }
+
+  /// Eat tokens until the end of a scope.<br>
+  /// `open_token`: Token that opens a scope.<br>
+  /// `close_token`: Token that closes a scope.
+  #[allow(unused)]
+  pub fn eat_scope(&mut self, open_token: TokenKind, close_token: TokenKind) -> Result<(), WaxError> {
+    let Ok(len) = self.iter.eat_scope(open_token, close_token) else {
+      todo!();
+    };
+    self.len_consumed += len;
+    Ok(())
   }
 }

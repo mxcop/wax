@@ -76,6 +76,16 @@ impl std::fmt::Display for AST
             NodeKind::Comb { name, attributes, .. } => {
               writeln!(f, "{}{} {}", "<-".bright_black(), name.green(), format!("({:?})", attributes).bright_black())?;
             }
+
+            /* Text */
+            NodeKind::Text(text) => {
+              let mut first = true;
+              for line in text.lines() {
+                if first { first = false; }
+                else { append_tabs(f, level)?; }
+                writeln!(f, "{}", line)?;
+              }
+            }
             
             _ => { writeln!(f, "{} {}", child.get_name(), format!("({:?})", child.kind).bright_black())?; }
           }
@@ -86,8 +96,14 @@ impl std::fmt::Display for AST
 
             /* Templates */
             NodeKind::Template { name } => { 
-              if name.starts_with('@') { writeln!(f, "{} {}: {{", "impl".red(), name.blue())?; }
-              else { writeln!(f, "{} {}: {{", "impl".red(), name.green())?; }
+              if name.starts_with('@') { writeln!(f, "{} {}: {{", "tmpl".red(), name.blue())?; }
+              else { writeln!(f, "{} {}: {{", "tmpl".red(), name.green())?; }
+            }
+
+            /* Stylesheets */
+            NodeKind::Stylesheet { name } => { 
+              if name.starts_with('@') { writeln!(f, "{} {}: {{", "styl".red(), name.blue())?; }
+              else { writeln!(f, "{} {}: {{", "styl".red(), name.green())?; }
             }
 
             /* Comb Tags */

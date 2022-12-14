@@ -116,4 +116,37 @@ impl<I: Iterator<Item=Token> + Clone> LexIter<I> {
     }
     len
   }
+
+  /// Eat a scope of opening and closing tokens.
+  pub fn eat_scope(&mut self, open: TokenKind, close: TokenKind) -> Result<usize, ()> {
+    let mut clone = self.iter.clone();
+    let mut count: usize = 0;
+    let mut depth: usize = 0;
+    while let Some(tk) = clone.next() {
+      count += 1;
+      match tk.kind {
+        kind if kind == open => {
+          depth += 1;
+        }
+        kind if kind == close => {
+          depth -= 1;
+          if depth == 0 {
+            break;
+          }
+        }
+        _ => ()
+      }
+    }
+
+    if depth != 0 {
+      /* Scope wasn't closed properly */
+      return Err(());
+    }
+
+    let mut len = 0usize;
+    for _ in 0..count {
+      len += self.next().unwrap().len();
+    }
+    Ok(len)
+  }
 }
