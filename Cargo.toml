@@ -11,9 +11,19 @@ keywords = ["html", "parser", "cli"]
 categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
 exclude = ["/assets", "/example"]
 
+[workspace]
+members = [
+    "compiler/waxc_errors",
+    "compiler/waxc_lexer",
+    "compiler/waxc_parser",
+]
+
 [[bin]]
 name = "wax"
 path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
 
 [dependencies]
 waxc_lexer = { path = "compiler/waxc_lexer" }
@@ -40,3 +50,10 @@ minify-html = "0.10.3"
 # HTML test server
 # warp = "0.3.3"
 # tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "my_benchmark"
+harness = false

@@ -1,27 +1,27 @@
-use waxc_errors::error::{WaxError, WaxHint};
-use waxc_lexer::{iter::TokenIter, token::Token};
+use waxc_errors::error::WaxError;
+use waxc_lexer::{token::{Token, TokenKind}};
 
-use crate::node::{SyntaxNode, Attribute};
+use crate::{node::{Attribute, NodeKind}, parser::Parser};
 
 use super::void::is_void;
 
 /// Parse the next attributes inside a token iterator.
-pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: bool) -> Result<SyntaxNode, WaxError<'a>> {
+pub fn parse_attributes<I: Iterator<Item = Token> + Clone>(name: String, pars: &mut Parser<I>, is_comb: bool) -> Result<NodeKind, WaxError> {
   let mut attributes: Vec<Attribute> = Vec::new();
   let mut self_closing = false;
   let mut hashed_attrib = false;
   
-  while let Some((dtk, tk)) = iter.next_de() {
-    match tk {
+  while let Some(tk) = pars.next_with_cursor() {
+    match tk.kind {
 
       /* # */
-      Token::Hash => {
+      TokenKind::Hash => {
         hashed_attrib = true;
       }
 
       /* name */
-      Token::Ident(ident) => {
-        let mut ident = ident.clone();
+      TokenKind::Ident => {
+        let mut ident = pars.read().to_string();
 
         /* # */
         if hashed_attrib {
@@ -31,16 +31,17 @@ pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: boo
 
         // Check for duplicate attributes:
         if attributes.iter().any(|attrib| attrib.name == ident) {
-          return Err(WaxError::from_token(dtk.clone(), 
-            "duplicate attribute", 
-            WaxHint::Hint("attribute names should be unique".into())
-          ));
+          // return Err(WaxError::from_token(dtk.clone(), 
+          //   "duplicate attribute", 
+          //   WaxHint::Hint("attribute names should be unique".into())
+          // ));
+          todo!();
         }
 
-        iter.eat_whitespace();
+        pars.eat_while(TokenKind::Whitespace);
 
         /* = */
-        let Some(Token::Equals) = iter.peek() else {
+        let TokenKind::Eq = pars.first() else {
           // Attribute without value:
           attributes.push(Attribute { 
             name: ident, 
@@ -48,35 +49,36 @@ pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: boo
           });
           continue;
         };
-        iter.next();
+        pars.next();
 
         // Parse the value of the attribute.
-        if let Some(value) = parse_string(iter) {
+        if let Some(value) = parse_string(pars) {
           // Attribute with value:
           attributes.push(Attribute { 
             name: ident, 
             value: Some(value)
           });
         } else {
-          return Err(WaxError::from_token(dtk.clone(), 
-            "attribute missing value", 
-            WaxHint::Hint("attributes should have a value after the `=`".into())
-          ));
+          // return Err(WaxError::from_token(dtk.clone(), 
+          //   "attribute missing value", 
+          //   WaxHint::Hint("attributes should have a value after the `=`".into())
+          // ));
+          todo!();
         }
       }
 
       /* / */
-      Token::Slash => {
+      TokenKind::Slash => {
         // Found self closing tag.
-        if let Some(Token::GreaterThen) = iter.peek() {
-          iter.next();
+        if let TokenKind::Gt = pars.first() {
+          pars.next();
           self_closing = true;
           break;
         }
       }
 
       /* > */
-      Token::GreaterThen => {
+      TokenKind::Gt => {
         break;
       }
 
@@ -90,37 +92,38 @@ pub fn parse_attributes<'a>(name: String, iter: &mut TokenIter<'a>, is_comb: boo
   }
 
   if is_comb {
-    Ok(SyntaxNode::Comb {
+    Ok(NodeKind::Comb {
       name, attributes, self_closing
     })
   } else {
-    Ok(SyntaxNode::Tag {
+    Ok(NodeKind::Tag {
       name, attributes, self_closing
     })
   }
 }
 
 /// Parse a string pattern.
-fn parse_string<'a>(iter: &mut TokenIter<'a>) -> Option<String> {
+fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Option<String> {
   let mut word: String = String::new();
   let mut escaped: bool = false;
   let double_quoted: bool;
 
-  iter.eat_whitespace();
+  pars.eat_while(TokenKind::Whitespace);
 
   /* " or ' */
-  match iter.next() {
-    Some(Token::DoubleQuote) => double_quoted = true,
-    Some(Token::SingleQuote) => double_quoted = false,
+  match pars.first() {
+    TokenKind::DoubleQuote => double_quoted = true,
+    TokenKind::Quote => double_quoted = false,
     _ => return None,
   }
+  pars.next();
 
-  while let Some((stk, tk)) = iter.next_de() {
-    match tk {
+  while let Some(tk) = pars.next_with_cursor() {
+    match tk.kind {
       /* Be aware of escape chars */
-      Token::BackSlash => escaped = true,
+      TokenKind::BackSlash => escaped = true,
       /* " */
-      Token::DoubleQuote => {
+      TokenKind::DoubleQuote => {
         if !double_quoted || escaped {
           escaped = false;
         } else {
@@ -128,18 +131,18 @@ fn parse_string<'a>(iter: &mut TokenIter<'a>) -> Option<String> {
         }
       }
       /* ' */
-      Token::SingleQuote => {
+      TokenKind::Quote => {
         if double_quoted || escaped {
           escaped = false;
         } else {
           return Some(word);
         }
       }
-      Token::EOF => return None,
+      TokenKind::EOF => return None,
       _ => ()
     }
     // Add the token to the string.
-    word.push_str(&stk.get_str());
+    word.push_str(&pars.read());
   }
 
   None

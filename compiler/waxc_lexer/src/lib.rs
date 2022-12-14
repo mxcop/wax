@@ -1,220 +1,186 @@
+pub mod lexer;
 pub mod token;
-pub mod span;
-pub mod iter;
-mod char;
 
-use self::char::{is_ident, is_number};
-use iter::TrackingIter;
-use token::{Token, SyntaxToken};
+use lexer::Lexer;
+use token::{Token, TokenKind, LiteralKind};
+use TokenKind::*;
+use LiteralKind::*;
 
-pub struct Lexer<'a> {
-  iter: TrackingIter<'a, char>
+/// Tokenize an input file token by token using an iterater from fn.
+pub fn lex<'a>(input: &'a str) -> impl Iterator<Item=Token> + Clone + 'a {
+  let mut lexer = Lexer::new(input);
+  std::iter::from_fn(move || {
+    let token = lexer.advance();
+    if token.kind != EOF {
+      Some(token)
+    } else {
+      None
+    }
+  })
 }
 
-impl<'a> Lexer<'a> {
-  pub fn new(input: TrackingIter<'a, char>) -> Self {
-    Self {
-      iter: input
-    }
-  }
+impl Lexer<'_> {
+  /// Determine the next token from the input file.
+  /// Will return an EOF token when the end of the file is reached.
+  pub fn advance(&mut self) -> Token {
+    let Some(first_char) = self.next() else {
+      return Token::new(EOF, 0);
+    };
 
-  fn next(&mut self) -> Option<&char> {
-    self.iter.next()
-  }
+    let token = match first_char {
+      // Slash, comment or block comment.
+      '/' => match self.peek() {
+        '/' => self.line_comment(),
+        '*' => self.block_comment(),
+        _ => Slash,
+      },
 
-  /// ### Get length of next whitespace
-  fn whitespace(&mut self, first_ch: char) -> usize {
-    let mut space: Vec<char> = vec![first_ch];
+      // Whitespace sequence.
+      c if is_whitespace(c) => self.whitespace(),
 
-    while let Some(&ch) = self.iter.peek() {
-      if *ch == ' ' {
-        self.next();
-        space.push(*ch);
-      } else {
-        break;
-      }
-    }
+      // Identifier.
+      c if is_id_start(c) => self.ident(),
 
-    space.len()
-  }
-
-  /// Read the next `n` amount of chars that all match the predicate.<br>
-  /// ```
-  /// predicate = fn(is_first: bool, ch: &char) -> bool
-  /// ```
-  fn read_next(&mut self, 
-    first_ch: &char,
-    predicate: fn(bool, &char) -> bool) 
-  -> Option<String> {
-
-    let mut word: Vec<char> = Vec::new();
-
-    if predicate(true, first_ch) {
-      word.push(*first_ch);
-      while let Some(&ch) = self.iter.peek() {
-        if predicate(false, ch) {
-          self.next();
-          word.push(*ch);
+      // Number literal.
+      '0'..='9' | '.' => {
+        if is_number(self.peek()) == false {
+          TokenKind::Dot
         } else {
-          return Some(word.iter().collect());
+          self.next();
+          let literal_kind = self.number();
+          TokenKind::Literal {
+            kind: literal_kind
+          }
         }
       }
-      // Return word if we reach the end of the file.
-      return Some(word.iter().collect());
-    }
 
-    None
-  }
+      // Single Character Tokens:
+      ';' => Semi,
+      ',' => Comma,
+      '(' => OpenParen,
+      ')' => CloseParen,
+      '{' => OpenBrace,
+      '}' => CloseBrace,
+      '[' => OpenBracket,
+      ']' => CloseBracket,
+      '@' => Atsign,
+      '#' => Hash,
+      '~' => Tilde,
+      '?' => Quest,
+      ':' => Colon,
+      '$' => Dollar,
+      '=' => Eq,
+      '!' => Bang,
+      '>' => Gt,
+      '&' => And,
+      '|' => Or,
+      '+' => Plus,
+      '*' => Star,
+      '^' => Caret,
+      '%' => Percent,
+      '\\' => BackSlash,
 
-  /// ### Conditional Move
-  /// Returns whether the next character is equal to the given character.<br>
-  /// If true then moves the iterator forward by one.
-  fn cmove(&mut self, ch: char) -> bool {
-    match self.iter.peek() {
-      Some(&ch2) if *ch2 == ch => {
-        self.next();
-        true
-      }
-      _ => false
-    }
-  }
+      // Double Character Tokens:
+      '-' => match self.peek() {
+        '>' => { self.next(); RightArrow },
+        _ => Minus,
+      },
+      '<' => match self.peek() {
+        '-' => { self.next(); LeftArrow },
+        _ => Lt,
+      },
 
-  /// ### Lexical Analysis
-  /// Analize the input and convert it into an array of tokens.
-  pub fn lex(&mut self, char_count: usize) -> Vec<SyntaxToken> {
-    let mut tokens: Vec<SyntaxToken> = Vec::with_capacity(char_count);
+      // String literal.
+      '"' => DoubleQuote,
+      '\'' => Quote,
+      '`' => Grave,
 
-    // Move through all the characters:
-    while let Some(&ch) = self.next() {
-
-      let Some(token) = self.evaluate(&ch) else {
-        continue;
-      };
-
-      // Push the token onto the stack.
-      tokens.push(token);
-    }
-
-    // End of File reached.
-    tokens.push(SyntaxToken::new(
-      Token::EOF,
-      self.iter.current_pos() - 1, 0
-    ));
-    tokens
-  }
-
-  /// Evaluate the next character.
-  fn evaluate(&mut self, ch: &char) -> Option<SyntaxToken> {
-    /* Spaces */
-    if *ch == ' ' {
-      let len = self.whitespace(*ch);
-      return Some(SyntaxToken::new(
-        Token::Whitespace(len), 
-        self.iter.current_pos(), len
-      ));
-    }
-
-    /* Newlines */
-    if *ch == '\n' {
-      return Some(SyntaxToken::new(
-        Token::Newline, 
-        self.iter.current_pos(), 1
-      ));
-    }
-
-    // Evaluate which token this char is:
-    let Some(token) = self.token_from_char(ch) else {
-      return None;
+      _ => Unknown,
     };
 
-    // Return the evaluated token:
-    Some(SyntaxToken::new(
-      token.clone(),
-      self.iter.current_pos(), token.to_string().len()
-    ))
+    let token = Token::new(token, self.len_since_last_reset());
+    self.reset_len();
+    token
   }
 
-  /// Evaluate which token a char should become.
-  fn token_from_char(&mut self, ch: &char) -> Option<Token> {
+  fn line_comment(&mut self) -> TokenKind {
+    self.next();
+    self.eat_while(|ch| ch != '\n');
+    LineComment
+  }
 
-    // Ignore return chars:
-    if *ch == '\r' {
-      return None;
+  fn block_comment(&mut self) -> TokenKind {
+    self.next();
+
+    // Keep track of the depth of the comment.
+    // We only want to close it once the depth is zero.
+    let mut depth: usize = 0;
+    while let Some(ch) = self.next() {
+      match ch {
+        '/' if self.peek() == '*' => {
+          self.next();
+          depth += 1;
+        }
+        '*' if self.peek() == '/' => {
+          self.next();
+          if depth == 0 {
+            break;
+          }
+          depth -= 1;
+        }
+        _ => (),
+      }
     }
 
-    let token = match ch {
-      /* Systematic */
-      ' ' => Token::Whitespace(self.whitespace(*ch)),
-      '\n' => Token::Newline,
-
-      /* Generic */
-      ',' => Token::Comma,
-      '.' => Token::Dot,
-      '\'' => Token::SingleQuote,
-      '"' => Token::DoubleQuote,
-      '`' => Token::Grave,
-      ':' => Token::Colon,
-      ';' => Token::Semicolon,
-
-      /* Math Symbols */
-      '+' => Token::Plus,
-      '-' => { if self.cmove('>') { Token::RightArrow } else { Token::Minus } },
-      '=' => Token::Equals,
-      '*' => Token::Star,
-      '/' => Token::Slash,
-
-      /* Special Symbols */
-      '#' => Token::Hash,
-      '%' => Token::Percent,
-      '&' => Token::Ampersand,
-      '@' => Token::Atsign,
-      '$' => Token::Dollarsign,
-      '~' => Token::Tilde,
-      '\\' => Token::BackSlash,
-      '!' => Token::Bang,
-      '?' => Token::Quest,
-
-      /* Closures */
-      '<' => { if self.cmove('-') { Token::LeftArrow } else { Token::LessThen } },
-      '>' => Token::GreaterThen,
-      '(' => Token::LeftParenthesis,
-      ')' => Token::RightParenthesis,
-      '{' => Token::LeftCurlyBracket,
-      '}' => Token::RightCurlyBracket,
-      '[' => Token::LeftSquareBracket,
-      ']' => Token::RightSquareBracket,
-
-      /* Words */
-      _ => {
-        self.token_from_ident(ch)
-      }
-    };
-
-    Some(token)
+    BlockComment
   }
 
-  /// Evaluate which token an identity should be.
-  fn token_from_ident(&mut self, first_ch: &char) -> Token {
-    /* Identity [a-zA-Z] */
-    if let Some(identity) 
-      = self.read_next(first_ch, is_ident) 
-    {
-      /* Keywords */
-      if let Some(keyword) = Token::from_string(&identity) {
-        keyword
-      } else {
-        Token::Ident(identity)
-      }
-    } 
-    /* Numbers [0-9] */
-    else if let Some(number) 
-      = self.read_next(first_ch, is_number) 
-    {
-      Token::Number(number)
-    } 
-    else {
-      // If the char wasn't matched and isn't an identity, it's illegal.
-      Token::Illegal(*first_ch)
-    }
+  fn whitespace(&mut self) -> TokenKind {
+    self.eat_while(is_whitespace);
+    Whitespace
   }
+
+  fn ident(&mut self) -> TokenKind {
+    self.eat_while(is_ident);
+    Ident
+  }
+
+  fn number(&mut self) -> LiteralKind {
+    self.eat_while(is_number);
+    Number
+  }
+}
+
+/// Is this character whitespace according to the HTML language definition?
+///
+/// See [HTML language reference](https://www.w3.org/TR/2011/WD-html-markup-20110113/syntax.html)
+/// for definitions of these classes.
+fn is_whitespace(ch: char) -> bool {
+  matches!(
+    ch,
+      '\u{0020}' // Space
+    | '\u{0009}' // Character Tabulation (tab)
+    | '\u{000A}' // Line Feed (LF)
+    | '\u{000C}' // Form Feed (FF)
+    | '\u{000D}' // Carriage Return (CR)
+  )
+}
+
+/// Is this character the start of an identity?
+fn is_id_start(ch: char) -> bool {
+  'a' <= ch && ch <= 'z' || 
+  'A' <= ch && ch <= 'Z'
+}
+
+/// Is this character a part of an identity?
+fn is_ident(ch: char) -> bool {
+  'a' <= ch && ch <= 'z' || 
+  'A' <= ch && ch <= 'Z' || 
+  '0' <= ch && ch <= '9' || 
+  ch == '_' || ch == '-'
+}
+
+/// Is this character a part of a number?
+fn is_number(ch: char) -> bool {
+  '0' <= ch && ch <= '9' || ch == '.'
 }
