@@ -101,6 +101,12 @@ impl std::fmt::Display for AST
             }
 
             /* Stylesheets */
+            NodeKind::Implementation { name } => { 
+              if name.starts_with('@') { write!(f, "{} {}: {{", "impl".red(), name.blue())?; }
+              else { write!(f, "{} {}: {{", "impl".red(), name.green())?; }
+            }
+
+            /* Stylesheets */
             NodeKind::Stylesheet { name } => { 
               if name.starts_with('@') { writeln!(f, "{} {}: {{", "styl".red(), name.blue())?; }
               else { writeln!(f, "{} {}: {{", "styl".red(), name.green())?; }

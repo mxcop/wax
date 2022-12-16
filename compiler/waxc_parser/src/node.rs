@@ -30,6 +30,7 @@ impl Node {
   pub fn get_name(&self) -> String {
     match &self.kind {
       NodeKind::Tag { name, .. } => name.clone(),
+      NodeKind::Comb { name, .. } => name.clone(),
       _ => format!("{:?}", &self)
     }
   }

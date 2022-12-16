@@ -11,7 +11,9 @@ pub fn parse_attributes<I: Iterator<Item = Token> + Clone>(name: String, pars: &
   let mut self_closing = false;
   let mut hashed_attrib = false;
   
-  while let Some(tk) = pars.next_with_cursor() {
+  loop {
+    let tk = pars.next_with_cursor();
+
     match tk.kind {
 
       /* # */
@@ -78,7 +80,7 @@ pub fn parse_attributes<I: Iterator<Item = Token> + Clone>(name: String, pars: &
       }
 
       /* > */
-      TokenKind::Gt => {
+      TokenKind::Gt | TokenKind::EOF => {
         break;
       }
 
@@ -118,7 +120,9 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
   }
   pars.next();
 
-  while let Some(tk) = pars.next_with_cursor() {
+  loop {
+    let tk = pars.next_with_cursor();
+
     match tk.kind {
       /* Be aware of escape chars */
       TokenKind::BackSlash => escaped = true,
@@ -144,6 +148,4 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
     // Add the token to the string.
     word.push_str(&pars.read());
   }
-
-  None
 }

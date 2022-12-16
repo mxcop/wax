@@ -15,13 +15,18 @@ fn main() {
 }
 
 /// Run a single parsing.
-fn run(input: &str, _filename: &str) {
+fn run(input: &str, filename: &str) {
   // Initialize the lexical iterator:
   let lexer = waxc_lexer::lex(input);
   let iter = LexIter::new(lexer);
 
   // Start the parsing process:
-  let parser = waxc_parser::parse(input.to_string(), iter).unwrap();
+  let parser = waxc_parser::parse(input.to_string(), iter);
 
-  println!("{}", parser);
+  match parser {
+    Err(e) => {
+      e.print(input, filename);
+    }
+    Ok(ast) => println!("{}", ast)
+  }
 }

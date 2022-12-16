@@ -14,7 +14,7 @@ impl card(header: str, desc: str) {
 }
 
 /* Css Stylesheet */
-styl card() {
+styl card {
   .card {
     width: 300px;
     height: 400px;

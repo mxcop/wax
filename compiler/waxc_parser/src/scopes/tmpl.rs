@@ -1,7 +1,7 @@
 mod void;
 mod attrib;
 
-use waxc_errors::error::WaxError;
+use waxc_errors::error::{WaxError, WaxHint};
 
 use void::is_void;
 use attrib::parse_attributes;
@@ -18,27 +18,27 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
   // Check if there is a double dot after the name:
   let TokenKind::Colon = pars.first() else {
-    // return Err(WaxError::from_token(tmpl_tk.clone(), 
-    //   "missing `:` on template definition", 
-    //   WaxHint::Example("`tmpl name:`".into())
-    // )); 
-    todo!();
+    return Err(pars.err_example(
+      "missing `:` on template definition", 
+      "tmpl <name>: <html>;"
+    ));
   };
   pars.next();
 
   let scope = pars.get_scope();
 
   // Move through all tokens until we reach a semicolon:
-  while let Some(tk) = pars.next_with_cursor() {
+  loop {
+    let tk = pars.next_with_cursor();
+    
     match tk.kind {
 
       /* < */
       TokenKind::Lt => {
+        pars.checkpoint();
         pars.update_cursor();
-        let Some(tk) = pars.next() else {
-          break;
-        };
-
+        let tk = pars.next();
+        
         match tk.kind {
           /* Opening Tag <tag> */
           TokenKind::Ident => {
@@ -46,22 +46,22 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
             let tag = parse_attributes(ident.to_string(), pars, false)?;
 
             if let NodeKind::Tag { self_closing: false, .. } = tag {
-              pars.add_scope(tag);
+              pars.add_scope_with_checkpoint(tag);
             } else {
-              pars.add_node(tag);
+              pars.add_node_with_checkpoint(tag);
             }
           }
           /* Closing Tag </tag> */
           TokenKind::Slash => {
 
             pars.eat_while(TokenKind::Whitespace);
+            pars.update_cursor();
 
             let TokenKind::Ident = pars.first() else {
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "invalid end tag", 
-              //   WaxHint::Example("</name>".into())
-              // ));
-              todo!();
+              return Err(pars.err_example(
+                "invalid end tag", 
+                "</tag>"
+              ));
             };
             pars.next();
             let ident = pars.read();
@@ -69,37 +69,37 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
             pars.eat_while(TokenKind::Whitespace);
 
             let TokenKind::Gt = pars.first() else {
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "invalid end tag", 
-              //   WaxHint::Example("</name>".into())
-              // ));
-              todo!();
+              return Err(pars.err_example(
+                "invalid end tag", 
+                "</tag>"
+              ));
             };
-            pars.next();
 
             /* Void Tag */
             if is_void(&ident) {
-              // let example = format!("void elements should only have a start tag `<{}>`", ident);
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "void element with end tag", 
-              //   WaxHint::Example(example)
-              // ));
-              todo!();
+              return Err(pars.err_hint(
+                "void element with closing tag", 
+                &format!("void elements only have an opening tag `<{}>`", ident)
+              ));
             }
+            pars.next();
 
             // Make sure we're closing the current scope:
-            //if ident != tree.get(*curr).get_name() {
-              // let tag = tree.get(*curr);
-              // let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
-              // return Err(WaxError::from_span(tag.get_span(), 
-              //   "misnested tag", 
-              //   WaxHint::Hint(hint)
-              // ));
-              //todo!();
-            //}
+            if ident != pars.scoped_node().get_name() {
+              let tag = pars.scoped_node();
+              let hint;
+              if let NodeKind::Comb { .. } = tag.kind {
+                hint = format!("try closing <-{}> before it's parent tag is closed", tag.get_name());
+              } else {
+                hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
+              }
+              return Err(pars.err_node(tag, 
+                "misnested tag", 
+                WaxHint::Hint(hint)
+              ));
+            }
 
             pars.retreat_scope();
-            //*curr = tree.get_parent(*curr).expect("No parent");
           }
           _ => {}
         }
@@ -107,72 +107,61 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
       /* <- */
       TokenKind::LeftArrow => {
+        pars.checkpoint();
         pars.update_cursor();
-        let Some(tk) = pars.next() else {
-          break;
-        };
+        let tk = pars.next();
 
         match tk.kind {
           /* Comb Opening Tag <-comb> */
           TokenKind::Ident => {
             let ident = pars.read();
-            let tag = parse_attributes(ident.to_string(), pars, false)?;
+            let tag = parse_attributes(ident.to_string(), pars, true)?;
 
             if let NodeKind::Comb { self_closing: false, .. } = tag {
-              pars.add_scope(tag);
+              pars.add_scope_with_checkpoint(tag);
             } else {
-              pars.add_node(tag);
+              pars.add_node_with_checkpoint(tag);
             }
           }
           /* Comb Closing Tag <-/comb> */
           TokenKind::Slash => {
-
             pars.eat_while(TokenKind::Whitespace);
 
             let TokenKind::Ident = pars.first() else {
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "invalid end tag", 
-              //   WaxHint::Example("</name>".into())
-              // ));
-              todo!();
+              return Err(pars.err_example(
+                "invalid end comb tag", 
+                "<-/comb>"
+              ));
             };
-            pars.next();
+            pars.next_with_cursor();
             let ident = pars.read();
 
             pars.eat_while(TokenKind::Whitespace);
 
             let TokenKind::Gt = pars.first() else {
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "invalid end tag", 
-              //   WaxHint::Example("</name>".into())
-              // ));
-              todo!();
+              return Err(pars.err_example(
+                "invalid end comb tag", 
+                "<-/comb>"
+              ));
             };
             pars.next();
 
-            /* Void Tag */
-            if is_void(&ident) {
-              // let example = format!("void elements should only have a start tag `<{}>`", ident);
-              // return Err(WaxError::from_token(dtk.clone(), 
-              //   "void element with end tag", 
-              //   WaxHint::Example(example)
-              // ));
-              todo!();
+            // Make sure we're closing the current scope:
+            if ident != pars.scoped_node().get_name() {
+              let tag = pars.scoped_node();
+              let hint;
+              if let NodeKind::Comb { .. } = tag.kind {
+                hint = format!("try closing <-{}> before it's parent tag is closed", tag.get_name());
+              } else {
+                hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
+              }
+              return Err(pars.err_node(tag, 
+                "misnested tag", 
+                WaxHint::Hint(hint)
+              ));
             }
 
-            // Make sure we're closing the current scope:
-            //if ident != tree.get(*curr).get_name() {
-              // let tag = tree.get(*curr);
-              // let hint = format!("try closing <{}> before it's parent tag is closed", tag.get_name());
-              // return Err(WaxError::from_span(tag.get_span(), 
-              //   "misnested tag", 
-              //   WaxHint::Hint(hint)
-              // ));
-              //todo!();
-            //}
-
             pars.retreat_scope();
-            //*curr = tree.get_parent(*curr).expect("No parent");
           }
           _ => {}
         }
@@ -181,22 +170,23 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
       /* ; */
       TokenKind::Semi => {
         if pars.get_scope() == scope { break; }
-        // if *curr > scope {
-        //   return Err(WaxError::from_span(tree.get(scope).get_span(), 
-        //     "overflowing template", 
-        //     WaxHint::Hint("make sure all tags witin the template are closed".into())
-        //   ));
-        // }
+        if pars.get_scope() > scope {
+          let tag = pars.scoped_node();
+          return Err(pars.err_hint(
+            "overflowing template", 
+            &format!("try closing <{}> before the `;`", tag.get_name())
+          ));
+        }
       }
 
       /* End of File */
       TokenKind::EOF => {
-        // if *curr == scope {
-        //   return Err(WaxError::from_token(dtk.clone(), 
-        //     "dangling template", 
-        //     WaxHint::Hint("templates should end with a `;`".into())
-        //   ));
-        // }
+        if pars.get_scope() == scope {
+          return Err(pars.err_hint(
+            "dangling template", 
+            "try closing the template with a `;`"
+          ));
+        }
         break;
       }
 
@@ -205,11 +195,9 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
 
       /* Unknown */
       TokenKind::Unknown => {
-        // return Err(WaxError::from_token(dtk.clone(), 
-        //   "unknown character",
-        //   WaxHint::None
-        // ));
-        todo!();
+        return Err(pars.err(
+          "unknown character"
+        ));
       }
 
       /* Text */
@@ -227,9 +215,6 @@ pub fn parse<I: Iterator<Item = Token> + Clone>(
       }
     }
   }
-
-  // Move back out of this template.
-  //*curr = tree.get_parent(*curr).expect("No parent");
 
   Ok(())
 }

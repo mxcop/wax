@@ -1,13 +1,14 @@
-use waxc_errors::error::WaxError;
-use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
+use waxc_errors::error::{WaxError, WaxHint};
+use waxc_lexer::{token::{Token, TokenKind, EOF_TOKEN}, lexer::LexIter};
 
-use crate::{tree::AST, node::{NodeKind, Span}};
+use crate::{tree::AST, node::{NodeKind, Span, Node}};
 
 /// The Wax parser
 pub struct Parser<I: Iterator<Item = Token> + Clone> {
   file: String,
   len_consumed: usize,
   pos_cursor: usize,
+  pos_checkpoint: usize,
   /* Lexical iterator */
   iter: LexIter<I>,
 
@@ -25,6 +26,7 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
       file,
       len_consumed: 0,
       pos_cursor: 0,
+      pos_checkpoint: 0,
       iter,
       tree,
       scope,
@@ -37,6 +39,16 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     self.tree.clone()
   }
 
+  /// Get a node from the abstract syntax tree.
+  // pub fn get_node(&self, idx: usize) -> &Node {
+  //   self.tree.get(idx)
+  // }
+
+  /// Get the node that is currently in scope.
+  pub fn scoped_node(&self) -> &Node {
+    self.tree.get(self.scope)
+  }
+
   /// Add a new node to the current scope.
   pub fn add_node(&mut self, node: NodeKind) {
     self.tree.add_child(self.scope, 
@@ -44,10 +56,24 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     node);
   }
 
+  /// Add a new node to the current scope using the checkpoint for it's position.
+  pub fn add_node_with_checkpoint(&mut self, node: NodeKind) {
+    self.tree.add_child(self.scope, 
+      &Span::new(self.pos_checkpoint, self.len_consumed - self.pos_checkpoint),
+    node);
+  }
+
   /// Add a new scope to the current scope.
   pub fn add_scope(&mut self, node: NodeKind) {
     self.scope = self.tree.add_child(self.scope, 
       &Span::new(self.pos_cursor, self.len_consumed - self.pos_cursor), 
+    node);
+  }
+
+  /// Add a new scope to the current scope using the checkpoint for it's position.
+  pub fn add_scope_with_checkpoint(&mut self, node: NodeKind) {
+    self.scope = self.tree.add_child(self.scope, 
+      &Span::new(self.pos_checkpoint, self.len_consumed - self.pos_checkpoint),
     node);
   }
 
@@ -65,22 +91,18 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   }
 
   /// Bump the iterator to the next token after updating the cursor. 
-  pub fn next_with_cursor(&mut self) -> Option<Token> {
+  pub fn next_with_cursor(&mut self) -> Token {
     self.update_cursor();
-    let Some(next) = self.iter.next() else {
-      return None;
-    };
+    let next = self.iter.next().unwrap_or(EOF_TOKEN);
     self.len_consumed += next.len();
-    Some(next)
+    next
   }
 
   /// Bump the iterator to the next token. 
-  pub fn next(&mut self) -> Option<Token> {
-    let Some(next) = self.iter.next() else {
-      return None;
-    };
+  pub fn next(&mut self) -> Token {
+    let next = self.iter.next().unwrap_or(EOF_TOKEN);
     self.len_consumed += next.len();
-    Some(next)
+    next
   }
 
   /// Returns the next element without consuming it.
@@ -89,10 +111,9 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   }
 
   /// Returns the next next element without consuming it.
-  #[allow(unused)]
-  pub fn second(&mut self) -> TokenKind {
-    self.iter.second()
-  }
+  // pub fn second(&mut self) -> TokenKind {
+  //   self.iter.second()
+  // }
 
   /// Read from the last cursor reset until the end of the last consumed token.
   pub fn read(&self) -> String {
@@ -125,5 +146,31 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     };
     self.len_consumed += len;
     Ok(())
+  }
+
+  /// Create a new wax error using a node.
+  pub fn err_node(&self, node: &Node, msg: &str, hint: WaxHint) -> WaxError {
+    let span = node.get_span();
+    WaxError::new(span.pos, span.len, msg, hint)
+  }
+
+  /// Create a new wax error with an example.
+  pub fn err_example(&self, msg: &str, example: &str) -> WaxError {
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Example(example.into()))
+  }
+
+  /// Create a new wax error with a hint.
+  pub fn err_hint(&self, msg: &str, hint: &str) -> WaxError {
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Hint(hint.into()))
+  }
+
+  /// Create a new wax error with a hint.
+  pub fn err(&self, msg: &str) -> WaxError {
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::None)
+  }
+
+  /// Set a checkpoint (useful for throwing more accurate errors)
+  pub fn checkpoint(&mut self) {
+    self.pos_checkpoint = self.pos_cursor;
   }
 }

@@ -32,6 +32,16 @@ impl WaxError {
     }
   }
 
+  pub fn new(pos: usize, len: usize, msg: &str, hint: WaxHint) -> Self {
+    Self {
+      pos,
+      len,
+      desc: msg.to_string(),
+      crumbs: None,
+      hint
+    }
+  }
+
   /// Print the error to the console.
   pub fn print(&self, file: &str, filename: &str) {
 
@@ -77,14 +87,16 @@ impl WaxError {
 
     println!("{}{}  {}", line_num.to_string().yellow(), "->".yellow(), lines[2]);
 
-    // Error pointer:
-    add_space(left_margin);
-    print!("{}", "|".bright_black());
-    add_space(get_char_num(file, self.pos - self.len + 2));
-    for _ in 0..self.len {
-      print!("{}", "^".bright_yellow());
+    if self.len > 0 {
+      // Error pointer:
+      add_space(left_margin);
+      print!("{}", "|".bright_black());
+      add_space(get_char_num(file, self.pos + 2));
+      for _ in 0..self.len {
+        print!("{}", "^".bright_yellow());
+      }
+      print!("\n");
     }
-    print!("\n");
 
     add_space(left_margin);
     println!("{}", ":".bright_black());

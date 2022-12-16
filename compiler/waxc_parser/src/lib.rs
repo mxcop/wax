@@ -38,14 +38,13 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     self.update_cursor();
     
     // Read the next token:
-    let Some(tk) = self.next() else {
-      return Ok(false);
-    };
+    let tk = self.next();
 
     match tk.kind {
       
       Ident => match self.read().as_str() {
         "tmpl" => self.template()?,
+        "impl" => self.implementation()?,
         "styl" => self.stylesheet()?,
         _ => (),
       },
@@ -62,8 +61,10 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   /// If so then start the template parser.
   fn template(&mut self) -> Result<(), WaxError> {
     let Some(name) = self.declaration()? else {
-      // todo: throw error that styl must be followed by a name.
-      todo!();
+      return Err(self.err_example(
+        "missing template name", 
+        "tmpl <name>: <html>;"
+      ));
     };
 
     /* Create the template node */
@@ -77,10 +78,44 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     Ok(())
   }
 
+  /// Check if an identity is really the start of a implementation.
+  /// If so then just parse the entire contents as text.
+  fn implementation(&mut self) -> Result<(), WaxError> {
+    let Some(name) = self.declaration()? else {
+      return Err(self.err_example(
+        "missing implementation name", 
+        "impl <name>() { <js> }"
+      ));
+    };
+
+    /* Create the implementation node */
+    self.add_scope(NodeKind::Implementation {
+      name: name.to_string()
+    });
+
+    /* Eat until we reach the end of the implementation */
+    self.eat_until(TokenKind::OpenBrace);
+    self.update_cursor();
+    self.eat_scope(TokenKind::OpenBrace, TokenKind::CloseBrace)?;
+
+    /* Read contents and remove the outer braces */
+    let content = self.read().trim_matches(|c| c == '{' || c == '}').to_string();
+
+    /* Put the contents into a text node and retreat */
+    self.add_node(NodeKind::Text(content));
+    self.retreat_scope();
+
+    Ok(())
+  }
+
+  /// Check if an identity is really the start of a stylesheet.
+  /// If so then just parse the entire contents as text.
   fn stylesheet(&mut self) -> Result<(), WaxError> {
     let Some(name) = self.declaration()? else {
-      // todo: throw error that styl must be followed by a name.
-      todo!();
+      return Err(self.err_example(
+        "missing stylesheet name", 
+        "styl <name>() { <css> }"
+      ));
     };
 
     /* Create the stylesheet node */
@@ -118,8 +153,11 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
       TokenKind::Atsign => {
         self.next();
         let TokenKind::Ident = self.first() else {
-          // todo: throw error that atsign must be followed by a name.
-          todo!();
+          self.next_with_cursor();
+          return Err(self.err_hint(
+            "name cannot be `@`", 
+            "did you mean `@html`?"
+          ));
         };
       }
 
