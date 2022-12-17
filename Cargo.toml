@@ -16,6 +16,7 @@ members = [
     "compiler/waxc_errors",
     "compiler/waxc_lexer",
     "compiler/waxc_parser",
+    "compiler/waxc_codegen",
 ]
 
 [[bin]]
@@ -29,6 +30,7 @@ opt-level = 3
 waxc_lexer = { path = "compiler/waxc_lexer" }
 waxc_errors = { path = "compiler/waxc_errors" }
 waxc_parser = { path = "compiler/waxc_parser" }
+waxc_codegen = { path = "compiler/waxc_codegen" }
 
 regex = "1.6.0"
 peekmore = "1.0.0"

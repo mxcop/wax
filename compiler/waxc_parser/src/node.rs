@@ -55,22 +55,26 @@ pub enum NodeKind {
   Template {
     name: String,
   },
+  /** Template Implementation definition */
   Implementation {
     name: String,
   },
+  /** Template Stylesheet definition */
   Stylesheet {
     name: String,
   },
+  /** Html tag */
   Tag {
     name: String,
     attributes: Vec<Attribute>,
     self_closing: bool,
-  }, /* Html tag */
+  }, 
+  /** Comb tag */
   Comb {
     name: String,
     attributes: Vec<Attribute>,
     self_closing: bool,
-  }, /* Comb tag */
+  }, 
   Text(String),
 }
 

@@ -679,8 +679,17 @@ dependencies = [
  "regex",
  "serde",
  "toml",
+ "waxc_codegen",
  "waxc_errors",
  "waxc_lexer",
+ "waxc_parser",
+]
+
+[[package]]
+name = "waxc_codegen"
+version = "0.1.0"
+dependencies = [
+ "colored",
  "waxc_parser",
 ]
 

@@ -21,8 +21,10 @@
     - [ ] Unquoted attribute values
     - [ ] *Unicode character checks
   - [ ] Implementations
+    - [x] Plain text
     - [ ] Links (#id)
-  - [ ] Stylesheets
+  - [x] Stylesheets
+    - [x] Plain text
 - [ ] Codegen
   - [ ] Templates (HTML)
     - [ ] IDs (#id)

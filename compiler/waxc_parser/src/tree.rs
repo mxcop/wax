@@ -42,6 +42,19 @@ impl AST
   pub fn get_parent(&self, idx: usize) -> Option<usize> {
     self.arena[idx].parent
   }
+
+  /// Get an iterator over all the child nodes of a node.
+  pub fn get_children(&self, idx: usize) -> impl Iterator<Item = &Node> + '_ {
+    let mut i: usize = 0;
+    std::iter::from_fn(move || {
+      i += 1;
+      if let Some(child_idx) = self.arena[idx].children.get(i - 1) {
+        self.arena.get(*child_idx)
+      } else {
+        None
+      }
+    })
+  }
 }
 
 impl std::fmt::Display for AST
