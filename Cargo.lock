@@ -690,6 +690,7 @@ name = "waxc_codegen"
 version = "0.1.0"
 dependencies = [
  "colored",
+ "waxc_errors",
  "waxc_parser",
 ]
 

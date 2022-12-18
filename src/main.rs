@@ -27,6 +27,10 @@ fn run(input: &str, filename: &str) {
     Err(e) => {
       e.print(input, filename);
     }
-    Ok(ast) => println!("{}", ast)
+    Ok(ast) => { 
+      println!("{}", &ast);
+      let comb = waxc_codegen::generate(ast).unwrap();
+      println!("{}", comb);
+    }
   }
 }

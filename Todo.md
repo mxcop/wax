@@ -27,7 +27,9 @@
     - [x] Plain text
 - [ ] Codegen
   - [ ] Templates (HTML)
+    - [x] Basics
     - [ ] IDs (#id)
+    - [ ] Slots
   - [ ] Stylesheets (CSS)
   - [ ] Implementations (JS)
     - [ ] Links (#id)

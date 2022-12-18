@@ -25,7 +25,5 @@ styl card {
 tmpl @html:
   <body>
     <-card header="Card 1" desc="This is card one" />
-    <-card header="Card 2" desc="This is card two">
-      <p>Hello world</p>
-    <-/card>
+    <-card header="Card 2" desc="This is card two" />
   </body>;

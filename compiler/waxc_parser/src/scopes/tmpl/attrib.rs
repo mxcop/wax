@@ -106,7 +106,7 @@ pub fn parse_attributes<I: Iterator<Item = Token> + Clone>(name: String, pars: &
 
 /// Parse a string pattern.
 fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Option<String> {
-  let mut word: String = String::new();
+  let mut word: String = String::with_capacity(24);
   let mut escaped: bool = false;
   let double_quoted: bool;
 
@@ -114,8 +114,14 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
 
   /* " or ' */
   match pars.first() {
-    TokenKind::DoubleQuote => double_quoted = true,
-    TokenKind::Quote => double_quoted = false,
+    TokenKind::DoubleQuote => { 
+      word.push('"');
+      double_quoted = true;
+    }
+    TokenKind::Quote => { 
+      word.push('\'');
+      double_quoted = false
+    }
     _ => return None,
   }
   pars.next();
@@ -131,6 +137,7 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
         if !double_quoted || escaped {
           escaped = false;
         } else {
+          word.push('"');
           return Some(word);
         }
       }
@@ -139,6 +146,7 @@ fn parse_string<I: Iterator<Item = Token> + Clone>(pars: &mut Parser<I>) -> Opti
         if double_quoted || escaped {
           escaped = false;
         } else {
+          word.push('\'');
           return Some(word);
         }
       }

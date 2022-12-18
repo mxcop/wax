@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 waxc_parser = { path = "../waxc_parser" }
+waxc_errors = { path = "../waxc_errors" }
 colored = "2.0.0"

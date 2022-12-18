@@ -23,6 +23,20 @@ fn criterion_benchmark(c: &mut Criterion) {
       black_box(waxc_parser::parse(input.to_string(), iter).unwrap());
     })
   });
+
+  c.bench_function("lexing + parsing + codegen", |b| {
+    b.iter(|| {
+      // Initialize the lexical iterator:
+      let lexer = black_box(waxc_lexer::lex(input));
+      let iter = black_box(waxc_lexer::lexer::LexIter::new(lexer));
+
+      // Start the parsing process:
+      let ast = black_box(waxc_parser::parse(input.to_string(), iter).unwrap());
+
+      // Start the codegen process:
+      black_box(waxc_codegen::generate(ast).unwrap());
+    })
+  });
 }
 
 criterion_group!(benches, criterion_benchmark);
