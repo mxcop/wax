@@ -23,14 +23,26 @@ fn run(input: &str, filename: &str) {
   // Start the parsing process:
   let parser = waxc_parser::parse(input.to_string(), iter);
 
-  match parser {
+  // Check for errors:
+  let ast = match parser {
     Err(e) => {
       e.print(input, filename);
+      return;
     }
-    Ok(ast) => { 
-      println!("{}", &ast);
-      let comb = waxc_codegen::generate(ast).unwrap();
-      println!("{}", comb);
+    Ok(ast) => ast
+  };
+  println!("{}", &ast);
+
+  // Generate the code:
+  let comb = waxc_codegen::generate(ast);
+
+  // Check for errors:
+  let comb = match comb {
+    Err(e) => {
+      e.print(input, filename);
+      return;
     }
-  }
+    Ok(comb) => comb
+  };
+  println!("{}", comb);
 }

@@ -3,7 +3,7 @@ pub mod comb;
 use std::collections::HashMap;
 
 use comb::WaxComb;
-use waxc_errors::error::WaxError;
+use waxc_errors::error::{WaxError, WaxHint};
 use waxc_parser::tree::AST;
 use waxc_parser::node::{NodeKind, Node, Attribute};
 
@@ -21,26 +21,24 @@ pub fn generate(ast: AST) -> Result<WaxComb, WaxError> {
       /* tmpl <name>: */
       NodeKind::Template { name } => match name {
         n if is_base(n) => {
-          html.push_str(&build_template(&ast, &templates, base_node));
+          html.push_str(&build_template(&ast, &templates, base_node)?);
         }
         _ => { 
           templates.insert(
             name.clone(), 
-            build_template(&ast, &templates, base_node)
+            build_template(&ast, &templates, base_node)?
           );
         }
       },
 
       /* impl <name>() */
-      NodeKind::Implementation { name } => (),
+      NodeKind::Implementation { .. } => (),
 
       /* styl <name> */
-      NodeKind::Stylesheet { name } => (),
+      NodeKind::Stylesheet { .. } => (),
       _ => {}
     }
   }
-
-  //dbg!(templates, html);
 
   Ok(WaxComb::new(
     html, 
@@ -55,7 +53,7 @@ fn is_base(name: &str) -> bool {
 }
 
 /// Recursively build a template node.
-fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node) -> String {
+fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node) -> Result<String, WaxError> {
   let mut iter = ast.get_children(scope.idx);
   let mut contents = String::with_capacity(256);
 
@@ -66,21 +64,28 @@ fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node) -> S
           contents.push_str(&build_tag(name, attributes, *self_closing));
         },
         NodeKind::Comb { name, .. } => {
-          contents.push_str(&build_comb(cache, name));
+          let Some(comb) = build_comb(cache, name) else {
+            let span = node.get_span();
+            return Err(WaxError::new(
+              span.pos, span.len, 
+              &format!("`tmpl {}` not found", node.get_name()), 
+            WaxHint::None));
+          };
+          contents.push_str(&comb);
         },
         NodeKind::Text(content) => contents.push_str(content),
         _ => ()
       }
     } else if let NodeKind::Tag { name, attributes, .. } = &node.kind {
       contents.push_str(&build_tag(name, attributes, false));
-      contents.push_str(&build_template(ast, cache, node));
+      contents.push_str(&build_template(ast, cache, node)?);
       contents.push_str(&build_end_tag(name));
     } else {
       println!("unhandled node is template ({})", node.get_name());
     }
   }
 
-  contents
+  Ok(contents)
 }
 
 /// Construct a HTML tag from name and attributes.
@@ -117,11 +122,11 @@ fn build_end_tag(name: &str) -> String {
 }
 
 /// Grab the comb as HTML from the template cache. (if it exists)
-fn build_comb(cache: &HashMap<String, String>, name: &str) -> String {
+fn build_comb(cache: &HashMap<String, String>, name: &str) -> Option<String> {
 
   let Some(comb) = cache.get(name) else {
-    panic!("wax comb not found");
+    return None;
   };
 
-  comb.clone()
+  Some(comb.clone())
 }
