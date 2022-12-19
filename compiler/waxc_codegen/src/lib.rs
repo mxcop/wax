@@ -74,7 +74,8 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
   }
 
   /* Insert html */
-  html = index.replace("@wax.body", &html);
+  html = index.replace("@wax.base", &html);
+  html = html.replace("@wax.head", ""); /* Temp */
 
   /* Trim whitespace */
   js = js.trim().to_string();
@@ -98,6 +99,7 @@ fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node, hash
   let hash: String = hasher.next_string();
 
   while let Some(node) = iter.next() {
+    /* No child nodes */
     if node.children.len() == 0 {
       match &node.kind {
         NodeKind::Tag { name, attributes, self_closing } => {
@@ -116,12 +118,13 @@ fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node, hash
         NodeKind::Text(content) => contents.push_str(content),
         _ => ()
       }
+    /* Is tag node with child nodes */
     } else if let NodeKind::Tag { name, attributes, .. } = &node.kind {
       contents.push_str(&build_tag(&hash, name, attributes, false));
       contents.push_str(&build_template(ast, cache, node, hasher)?);
       contents.push_str(&build_end_tag(name));
     } else {
-      println!("unhandled node is template ({})", node.get_name());
+      unreachable!("unhandled node is template ({})", node.get_name());
     }
   }
 

@@ -31,5 +31,7 @@
     - [ ] IDs (#id)
     - [ ] Slots
   - [ ] Stylesheets (CSS)
+    - [x] Basics
+    - [ ] Import in HTML
   - [ ] Implementations (JS)
     - [ ] Links (#id)

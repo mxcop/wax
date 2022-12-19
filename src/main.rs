@@ -47,6 +47,10 @@ fn run(index_file: &str, input: &str, filename: &str) {
   };
   println!("{}", &comb);
 
+  // Save the files:
+  if std::path::Path::new("./build/").is_dir() == false {
+    std::fs::create_dir("./build/").expect("failed to create build dir");
+  }
   std::fs::write("./build/index.html", comb.html).expect("failed to save html");
   std::fs::write("./build/index.css", comb.css).expect("failed to save css");
 }
