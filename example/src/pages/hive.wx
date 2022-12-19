@@ -18,6 +18,6 @@ styl card {
 }
 
 /* Root Html Template */
-tmpl @html:
+tmpl @base:
   <-card />
   <-card />;

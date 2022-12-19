@@ -25,6 +25,8 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
   let mut html: String = String::with_capacity(256);
   let mut js: String = String::with_capacity(128);
   let mut css: String = String::with_capacity(256);
+
+  let mut base_found = false;
   
   /* Find the file root node (@html) */
   while let Some(base_node) = root_nodes.next() {
@@ -32,6 +34,7 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
       /* tmpl <name>: */
       NodeKind::Template { name } => match name {
         n if is_base(n) => {
+          base_found = true;
           html.push_str(&build_template(&ast, &templates, base_node, &mut hasher)?);
         }
         _ => { 
@@ -63,7 +66,15 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
     }
   }
 
-  println!("{}", index.replace("@wax.body", &html));
+  if !base_found {
+    return Err(WaxError::new(
+      0, 0, 
+      "missing base template", 
+    WaxHint::Example("tmpl @base:".into())));
+  }
+
+  /* Insert html */
+  html = index.replace("@wax.body", &html);
 
   /* Trim whitespace */
   js = js.trim().to_string();
@@ -77,7 +88,7 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
 
 /// Is this template a base template? (@html)
 fn is_base(name: &str) -> bool {
-  name == "@html"
+  name == "@base"
 }
 
 /// Recursively build a template node.

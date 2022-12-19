@@ -45,5 +45,8 @@ fn run(index_file: &str, input: &str, filename: &str) {
     }
     Ok(comb) => comb
   };
-  println!("{}", comb);
+  println!("{}", &comb);
+
+  std::fs::write("./build/index.html", comb.html).expect("failed to save html");
+  std::fs::write("./build/index.css", comb.css).expect("failed to save css");
 }

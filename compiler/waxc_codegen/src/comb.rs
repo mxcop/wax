@@ -1,7 +1,7 @@
 pub struct WaxComb {
-  html: String,
-  js: String,
-  css: String,
+  pub html: String,
+  pub js: String,
+  pub css: String,
 }
 
 impl WaxComb {

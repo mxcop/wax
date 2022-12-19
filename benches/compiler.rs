@@ -1,6 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn criterion_benchmark(c: &mut Criterion) {
+  let index = &std::fs::read_to_string("./example/src/index.html").expect("failed to load file");
   let input = &std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
 
   c.bench_function("lexing", |b| {
@@ -34,7 +35,7 @@ fn criterion_benchmark(c: &mut Criterion) {
       let ast = black_box(waxc_parser::parse(input.to_string(), iter).unwrap());
 
       // Start the codegen process:
-      black_box(waxc_codegen::generate(ast).unwrap());
+      black_box(waxc_codegen::generate(index.to_string(), ast).unwrap());
     })
   });
 }
