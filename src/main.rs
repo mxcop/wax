@@ -9,13 +9,14 @@ fn main() {
   // Enable colors in the command prompt.
   colored::control::set_virtual_terminal(true).unwrap();
 
+  let index_file = std::fs::read_to_string("./example/src/index.html").expect("failed to load index.html");
   let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
 
-  run(&input, "src/pages/hive.wx");
+  run(&index_file, &input, "src/pages/hive.wx");
 }
 
 /// Run a single parsing.
-fn run(input: &str, filename: &str) {
+fn run(index_file: &str, input: &str, filename: &str) {
   // Initialize the lexical iterator:
   let lexer = waxc_lexer::lex(input);
   let iter = LexIter::new(lexer);
@@ -34,7 +35,7 @@ fn run(input: &str, filename: &str) {
   println!("{}", &ast);
 
   // Generate the code:
-  let comb = waxc_codegen::generate(ast);
+  let comb = waxc_codegen::generate(index_file.to_string(), ast);
 
   // Check for errors:
   let comb = match comb {

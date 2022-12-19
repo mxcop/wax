@@ -1,17 +1,13 @@
-/* Html Template */
+/* Title Template */
+tmpl title:
+  <h2>Header</h2>;
+
+/* Card Template */
 tmpl card:
   <div class="card">
-    <h2 #header title='let " const'>Test Test Test</h2>
-    <p #desc>tmpl</p>
-    <br>
-    <img src="img.png">
+    <-title />
+    <p>paragraph</p>
   </div>;
-
-/* Template Implementation */
-impl card(header: str, desc: str) {
-  #header.inner_text = header;
-  #desc.inner_text = desc;
-}
 
 /* Css Stylesheet */
 styl card {
@@ -23,7 +19,5 @@ styl card {
 
 /* Root Html Template */
 tmpl @html:
-  <body>
-    <-card header="Card 1" desc="This is card one" />
-    <-card header="Card 2" desc="This is card two" />
-  </body>;
+  <-card />
+  <-card />;

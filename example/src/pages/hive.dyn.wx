@@ -1,0 +1,29 @@
+/* Html Template */
+tmpl card:
+  <div class="card">
+    <h2 #header title='let " const'>Test Test Test</h2>
+    <p #desc>tmpl</p>
+    <br>
+    <img src="img.png">
+  </div>;
+
+/* Template Implementation */
+impl card(header: str, desc: str) {
+  #header.inner_text = header;
+  #desc.inner_text = desc;
+}
+
+/* Css Stylesheet */
+styl card {
+  .card {
+    width: 300px;
+    height: 400px;
+  }
+}
+
+/* Root Html Template */
+tmpl @html:
+  <body>
+    <-card header="Card 1" desc="This is card one" />
+    <-card header="Card 2" desc="This is card two" />
+  </body>;
