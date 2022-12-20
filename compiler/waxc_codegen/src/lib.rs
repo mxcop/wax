@@ -75,7 +75,7 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
 
   /* Insert html */
   html = index.replace("@wax.base", &html);
-  html = html.replace("@wax.head", ""); /* Temp */
+  html = html.replace("@wax.head", "<link rel=\"stylesheet\" href=\"index.css\">"); /* Temp */
 
   /* Trim whitespace */
   js = js.trim().to_string();
