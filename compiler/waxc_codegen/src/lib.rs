@@ -31,6 +31,12 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
   /* Find the file root node (@html) */
   while let Some(base_node) = root_nodes.next() {
     match &base_node.kind {
+      /* use "<path>"; */
+      NodeKind::Using { path } => {
+        todo!("{}", path); 
+        // See if the path exists, if so then load the wax file.
+      },
+
       /* tmpl <name>: */
       NodeKind::Template { name } => match name {
         n if is_base(n) => {
