@@ -51,25 +51,29 @@ pub struct Attribute {
 pub enum NodeKind {
   Root,
 
-  /** Template definition */
+  /** `use "path/to/file";` */
+  Using {
+    path: String,
+  },
+  /** `tmpl <name>: ;` */
   Template {
     name: String,
   },
-  /** Template Implementation definition */
+  /** `impl <name>() {}` */
   Implementation {
     name: String,
   },
-  /** Template Stylesheet definition */
+  /** `styl <name> {}` */
   Stylesheet {
     name: String,
   },
-  /** Html tag */
+  /** `<tag> ... </tag>` */
   Tag {
     name: String,
     attributes: Vec<Attribute>,
     self_closing: bool,
   }, 
-  /** Comb tag */
+  /** `<-comb> ... </comb>` */
   Comb {
     name: String,
     attributes: Vec<Attribute>,

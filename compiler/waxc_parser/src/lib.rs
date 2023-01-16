@@ -43,6 +43,7 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     match tk.kind {
       
       Ident => match self.read().as_str() {
+        "use"  => self.using()?,
         "tmpl" => self.template()?,
         "impl" => self.implementation()?,
         "styl" => self.stylesheet()?,
@@ -55,6 +56,43 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     };
 
     Ok(true)
+  }
+
+  /// Try parsing a using statement. (`use "...";`)
+  fn using(&mut self) -> Result<(), WaxError> {
+    let path = self.string()?;
+
+    self.add_node(NodeKind::Using { path });
+
+    self.eat_while(TokenKind::Whitespace);
+    if self.next().kind != TokenKind::Semi {
+      return Err(self.err_example(
+        "missing semicolon on use", 
+        "use \"/path\";"
+      ));
+    }
+
+    Ok(())
+  }
+
+  fn string(&mut self) -> Result<String, WaxError> {
+    /* Eat whitespace */
+    self.eat_while(TokenKind::Whitespace);
+    self.update_cursor();
+
+    if self.next().kind != TokenKind::DoubleQuote {
+      return Err(self.err_example(
+        "unformatted import path", 
+        "use \"/path\";"
+      ));
+    }
+
+    /* File names cannot include double quotes 
+      so we can just eat until the next one */
+    self.eat_until(TokenKind::DoubleQuote);
+    self.next();
+    
+    Ok(self.read())
   }
 
   /// Check if an identity is really the start of a template.
