@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn criterion_benchmark(c: &mut Criterion) {
@@ -35,7 +37,7 @@ fn criterion_benchmark(c: &mut Criterion) {
       let ast = black_box(waxc_parser::parse(input.to_string(), iter).unwrap());
 
       // Start the codegen process:
-      black_box(waxc_codegen::generate(index.to_string(), ast).unwrap());
+      black_box(waxc_codegen::generate(index.to_string(), Path::new("./example/src/pages/"), ast).unwrap());
     })
   });
 }

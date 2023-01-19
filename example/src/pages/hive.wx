@@ -1,15 +1,5 @@
-use "test";
-
-/* Title Template */
-tmpl title:
-  <h2>Header</h2>;
-
-/* Card Template */
-tmpl card:
-  <div class="card">
-    <-title />
-    <p>paragraph</p>
-  </div>;
+use card from "./card.wx";
+use { card, title } from "./card.wx";
 
 /* Root Html Template */
 tmpl @base:

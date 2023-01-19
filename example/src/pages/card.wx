@@ -1,0 +1,10 @@
+/* Title Template */
+tmpl title:
+  <h2>Header</h2>;
+
+/* Card Template */
+tmpl card:
+  <div class="card">
+    <-title />
+    <p>paragraph</p>
+  </div>;

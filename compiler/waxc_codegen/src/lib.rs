@@ -1,7 +1,7 @@
 pub mod comb;
-//mod hash;
 
 use std::collections::HashMap;
+use std::path::Path;
 
 use comb::WaxComb;
 use tiny_id::ShortCodeGenerator;
@@ -14,7 +14,7 @@ use waxc_parser::node::{NodeKind, Node, Attribute};
 /// index # index.html file
 /// ast   # abstract syntax tree
 /// ```
-pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
+pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, WaxError> {
   let mut root_nodes = ast.get_children(0);
   
   /* Create hasher instance */
@@ -32,9 +32,25 @@ pub fn generate(index: String, ast: AST) -> Result<WaxComb, WaxError> {
   while let Some(base_node) = root_nodes.next() {
     match &base_node.kind {
       /* use "<path>"; */
-      NodeKind::Using { path } => {
-        todo!("{}", path); 
+      NodeKind::Using { parts, path } => {
         // See if the path exists, if so then load the wax file.
+        let path = index_path.join(path.trim_matches('"'));
+
+        if path.exists() {
+          let file = std::fs::read_to_string(&path).unwrap();
+
+          // Lex the new file
+          
+          // Parse the new file
+
+          // Cache the whole AST somewhere (in case another file also uses this file)
+
+          // Extract the parts we need
+
+          println!("{file}");
+        }
+
+        todo!("{:?}, {}", parts, path.to_string_lossy()); 
       },
 
       /* tmpl <name>: */

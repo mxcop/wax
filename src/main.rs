@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use waxc_lexer::lexer::LexIter;
 
 mod args;
@@ -35,7 +37,7 @@ fn run(index_file: &str, input: &str, filename: &str) {
   println!("{}", &ast);
 
   // Generate the code:
-  let comb = waxc_codegen::generate(index_file.to_string(), ast);
+  let comb = waxc_codegen::generate(index_file.to_string(), Path::new("./example/src/pages/"), ast);
 
   // Check for errors:
   let comb = match comb {

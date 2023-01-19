@@ -51,8 +51,9 @@ pub struct Attribute {
 pub enum NodeKind {
   Root,
 
-  /** `use "path/to/file";` */
+  /** `use { <a>, <b> } from "path/to/file";` */
   Using {
+    parts: Vec<String>,
     path: String,
   },
   /** `tmpl <name>: ;` */

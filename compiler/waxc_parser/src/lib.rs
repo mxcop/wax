@@ -3,6 +3,8 @@ mod parser;
 mod scopes;
 pub mod tree;
 
+use std::vec;
+
 use node::NodeKind;
 use parser::Parser;
 use scopes::tmpl;
@@ -58,11 +60,21 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     Ok(true)
   }
 
-  /// Try parsing a using statement. (`use "...";`)
+  /// Try parsing a using statement. (`use ... from "...";`)
   fn using(&mut self) -> Result<(), WaxError> {
+    let parts = self.using_parts()?;
+    
+    /* Look for the 'from' keyword */
+    self.eat_while(TokenKind::Whitespace);
+    self.update_cursor();
+    self.next();
+    if self.read() != "from" {
+      todo!("ERROR missing from");
+    }
+
     let path = self.string()?;
 
-    self.add_node(NodeKind::Using { path });
+    self.add_node(NodeKind::Using { parts, path });
 
     self.eat_while(TokenKind::Whitespace);
     if self.next().kind != TokenKind::Semi {
@@ -73,6 +85,59 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
     }
 
     Ok(())
+  }
+
+  fn using_parts(&mut self) -> Result<Vec<String>, WaxError> {
+    /* Eat whitespace */
+    self.eat_while(TokenKind::Whitespace);
+    self.update_cursor();
+
+    match self.next().kind {
+      /* Multi import (use { <name>, <name> } from "...") */
+      TokenKind::OpenBrace => {
+        let mut parts = vec![];
+        let mut was_ident = false;
+        loop {
+          self.update_cursor();
+          let tk = self.next();
+
+          match tk.kind {
+            TokenKind::CloseBrace => {
+              break;
+            },
+            TokenKind::Ident => {
+              if was_ident == false {
+                parts.push(self.read());
+                was_ident = true;
+              } else {
+                todo!("ERROR using parts must be seperated using commas");
+              }
+            },
+            TokenKind::Comma => {
+              if was_ident == true {
+                was_ident = false;
+              } else {
+                todo!("ERROR missing name between seperators");
+              }
+            }
+            TokenKind::Whitespace => (),
+            _ => { todo!("ERROR unknown character in using statement '{}'", self.read()); }
+          }
+        }
+        Ok(parts)
+      }
+      /* Single import (use <name> from "...") */
+      TokenKind::Ident => {
+        Ok(vec![self.read()])
+      }
+
+      _ => { 
+        Err(self.err_example(
+        "unformatted import path", 
+        "use \"/path\";"
+        ))
+      }
+    }
   }
 
   fn string(&mut self) -> Result<String, WaxError> {
