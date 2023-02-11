@@ -1,4 +1,4 @@
-use card from "./card.wx";
+// use card from "./card.wx";
 use { card, title } from "./card.wx";
 
 /* Root Html Template */

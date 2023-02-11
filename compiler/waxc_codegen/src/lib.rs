@@ -22,6 +22,7 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
 
   /* Template cache (name, contents) */
   let mut templates: HashMap<String, String> = HashMap::new();
+  //let mut module_nodes: Vec<Node> = Vec::new();
   let mut html: String = String::with_capacity(256);
   let mut js: String = String::with_capacity(128);
   let mut css: String = String::with_capacity(256);
@@ -32,25 +33,32 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
   while let Some(base_node) = root_nodes.next() {
     match &base_node.kind {
       /* use "<path>"; */
-      NodeKind::Using { parts, path } => {
+      NodeKind::Using { parts: _, path } => {
         // See if the path exists, if so then load the wax file.
         let path = index_path.join(path.trim_matches('"'));
 
         if path.exists() {
           let file = std::fs::read_to_string(&path).unwrap();
 
-          // Lex the new file
-          
-          // Parse the new file
+          let module = genmod(file)?;
+          let mut module_root_nodes = module.get_children(0);
 
-          // Cache the whole AST somewhere (in case another file also uses this file)
-
-          // Extract the parts we need
-
-          println!("{file}");
+          while let Some(module_node) = module_root_nodes.next() {
+            if let NodeKind::Template { name } = &module_node.kind {
+              templates.insert(
+                name.clone(), 
+                build_template(&module, &templates, module_node, &mut hasher)?
+              );
+            }
+          }
+        } else {
+          return Err(WaxError::new(
+            0, 0, 
+            "module not found", 
+          WaxHint::None));
         }
 
-        todo!("{:?}, {}", parts, path.to_string_lossy()); 
+        //todo!("{:?}, {}", parts, path.to_string_lossy()); 
       },
 
       /* tmpl <name>: */
@@ -107,6 +115,16 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
     js, 
     css
   ))
+}
+
+/// Generate the abstract syntax tree for a wax module.
+fn genmod(file: String) -> Result<AST, WaxError> {
+  // Initialize the lexical iterator:
+  let lexer = waxc_lexer::lex(&file);
+  let iter = waxc_lexer::lexer::LexIter::new(lexer);
+
+  // Start the parsing process:
+  waxc_parser::parse(file.clone(), iter)
 }
 
 /// Is this template a base template? (@html)

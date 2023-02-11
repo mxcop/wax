@@ -9,7 +9,7 @@ mod utils;
 
 fn main() {
   // Enable colors in the command prompt.
-  colored::control::set_virtual_terminal(true).unwrap();
+  //colored::control::set_virtual_terminal(true).unwrap();
 
   let index_file = std::fs::read_to_string("./example/src/index.html").expect("failed to load index.html");
   let input = std::fs::read_to_string("./example/src/pages/hive.wx").expect("failed to load file");
