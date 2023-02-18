@@ -1,11 +1,14 @@
+use std::path::Path;
+
 use waxc_errors::error::{WaxError, WaxHint};
 use waxc_lexer::{token::{Token, TokenKind, EOF_TOKEN}, lexer::LexIter};
 
 use crate::{tree::AST, node::{NodeKind, Span, Node}};
 
 /// The Wax parser
-pub struct Parser<I: Iterator<Item = Token> + Clone> {
+pub struct Parser<'a, I: Iterator<Item = Token> + Clone> {
   file: String,
+  filepath: &'a Path,
   len_consumed: usize,
   pos_cursor: usize,
   pos_checkpoint: usize,
@@ -16,14 +19,15 @@ pub struct Parser<I: Iterator<Item = Token> + Clone> {
   scope: usize,
 }
 
-impl<I: Iterator<Item = Token> + Clone> Parser<I> {
-  pub fn new(file: String, iter: LexIter<I>) -> Self {
+impl<'a, I: Iterator<Item = Token> + Clone> Parser<'a, I> {
+  pub fn new(file: String, filepath: &'a Path, iter: LexIter<I>) -> Self {
     /* Initialize the abstract syntax tree */
     let mut tree = AST::new();
     let scope = tree.add_node(Span::new(0, 0), NodeKind::Root);
 
     Self {
       file,
+      filepath,
       len_consumed: 0,
       pos_cursor: 0,
       pos_checkpoint: 0,
@@ -151,22 +155,22 @@ impl<I: Iterator<Item = Token> + Clone> Parser<I> {
   /// Create a new wax error using a node.
   pub fn err_node(&self, node: &Node, msg: &str, hint: WaxHint) -> WaxError {
     let span = node.get_span();
-    WaxError::new(span.pos, span.len, msg, hint)
+    WaxError::new(span.pos, span.len, msg, hint, Some(self.filepath))
   }
 
   /// Create a new wax error with an example.
   pub fn err_example(&self, msg: &str, example: &str) -> WaxError {
-    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Example(example.into()))
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Example(example.into()), Some(self.filepath))
   }
 
   /// Create a new wax error with a hint.
   pub fn err_hint(&self, msg: &str, hint: &str) -> WaxError {
-    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Hint(hint.into()))
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::Hint(hint.into()), Some(self.filepath))
   }
 
   /// Create a new wax error with a hint.
   pub fn err(&self, msg: &str) -> WaxError {
-    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::None)
+    WaxError::new(self.pos_cursor, self.len_consumed - self.pos_cursor, msg, WaxHint::None, Some(self.filepath))
   }
 
   /// Set a checkpoint (useful for throwing more accurate errors)

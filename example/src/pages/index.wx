@@ -1,8 +1,8 @@
-// use card from "./card.wx";
-use { card, title } from "./card.wx";
+use { card, title } from "./lib/card.wx";
 
 /* Root Html Template */
 tmpl @base:
+  <a href="./test/index.html">Test Page Link</a>
   <-card />
   <-card />;
 

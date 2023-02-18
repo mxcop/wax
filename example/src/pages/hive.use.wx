@@ -1,4 +1,0 @@
-use card from "./hive.wx";
-
-tmpl @base:
-  <-card />;

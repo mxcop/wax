@@ -3,7 +3,7 @@ mod parser;
 mod scopes;
 pub mod tree;
 
-use std::vec;
+use std::{vec, path::Path};
 
 use node::NodeKind;
 use parser::Parser;
@@ -16,11 +16,12 @@ use waxc_lexer::{token::{Token, TokenKind}, lexer::LexIter};
 /// Parse an input stream of tokens into an abstract syntax tree.
 pub fn parse<'a, I: Iterator<Item = Token> + Clone>(
   file: String,
+  filepath: &Path,
   iter: LexIter<I>,
 ) -> Result<AST, WaxError> {
 
   let mut parser 
-    = Parser::new(file, iter);
+    = Parser::new(file, filepath, iter);
 
   /* Move through all the tokens */
   loop {
@@ -33,7 +34,7 @@ pub fn parse<'a, I: Iterator<Item = Token> + Clone>(
   Ok(parser.get_tree())
 }
 
-impl<I: Iterator<Item = Token> + Clone> Parser<I> {
+impl<'a, I: Iterator<Item = Token> + Clone> Parser<'a, I> {
   /// Parse the next token from the lexer.
   pub fn advance(&mut self) -> Result<bool, WaxError> {
     use TokenKind::*;

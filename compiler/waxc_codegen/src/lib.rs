@@ -1,20 +1,64 @@
-pub mod comb;
+pub mod page;
+mod visit;
 
 use std::collections::HashMap;
+use std::fs::read_to_string;
 use std::path::Path;
 
-use comb::WaxComb;
+use page::OutputPage;
 use tiny_id::ShortCodeGenerator;
+use visit::walk_pages;
 use waxc_errors::error::{WaxError, WaxHint};
 use waxc_parser::tree::AST;
 use waxc_parser::node::{NodeKind, Node, Attribute};
+
+pub fn generate(index_path: &Path, pages_dir: &Path) -> Result<Vec<OutputPage>, WaxError> {
+  /* Path related checks: */
+  if !index_path.exists() {
+    return Err(WaxError::new(
+      0, 0, 
+      "missing index.html file", 
+    WaxHint::None, None));
+  }
+  if !pages_dir.exists() {
+    return Err(WaxError::new(
+      0, 0, 
+      "pages directory doesn't exist", 
+    WaxHint::None, None));
+  }
+  if !pages_dir.is_dir() {
+    return Err(WaxError::new(
+      0, 0, 
+      "pages directory needs to be a directory", 
+    WaxHint::None, None));
+  }
+
+  let Ok(index_html) = read_to_string(index_path) else {
+    return Err(WaxError::new(
+      0, 0, 
+      "couldn't read index.html file", 
+    WaxHint::None, None));
+  };
+
+  /* Create the output pages vector */
+  let mut pages: Vec<OutputPage> = Vec::with_capacity(8);
+
+  /* Walk the pages directory recursively */
+  walk_pages(&mut pages, pages_dir, &|page_path| {
+    //println!(" compiling page {}", page_path.to_string_lossy());
+    genpage(page_path, &index_html, index_path.parent().unwrap())
+  })?;
+
+  Ok(pages)
+}
 
 /// Generate HTML, JS, and CSS from an abstract syntax tree.<br>
 /// ```toml
 /// index # index.html file
 /// ast   # abstract syntax tree
 /// ```
-pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, WaxError> {
+pub fn genpage(page_path: &Path, index: &String, index_path: &Path) -> Result<OutputPage, WaxError> {
+  let ast = genmod(read_to_string(page_path).unwrap(), page_path)?; // TODO: remove unwrap
   let mut root_nodes = ast.get_children(0);
   
   /* Create hasher instance */
@@ -36,18 +80,18 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
       NodeKind::Using { parts: _, path } => {
         // See if the path exists, if so then load the wax file.
         let path = index_path.join(path.trim_matches('"'));
-
+        //println!("path: {}", path.to_string_lossy());
         if path.exists() {
           let file = std::fs::read_to_string(&path).unwrap();
 
-          let module = genmod(file)?;
+          let module = genmod(file, page_path)?;
           let mut module_root_nodes = module.get_children(0);
 
           while let Some(module_node) = module_root_nodes.next() {
             if let NodeKind::Template { name } = &module_node.kind {
               templates.insert(
                 name.clone(), 
-                build_template(&module, &templates, module_node, &mut hasher)?
+                build_template(page_path, &module, &templates, module_node, &mut hasher)?
               );
             }
           }
@@ -55,22 +99,20 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
           return Err(WaxError::new(
             0, 0, 
             "module not found", 
-          WaxHint::None));
+          WaxHint::None, Some(page_path)));
         }
-
-        //todo!("{:?}, {}", parts, path.to_string_lossy()); 
       },
 
       /* tmpl <name>: */
       NodeKind::Template { name } => match name {
         n if is_base(n) => {
           base_found = true;
-          html.push_str(&build_template(&ast, &templates, base_node, &mut hasher)?);
+          html.push_str(&build_template(page_path, &ast, &templates, base_node, &mut hasher)?);
         }
         _ => { 
           templates.insert(
             name.clone(), 
-            build_template(&ast, &templates, base_node, &mut hasher)?
+            build_template(page_path, &ast, &templates, base_node, &mut hasher)?
           );
         }
       },
@@ -100,7 +142,7 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
     return Err(WaxError::new(
       0, 0, 
       "missing base template", 
-    WaxHint::Example("tmpl @base:".into())));
+    WaxHint::Example("tmpl @base:".into()), Some(page_path)));
   }
 
   /* Insert html */
@@ -110,7 +152,8 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
   /* Trim whitespace */
   js = js.trim().to_string();
 
-  Ok(WaxComb::new(
+  Ok(OutputPage::new(
+    page_path.to_string_lossy().to_string(),
     html, 
     js, 
     css
@@ -118,13 +161,13 @@ pub fn generate(index: String, index_path: &Path, ast: AST) -> Result<WaxComb, W
 }
 
 /// Generate the abstract syntax tree for a wax module.
-fn genmod(file: String) -> Result<AST, WaxError> {
+fn genmod(file: String, filepath: &Path) -> Result<AST, WaxError> {
   // Initialize the lexical iterator:
   let lexer = waxc_lexer::lex(&file);
   let iter = waxc_lexer::lexer::LexIter::new(lexer);
 
   // Start the parsing process:
-  waxc_parser::parse(file.clone(), iter)
+  waxc_parser::parse(file.clone(), filepath, iter)
 }
 
 /// Is this template a base template? (@html)
@@ -133,7 +176,7 @@ fn is_base(name: &str) -> bool {
 }
 
 /// Recursively build a template node.
-fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node, hasher: &mut ShortCodeGenerator<char>) -> Result<String, WaxError> {
+fn build_template(page_path: &Path, ast: &AST, cache: &HashMap<String, String>, scope: &Node, hasher: &mut ShortCodeGenerator<char>) -> Result<String, WaxError> {
   let mut iter = ast.get_children(scope.idx);
   let mut contents = String::with_capacity(256);
   let hash: String = hasher.next_string();
@@ -151,7 +194,7 @@ fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node, hash
             return Err(WaxError::new(
               span.pos, span.len, 
               &format!("`tmpl {}` not found", node.get_name()), 
-            WaxHint::None));
+            WaxHint::None, Some(page_path)));
           };
           contents.push_str(&comb);
         },
@@ -161,7 +204,7 @@ fn build_template(ast: &AST, cache: &HashMap<String, String>, scope: &Node, hash
     /* Is tag node with child nodes */
     } else if let NodeKind::Tag { name, attributes, .. } = &node.kind {
       contents.push_str(&build_tag(&hash, name, attributes, false));
-      contents.push_str(&build_template(ast, cache, node, hasher)?);
+      contents.push_str(&build_template(page_path, ast, cache, node, hasher)?);
       contents.push_str(&build_end_tag(name));
     } else {
       unreachable!("unhandled node is template ({})", node.get_name());
