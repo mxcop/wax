@@ -1,4 +1,0 @@
-<main class="base">
-  <!-- Slot will contain the component of the selected route -->
-  <slot />
-</main>
