@@ -55,7 +55,7 @@ impl WaxError {
   }
 
   /// Print the error to the console.
-  pub fn print(&self) {
+  pub fn print(&self, src_dir: &str) {
 
     match &self.file {
       // If this error is focused on a file:
@@ -65,10 +65,10 @@ impl WaxError {
         let Ok(file) = read_to_string(filepath) else {
           panic!("couldn't find file!");
         };
-        let Some(filename) = filepath.file_name() else {
-          panic!("coudln't find file name!");
-        };
-        let filename = filename.to_string_lossy().to_string();
+        // let Some(filename) = filepath.file_name() else {
+        //   panic!("coudln't find file name!");
+        // };
+        let filename = filepath.strip_prefix(src_dir).unwrap().to_string_lossy().to_string();
 
         // Get the line information:
         let (line_num, lines) = get_lines(&file, self.pos);

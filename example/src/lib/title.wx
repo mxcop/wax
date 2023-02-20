@@ -1,0 +1,3 @@
+/* Title Template */
+tmpl title:
+  <h2>Header</h2>;

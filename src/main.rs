@@ -42,7 +42,7 @@ fn run(index_path: &Path, filename: &str) {
   // Check for errors:
   let pages = match pages {
     Err(e) => {
-      e.print();
+      e.print("./example/src/");
       return;
     }
     Ok(pages) => pages

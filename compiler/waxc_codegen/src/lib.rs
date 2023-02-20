@@ -45,8 +45,8 @@ pub fn generate(index_path: &Path, pages_dir: &Path) -> Result<Vec<OutputPage>, 
 
   /* Walk the pages directory recursively */
   walk_pages(&mut pages, pages_dir, &|page_path| {
-    //println!(" compiling page {}", page_path.to_string_lossy());
-    genpage(page_path, &index_html, index_path.parent().unwrap())
+    genpage(page_path, &index_html, index_path.parent()
+      .expect("couldn't find index.html directory"))
   })?;
 
   Ok(pages)
@@ -58,7 +58,14 @@ pub fn generate(index_path: &Path, pages_dir: &Path) -> Result<Vec<OutputPage>, 
 /// ast   # abstract syntax tree
 /// ```
 pub fn genpage(page_path: &Path, index: &String, index_path: &Path) -> Result<OutputPage, WaxError> {
-  let ast = genmod(read_to_string(page_path).unwrap(), page_path)?; // TODO: remove unwrap
+  let Ok(page_file) = read_to_string(page_path) else {
+    return Err(WaxError::new(
+      0, 0, 
+      "couldn't read page file", 
+    WaxHint::None, None));
+  };
+
+  let ast = genmod(page_file, page_path)?;
   let mut root_nodes = ast.get_children(0);
   
   /* Create hasher instance */
@@ -66,7 +73,6 @@ pub fn genpage(page_path: &Path, index: &String, index_path: &Path) -> Result<Ou
 
   /* Template cache (name, contents) */
   let mut templates: HashMap<String, String> = HashMap::new();
-  //let mut module_nodes: Vec<Node> = Vec::new();
   let mut html: String = String::with_capacity(256);
   let mut js: String = String::with_capacity(128);
   let mut css: String = String::with_capacity(256);
@@ -80,8 +86,11 @@ pub fn genpage(page_path: &Path, index: &String, index_path: &Path) -> Result<Ou
       NodeKind::Using { parts: _, path } => {
         // See if the path exists, if so then load the wax file.
         let path = index_path.join(path.trim_matches('"'));
-        //println!("path: {}", path.to_string_lossy());
+        
         if path.exists() {
+          // TODO: Make this using part recursive.
+          // Write all the found modules into the templates hashmap.
+
           let file = std::fs::read_to_string(&path).unwrap();
 
           let module = genmod(file, page_path)?;
@@ -91,7 +100,7 @@ pub fn genpage(page_path: &Path, index: &String, index_path: &Path) -> Result<Ou
             if let NodeKind::Template { name } = &module_node.kind {
               templates.insert(
                 name.clone(), 
-                build_template(page_path, &module, &templates, module_node, &mut hasher)?
+                build_template(&path, &module, &templates, module_node, &mut hasher)?
               );
             }
           }
@@ -175,7 +184,7 @@ fn is_base(name: &str) -> bool {
   name == "@base"
 }
 
-/// Recursively build a template node.
+/// Build a template node.
 fn build_template(page_path: &Path, ast: &AST, cache: &HashMap<String, String>, scope: &Node, hasher: &mut ShortCodeGenerator<char>) -> Result<String, WaxError> {
   let mut iter = ast.get_children(scope.idx);
   let mut contents = String::with_capacity(256);
@@ -207,7 +216,7 @@ fn build_template(page_path: &Path, ast: &AST, cache: &HashMap<String, String>, 
       contents.push_str(&build_template(page_path, ast, cache, node, hasher)?);
       contents.push_str(&build_end_tag(name));
     } else {
-      unreachable!("unhandled node is template ({})", node.get_name());
+      unreachable!("unhandled node in template ({})", node.get_name());
     }
   }
 

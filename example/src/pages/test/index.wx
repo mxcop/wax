@@ -4,21 +4,3 @@ use { card, title } from "./lib/card.wx";
 tmpl @base:
   <-card />
   <-card />;
-
-/* Css Stylesheet */
-styl card {
-  body {
-    display: flex;
-  }
-  .card {
-    width: 200px;
-    height: 250px;
-
-    background-color: #aaa;
-    margin-right: 16px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
