@@ -13,6 +13,8 @@
   </a>
 </h2>
 
+<div align="center"><i>Most development is happening on the rework branch</i></div>
+
 <br>
 
 ## Install
