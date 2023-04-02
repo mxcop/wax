@@ -6,15 +6,10 @@
     <img align="right" src="https://img.shields.io/crates/d/wax-cli">
   </a>
 </h2>
-
-<div align="center"><i>Most development is happening on the rework branch</i></div>
-
 <br>
 
 Very **experimental**, and **early access** version of the Wax compiler.<br>
 The current CLI uploaded to crates.io is an old version which can be found on the `legacy` branch.
-
-<br>
 
 ## Install
 
