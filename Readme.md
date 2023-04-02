@@ -1,19 +1,18 @@
-<h2 align="center">
-  <img src="https://raw.githubusercontent.com/mxcop/wax/main/.github/icon.svg" width="80px">
-  <div>
-    Wax
-  </div>
-  <div>
-    <sub>HTML with Components</sub>
-  </div>
+<h2 align="left">
+  <div><img src="https://raw.githubusercontent.com/mxcop/wax/main/.github/icon.svg" width="64px"> Wax</div>
   <a href="https://crates.io/crates/wax-cli">
     <img align="right" src="https://img.shields.io/crates/v/wax-cli?color=blueviolet">
     <img align="right" src="https://img.shields.io/crates/l/wax-cli">
-    <img align="left" src="https://img.shields.io/crates/d/wax-cli">
+    <img align="right" src="https://img.shields.io/crates/d/wax-cli">
   </a>
 </h2>
 
 <div align="center"><i>Most development is happening on the rework branch</i></div>
+
+<br>
+
+Very **experimental**, and **early access** version of the Wax compiler.<br>
+The current CLI uploaded to crates.io is an old version which can be found on the `legacy` branch.
 
 <br>
 
@@ -38,91 +37,79 @@ $ wax create <NAME>
 $ wax build <PATH>
 ```
 
-<br>
-
 ## Project Structure
 
 ```graphql
 ./<my-wax-site>/* 
   │
   ├─ .wax       - # Wax file cache
-  ├─ dist       - # Wax build output
+  ├─ build/     - # Wax build output
   │
-  ├─ src/*      - # Your codebase (html, css, and js)
-  │  ├─ lib/       - # Html wax components
-  │  ├─ pages/     - # Your html pages
+  ├─ src/*
+  │  ├─ lib/        - # Wax components (*.wx)
+  │  ├─ pages/      - # Wax page components (*.wx)
+  │  ├─ index.html  - # Html template file
   │  └─ ...
   │
   └─ wax.toml   - # Wax config file
 ```
 
-<br>
+## Wax Syntax
 
-### Static Components
+Wax components are build out of three parts.
 
-Wax components are an extension of html.
-
-<div><sup>Example : Component File</sup></div>
-
-```html
-~ src/lib/my-component.html
-
-<p>
-  Hello from my component ! :D
-</p>
-```
-<br>
-
-Importing / including wax components is done using the <code><wax!></code> tag.<br>
-<i>e.g.</i> <code><wax! … src="[path]" … ></code>
-
-<div><sup>Example : Importing</sup></div>
+### Templates
+Contain Html that can be inserted into other templates using the insert (`<-`) operator.
+<div><sup>Example : Wax Html Template</sup></div>
 
 ```html
-~ src/routes/index.html
+tmpl Hello:
+  <p>Hello, World!</p>;
 
-<body>
-  …
-  <wax! src="../lib/my-component.html" />
-  …
-</body>
+tmpl @base:
+  <-Hello />; <!-- <p>Hello, World!</p> -->
 ```
-<br>
+`@base` is a special tag which makes this template the basis for a page.<br>
+Every component within the `/pages` dir should have an `@base` template.
 
-### Dynamic Components *
-
-Passing parameters to a component is done using html attributes.<br>
-<i>e.g.</i> <code><wax! … [key]="[value]" … ></code>
-
-<div><sup>Example : Importing</sup></div>
+### Stylesheets
+Contain Css that is linked to a template of the same name.
+<div><sup>Example : Wax Css Stylesheet</sup></div>
 
 ```html
-~ src/routes/index.html
+tmpl Hello:
+  <p>Hello, World!</p>;
 
-<body>
-  …
-  <wax! src="../lib/my-component.html" title="My dynamic title" />
-  …
-</body>
+styl Hello {
+  p {
+    color: red;
+  }
+}
 ```
-<br>
 
-Each component has to declare its parameters using <code><params! … [key] … ></code><br>
-Parameters can be inserted into the html using <code>{ [key] }</code>
-
-<div><sup>Example : Component File</sup></div>
+<h3>Implementations <sup>(wip)</sup></h3>
+Contain Javascript that is linked to a template of the same name.
+<div><sup>Example : Wax JS Implementation</sup></div>
 
 ```html
-~ src/lib/my-component.html
+tmpl Hello:
+  <p #paragraph>Hello, World!</p>;
 
-<params! title>
-
-<h1>
-  { title }
-</h1>
+impl Hello {
+  #paragraph.textContent = 'Hello, Wax!';
+}
 ```
 
-<br>
+<h3>Using Statements <sup>(wip)</sup></h3>
+Allow you to import Wax components within other Wax components.
+<div><sup>Example : Wax Using Statement</sup></div>
+
+```html
+use Hello from "./lib/hello.wx";
+
+tmpl @base:
+  <-Hello />; <!-- <p>Hello, World!</p> -->
+```
 
 ## Config
 
@@ -136,14 +123,4 @@ pages = "RelativePath"  # Path to the directory containing your index.html.
 
 [build]
 minify = "Boolean?"     # If enabled, will minify the collapsed HTML files.
-```
-
-<br>
-
-## Testing
-
-<div><sup>* Using the testing project in <code>./assets</code></sup></div>
-
-```
-$ cargo run build ./assets
 ```

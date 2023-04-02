@@ -1,0 +1,30 @@
+//use title from "./lib/title.wx";
+
+/* Title Template */
+tmpl title:
+  <h2>Header</h2>;
+
+/* Card Template */
+tmpl card:
+  <div class="card">
+    <-title />
+    <p>paragraph</p>
+  </div>;
+
+/* Css Stylesheet */
+styl card {
+  body {
+    display: flex;
+  }
+  .card {
+    width: 200px;
+    height: 250px;
+
+    background-color: #aaa;
+    margin-right: 16px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}

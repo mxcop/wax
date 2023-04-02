@@ -1,0 +1,6 @@
+use { card, title } from "./lib/card.wx";
+
+/* Root Html Template */
+tmpl @base:
+  <-card />
+  <-card />;

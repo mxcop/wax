@@ -2,21 +2,38 @@
 name = "wax-cli"
 description = "An extension of HTML written in Rust"
 authors = ["Max C. <mxcop.dev@gmail.com>"]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 readme = "Readme.md"
 repository = "https://github.com/mxcop/wax/"
 license = "MIT"
 keywords = ["html", "parser", "cli"]
 categories = ["command-line-utilities", "compilers", "development-tools::build-utils", "parser-implementations"]
-exclude = ["/assets"]
+exclude = ["/assets", "/example"]
+
+[workspace]
+members = [
+    "compiler/waxc_errors",
+    "compiler/waxc_lexer",
+    "compiler/waxc_parser",
+    "compiler/waxc_codegen",
+]
 
 [[bin]]
 name = "wax"
 path = "src/main.rs"
 
+[profile.release]
+opt-level = 3
+
 [dependencies]
+waxc_lexer = { path = "compiler/waxc_lexer" }
+waxc_errors = { path = "compiler/waxc_errors" }
+waxc_parser = { path = "compiler/waxc_parser" }
+waxc_codegen = { path = "compiler/waxc_codegen" }
+
 regex = "1.6.0"
+peekmore = "1.0.0"
 
 # Toml parser
 toml = "0.5.9"
@@ -29,5 +46,16 @@ colored = "2.0.0"
 clap = { version = "4.0.18", features = ["derive"] }
 
 # Markdown parser
-pulldown-cmark = { version = "0.9.2", default-features = false }
-minify-html = "0.10.3"
+# pulldown-cmark = { version = "0.9.2", default-features = false }
+# minify-html = "0.10.3"
+
+# HTML test server
+# warp = "0.3.3"
+# tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[dev-dependencies]
+criterion = "0.4.0"
+
+[[bench]]
+name = "compiler"
+harness = false

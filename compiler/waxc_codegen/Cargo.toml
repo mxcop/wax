@@ -1,0 +1,16 @@
+[package]
+name = "waxc_codegen"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+waxc_lexer = { path = "../waxc_lexer" }
+waxc_parser = { path = "../waxc_parser" }
+waxc_errors = { path = "../waxc_errors" }
+
+tiny_id = "0.1.5"
+
+# Debugging
+colored = "2.0.0"
